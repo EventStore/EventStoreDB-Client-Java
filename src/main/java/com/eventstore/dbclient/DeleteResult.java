@@ -1,6 +1,4 @@
-package com.eventstore.dbclient.result;
-
-import com.eventstore.dbclient.Position;
+package com.eventstore.dbclient;
 
 import javax.validation.constraints.NotNull;
 import java.util.Objects;
