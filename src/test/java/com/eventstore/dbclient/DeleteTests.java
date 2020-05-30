@@ -1,6 +1,5 @@
 package com.eventstore.dbclient;
 
-import com.eventstore.dbclient.result.DeleteResult;
 import org.junit.Rule;
 import org.junit.Test;
 import testcontainers.module.EventStoreTestDBContainer;
