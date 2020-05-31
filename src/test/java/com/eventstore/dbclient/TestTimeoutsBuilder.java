@@ -13,9 +13,13 @@ public class TestTimeoutsBuilder {
         // to test that the builder will construct.
         Timeouts timeouts = TimeoutsBuilder.newBuilder()
                 .withShutdownTimeout(10, TimeUnit.HOURS)
+                .withSubscriptionTimeout(9, TimeUnit.DAYS)
                 .build();
 
         assertEquals(10, timeouts.shutdownTimeout);
         assertEquals(TimeUnit.HOURS, timeouts.shutdownTimeoutUnit);
+
+        assertEquals(9, timeouts.subscriptionTimeout);
+        assertEquals(TimeUnit.DAYS, timeouts.subscriptionTimeoutUnit);
     }
 }
