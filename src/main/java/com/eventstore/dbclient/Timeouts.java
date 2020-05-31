@@ -6,10 +6,18 @@ public class Timeouts {
     final long shutdownTimeout;
     final TimeUnit shutdownTimeoutUnit;
 
-    public static final Timeouts DEFAULT = new Timeouts(1, TimeUnit.SECONDS);
+    final long subscriptionTimeout;
+    final TimeUnit subscriptionTimeoutUnit;
 
-    Timeouts(final long shutdownTimeout, final TimeUnit shutdownTimeoutUnit) {
+    public static final Timeouts DEFAULT = new Timeouts(
+            5, TimeUnit.SECONDS,
+            5, TimeUnit.SECONDS);
+
+    Timeouts(final long shutdownTimeout, final TimeUnit shutdownTimeoutUnit,
+             final long subscriptionTimeout, final TimeUnit subscriptionTimeoutUnit) {
         this.shutdownTimeout = shutdownTimeout;
         this.shutdownTimeoutUnit = shutdownTimeoutUnit;
+        this.subscriptionTimeout = subscriptionTimeout;
+        this.subscriptionTimeoutUnit = subscriptionTimeoutUnit;
     }
 }

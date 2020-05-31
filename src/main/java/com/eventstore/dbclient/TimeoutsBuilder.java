@@ -6,6 +6,9 @@ public class TimeoutsBuilder {
     long shutdownTimeout;
     TimeUnit shutdownTimeoutUnit;
 
+    long subscriptionTimeout;
+    TimeUnit subscriptionTimeoutUnit;
+
     public static TimeoutsBuilder newBuilder() {
         TimeoutsBuilder builder = new TimeoutsBuilder();
         builder.shutdownTimeout = Timeouts.DEFAULT.shutdownTimeout;
@@ -19,8 +22,14 @@ public class TimeoutsBuilder {
         return this;
     }
 
+    public TimeoutsBuilder withSubscriptionTimeout(final long timeout, final TimeUnit timeoutUnit) {
+        subscriptionTimeout = timeout;
+        subscriptionTimeoutUnit = timeoutUnit;
+        return this;
+    }
+
     public Timeouts build() {
-        return new Timeouts(shutdownTimeout, shutdownTimeoutUnit);
+        return new Timeouts(shutdownTimeout, shutdownTimeoutUnit, subscriptionTimeout, subscriptionTimeoutUnit);
     }
 
     private TimeoutsBuilder() {

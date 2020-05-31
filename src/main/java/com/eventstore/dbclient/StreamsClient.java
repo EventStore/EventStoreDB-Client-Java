@@ -6,6 +6,8 @@ import com.eventstore.dbclient.proto.streams.StreamsOuterClass;
 import com.google.protobuf.ByteString;
 import io.grpc.ManagedChannel;
 import io.grpc.Metadata;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext;
 import io.grpc.stub.ClientCallStreamObserver;
@@ -24,6 +26,7 @@ import java.util.stream.Stream;
 
 public class StreamsClient {
     private static final StreamsOuterClass.ReadReq.Options.Builder defaultReadOptions;
+    private static final StreamsOuterClass.ReadReq.Options.Builder defaultSubscribeOptions;
 
     private final ManagedChannel _channel;
     private final StreamsGrpc.StreamsStub _stub;
@@ -33,6 +36,9 @@ public class StreamsClient {
         defaultReadOptions = StreamsOuterClass.ReadReq.Options.newBuilder()
                 .setUuidOption(StreamsOuterClass.ReadReq.Options.UUIDOption.newBuilder()
                         .setStructured(Shared.Empty.getDefaultInstance()));
+        defaultSubscribeOptions = defaultReadOptions.clone()
+                .setReadDirection(StreamsOuterClass.ReadReq.Options.ReadDirection.Forwards)
+                .setSubscription(StreamsOuterClass.ReadReq.Options.SubscriptionOptions.getDefaultInstance());
     }
 
     // region Construction and Shutdown
@@ -188,6 +194,22 @@ public class StreamsClient {
 
     // endregion
 
+    // region Subscriptions
+
+    public CompletableFuture<Subscription> subscribeToStream(String streamName,
+                                                             StreamRevision lastCheckpoint,
+                                                             boolean resolveLinks,
+                                                             SubscriptionListener listener) {
+        StreamsOuterClass.ReadReq.Options.Builder opts = defaultSubscribeOptions.clone()
+                .setResolveLinks(resolveLinks)
+                .setNoFilter(Shared.Empty.getDefaultInstance())
+                .setStream(toStreamOptions(streamName, lastCheckpoint));
+
+        return subscribeInternal(opts, listener);
+    }
+
+    // endregion
+
     // region Internal Implementation Helpers
 
     private <ReqT, RespT, TargetT> ClientResponseObserver<ReqT, RespT> convertSingleResponse(
@@ -291,6 +313,72 @@ public class StreamsClient {
         return result;
     }
 
+    private CompletableFuture<Subscription> subscribeInternal(StreamsOuterClass.ReadReq.Options.Builder opts, SubscriptionListener listener) {
+        StreamsOuterClass.ReadReq readReq = StreamsOuterClass.ReadReq.newBuilder()
+                .setOptions(opts)
+                .build();
+
+        CompletableFuture<Subscription> future = new CompletableFuture<>();
+        ClientResponseObserver<StreamsOuterClass.ReadReq, StreamsOuterClass.ReadResp> observer = new ClientResponseObserver<StreamsOuterClass.ReadReq, StreamsOuterClass.ReadResp>() {
+            private boolean _confirmed;
+            private Subscription _subscription;
+            private ClientCallStreamObserver<StreamsOuterClass.ReadReq> _requestStream;
+
+            @Override
+            public void beforeStart(ClientCallStreamObserver<StreamsOuterClass.ReadReq> requestStream) {
+                this._requestStream = requestStream;
+            }
+
+            @Override
+            public void onNext(@NotNull StreamsOuterClass.ReadResp readResp) {
+                if (!_confirmed && readResp.hasConfirmation()) {
+                    this._confirmed = true;
+                    this._subscription = new Subscription(this._requestStream,
+                            readResp.getConfirmation().getSubscriptionId());
+                    future.complete(this._subscription);
+                    return;
+                }
+
+                if (!_confirmed && readResp.hasEvent()) {
+                    onError(new IllegalStateException("Unconfirmed subscription received event"));
+                    return;
+                }
+
+                if (_confirmed && !readResp.hasEvent()) {
+                    onError(new IllegalStateException(
+                            String.format("Confirmed subscription %s received non-event variant",
+                                    _subscription.getSubscriptionId())));
+                    return;
+                }
+
+                listener.onEvent(this._subscription, ResolvedEvent.fromWire(readResp.getEvent()));
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                if (throwable instanceof StatusRuntimeException) {
+                    Status s = ((StatusRuntimeException) throwable).getStatus();
+                    if (s.getCode() == Status.Code.CANCELLED) {
+                        listener.onCancelled(this._subscription);
+                        return;
+                    }
+                }
+
+                listener.onError(this._subscription, throwable);
+            }
+
+            @Override
+            public void onCompleted() {
+                // Subscriptions should only complete on error.
+            }
+        };
+
+        _stub.withDeadlineAfter(this._timeouts.subscriptionTimeout, this._timeouts.subscriptionTimeoutUnit)
+                .read(readReq, observer);
+
+        return future;
+    }
+
     // endregion
 
     // region Protocol Buffers Conversion
@@ -365,7 +453,6 @@ public class StreamsClient {
 
         builder.setFilter(optsB.build());
     }
-
 
     // endregion
 }
