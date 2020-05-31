@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -28,6 +27,7 @@ public class StreamsClient {
 
     private final ManagedChannel _channel;
     private final StreamsGrpc.StreamsStub _stub;
+    private final Timeouts _timeouts;
 
     static {
         defaultReadOptions = StreamsOuterClass.ReadReq.Options.newBuilder()
@@ -37,15 +37,19 @@ public class StreamsClient {
 
     // region Construction and Shutdown
 
-    public StreamsClient(String host, int port, UserCredentials defaultCredentials, SslContext sslContext) {
+    public StreamsClient(String host, int port, UserCredentials defaultCredentials, Timeouts timeouts, SslContext sslContext) {
         this(NettyChannelBuilder.forAddress(host, port)
                 .userAgent("Event Store Client (Java) v1.0.0-SNAPSHOT")
                 .sslContext(sslContext)
-                .build(), defaultCredentials);
+                .build(), defaultCredentials, timeouts);
     }
 
-    public StreamsClient(ManagedChannel channel, UserCredentials credentials) {
+    public StreamsClient(
+            @NotNull ManagedChannel channel,
+            @NotNull UserCredentials credentials,
+            @NotNull Timeouts timeouts) {
         _channel = channel;
+        _timeouts = timeouts;
 
         Metadata headers = new Metadata();
         headers.put(Metadata.Key.of("authorization", Metadata.ASCII_STRING_MARSHALLER), credentials.basicAuthHeader());
@@ -54,8 +58,7 @@ public class StreamsClient {
     }
 
     public void shutdown() throws InterruptedException {
-        // TODO(jen20): Make a configurable timeout here
-        _channel.shutdown().awaitTermination(2, TimeUnit.SECONDS);
+        _channel.shutdown().awaitTermination(_timeouts.shutdownTimeout, _timeouts.shutdownTimeoutUnit);
     }
 
     // endregion
