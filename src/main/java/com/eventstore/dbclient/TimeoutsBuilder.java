@@ -22,4 +22,8 @@ public class TimeoutsBuilder {
     public Timeouts build() {
         return new Timeouts(shutdownTimeout, shutdownTimeoutUnit);
     }
+
+    private TimeoutsBuilder() {
+        // Construct via newBuilder() factory method.
+    }
 }
