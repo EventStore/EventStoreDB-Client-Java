@@ -18,11 +18,8 @@ import io.grpc.stub.StreamObserver;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 public class StreamsClient {
     private static final StreamsOuterClass.ReadReq.Options.Builder defaultReadOptions;
@@ -205,7 +202,35 @@ public class StreamsClient {
                 .setNoFilter(Shared.Empty.getDefaultInstance())
                 .setStream(toStreamOptions(streamName, lastCheckpoint));
 
-        return subscribeInternal(opts, listener);
+        return subscribeInternal(opts, listener, null);
+    }
+
+    public CompletableFuture<Subscription> subscribeToAll(Position lastCheckpoint,
+                                                          boolean resolveLinks,
+                                                          SubscriptionListener listener) {
+        return subscribeToAll(lastCheckpoint, resolveLinks, listener, null);
+    }
+
+    public CompletableFuture<Subscription> subscribeToAll(Position lastCheckpoint,
+                                                          boolean resolveLinks,
+                                                          SubscriptionListener listener,
+                                                          SubscriptionFilter filter) {
+        StreamsOuterClass.ReadReq.Options.Builder opts = defaultSubscribeOptions.clone()
+                .setResolveLinks(resolveLinks)
+                .setAll(StreamsOuterClass.ReadReq.Options.AllOptions.newBuilder()
+                        .setPosition(StreamsOuterClass.ReadReq.Options.Position.newBuilder()
+                                .setCommitPosition(lastCheckpoint.getCommitUnsigned())
+                                .setPreparePosition(lastCheckpoint.getPrepareUnsigned()))
+                        .build());
+        Checkpointer checkpointer = null;
+        if (filter != null) {
+            filter.addToWireReadReq(opts);
+            checkpointer = filter.getCheckpointer();
+        } else {
+            opts.setNoFilter(Shared.Empty.getDefaultInstance());
+        }
+
+        return subscribeInternal(opts, listener, checkpointer);
     }
 
     // endregion
@@ -313,7 +338,7 @@ public class StreamsClient {
         return result;
     }
 
-    private CompletableFuture<Subscription> subscribeInternal(StreamsOuterClass.ReadReq.Options.Builder opts, SubscriptionListener listener) {
+    private CompletableFuture<Subscription> subscribeInternal(StreamsOuterClass.ReadReq.Options.Builder opts, SubscriptionListener listener, Checkpointer checkpointer) {
         StreamsOuterClass.ReadReq readReq = StreamsOuterClass.ReadReq.newBuilder()
                 .setOptions(opts)
                 .build();
@@ -334,7 +359,7 @@ public class StreamsClient {
                 if (!_confirmed && readResp.hasConfirmation()) {
                     this._confirmed = true;
                     this._subscription = new Subscription(this._requestStream,
-                            readResp.getConfirmation().getSubscriptionId());
+                            readResp.getConfirmation().getSubscriptionId(), checkpointer);
                     future.complete(this._subscription);
                     return;
                 }
@@ -344,9 +369,21 @@ public class StreamsClient {
                     return;
                 }
 
+                if (_confirmed && readResp.hasCheckpoint()) {
+                    Checkpointer checkpointer = this._subscription.getCheckpointer();
+                    if (checkpointer == null) {
+                        return;
+                    }
+
+                    StreamsOuterClass.ReadResp.Checkpoint checkpoint = readResp.getCheckpoint();
+                    Position checkpointPos = new Position(checkpoint.getCommitPosition(), checkpoint.getPreparePosition());
+                    checkpointer.onCheckpoint(this._subscription, checkpointPos);
+                    return;
+                }
+
                 if (_confirmed && !readResp.hasEvent()) {
                     onError(new IllegalStateException(
-                            String.format("Confirmed subscription %s received non-event variant",
+                            String.format("Confirmed subscription %s received non-{event,checkpoint} variant",
                                     _subscription.getSubscriptionId())));
                     return;
                 }
@@ -379,6 +416,7 @@ public class StreamsClient {
         return future;
     }
 
+
     // endregion
 
     // region Protocol Buffers Conversion
@@ -399,59 +437,6 @@ public class StreamsClient {
 
         return builder.setRevision(revision.getValueUnsigned())
                 .build();
-    }
-
-    private static void addFilter(StreamsOuterClass.ReadReq.Options.Builder builder, EventFilter filter) {
-        if (filter == null) {
-            builder.setNoFilter(Shared.Empty.getDefaultInstance());
-            return;
-        }
-
-        RegularFilterExpression regex = filter.getRegularFilterExpression();
-        PrefixFilterExpression[] prefixes = filter.getPrefixFilterExpressions();
-        Optional<Integer> maxSearchWindow = filter.getMaxSearchWindow();
-
-        if (regex != null && prefixes != null && prefixes.length != 0) {
-            throw new IllegalArgumentException("Regex and Prefix expressions are mutually exclusive");
-        }
-
-        StreamsOuterClass.ReadReq.Options.FilterOptions.Expression expression = null;
-        if (regex != null) {
-            expression = StreamsOuterClass.ReadReq.Options.FilterOptions.Expression.newBuilder()
-                    .setRegex(regex.toString())
-                    .build();
-        }
-
-        if (prefixes != null && prefixes.length > 0) {
-            StreamsOuterClass.ReadReq.Options.FilterOptions.Expression.Builder expressionB = StreamsOuterClass.ReadReq.Options.FilterOptions.Expression.newBuilder();
-            Stream.of(prefixes)
-                    .map(Object::toString)
-                    .filter(Objects::nonNull)
-                    .distinct()
-                    .forEach(expressionB::addPrefix);
-            expression = expressionB.build();
-        }
-
-        if (expression == null) {
-            builder.setNoFilter(Shared.Empty.getDefaultInstance());
-            return;
-        }
-
-        StreamsOuterClass.ReadReq.Options.FilterOptions.Builder optsB = StreamsOuterClass.ReadReq.Options.FilterOptions.newBuilder();
-        if (filter instanceof StreamFilter) {
-            optsB.setStreamName(expression);
-        }
-        if (filter instanceof EventTypeFilter) {
-            optsB.setEventType(expression);
-        }
-
-        if (maxSearchWindow != null && maxSearchWindow.isPresent()) {
-            optsB.setMax(maxSearchWindow.get());
-        } else {
-            optsB.setCount(Shared.Empty.getDefaultInstance());
-        }
-
-        builder.setFilter(optsB.build());
     }
 
     // endregion
