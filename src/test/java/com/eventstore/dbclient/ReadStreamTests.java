@@ -22,7 +22,7 @@ public class ReadStreamTests {
     public final EventStoreStreamsClient client = new EventStoreStreamsClient(server);
 
     @Test
-    public void testReadStreamForwards10Events() throws Throwable {
+    public void testReadStreamForward10EventsFromPositionStart() throws Throwable {
         CompletableFuture<ReadStreamResult> future = client.instance.readStream(
                 Direction.Forward,
                 "dataset20M-1800",
@@ -36,6 +36,29 @@ public class ReadStreamTests {
         assertEquals(10, result.getEvents().size());
 
         TestResolvedEvent[] expectedEvents = loadSerializedTestData("dataset20M-1800-e0-e10");
+        for (int i = 0; i < expectedEvents.length; i++) {
+            TestResolvedEvent expected = expectedEvents[i];
+            ResolvedEvent actual = actualEvents[i];
+
+            expected.assertEquals(actual);
+        }
+    }
+
+    @Test
+    public void testReadStreamBackward10EventsFromPositionEnd() throws Throwable {
+        CompletableFuture<ReadStreamResult> future = client.instance.readStream(
+                Direction.Backward,
+                "dataset20M-1800",
+                StreamRevision.END,
+                10,
+                false);
+        ReadStreamResult result = future.get();
+        ResolvedEvent[] actualEvents = result.getEvents().toArray(new ResolvedEvent[0]);
+
+        assertNotNull(result.getEvents());
+        assertEquals(10, result.getEvents().size());
+
+        TestResolvedEvent[] expectedEvents = loadSerializedTestData("dataset20M-1800-e1999-e1990");
         for (int i = 0; i < expectedEvents.length; i++) {
             TestResolvedEvent expected = expectedEvents[i];
             ResolvedEvent actual = actualEvents[i];
