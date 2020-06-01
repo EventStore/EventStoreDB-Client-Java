@@ -15,6 +15,10 @@ public class SubscriptionFilter {
     private final int checkpointIntervalUnsigned;
     private final Checkpointer checkpointer;
 
+    public static SubscriptionFilterBuilder newBuilder() {
+        return new SubscriptionFilterBuilder();
+    }
+
     public SubscriptionFilter(@NotNull final EventFilter filter) {
         this.filter = filter;
         this.checkpointer = null;
@@ -29,15 +33,7 @@ public class SubscriptionFilter {
         this.checkpointIntervalUnsigned = checkpointIntervalUnsigned;
     }
 
-    public EventFilter getFilter() {
-        return filter;
-    }
-
-    public int getCheckpointIntervalUnsigned() {
-        return checkpointIntervalUnsigned;
-    }
-
-    public Checkpointer getCheckpointer() {
+    Checkpointer getCheckpointer() {
         return checkpointer;
     }
 
