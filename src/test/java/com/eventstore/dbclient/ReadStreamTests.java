@@ -1,18 +1,12 @@
 package com.eventstore.dbclient;
 
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Rule;
 import org.junit.Test;
 import testcontainers.module.EventStoreStreamsClient;
 import testcontainers.module.EventStoreTestDBContainer;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 public class ReadStreamTests {
     @Rule
@@ -23,62 +17,37 @@ public class ReadStreamTests {
 
     @Test
     public void testReadStreamForward10EventsFromPositionStart() throws Throwable {
-        CompletableFuture<ReadStreamResult> future = client.instance.readStream(
+        CompletableFuture<ReadResult> future = client.instance.readStream(
                 Direction.Forward,
                 "dataset20M-1800",
                 StreamRevision.START,
                 10,
                 false);
-        ReadStreamResult result = future.get();
-        ResolvedEvent[] actualEvents = result.getEvents().toArray(new ResolvedEvent[0]);
-
-        assertNotNull(result.getEvents());
-        assertEquals(10, result.getEvents().size());
-
-        TestResolvedEvent[] expectedEvents = loadSerializedTestData("dataset20M-1800-e0-e10");
-        for (int i = 0; i < expectedEvents.length; i++) {
-            TestResolvedEvent expected = expectedEvents[i];
-            ResolvedEvent actual = actualEvents[i];
-
-            expected.assertEquals(actual);
-        }
+        ReadResult result = future.get();
+        verifyAgainstTestData(result.getEvents(), "dataset20M-1800-e0-e10");
     }
 
     @Test
     public void testReadStreamBackward10EventsFromPositionEnd() throws Throwable {
-        CompletableFuture<ReadStreamResult> future = client.instance.readStream(
+        CompletableFuture<ReadResult> future = client.instance.readStream(
                 Direction.Backward,
                 "dataset20M-1800",
                 StreamRevision.END,
                 10,
                 false);
-        ReadStreamResult result = future.get();
-        ResolvedEvent[] actualEvents = result.getEvents().toArray(new ResolvedEvent[0]);
-
-        assertNotNull(result.getEvents());
-        assertEquals(10, result.getEvents().size());
-
-        TestResolvedEvent[] expectedEvents = loadSerializedTestData("dataset20M-1800-e1999-e1990");
-        for (int i = 0; i < expectedEvents.length; i++) {
-            TestResolvedEvent expected = expectedEvents[i];
-            ResolvedEvent actual = actualEvents[i];
-
-            expected.assertEquals(actual);
-        }
+        ReadResult result = future.get();
+        verifyAgainstTestData(result.getEvents(), "dataset20M-1800-e1999-e1990");
     }
 
-    private TestResolvedEvent[] loadSerializedTestData(String filenameStem) {
-        String filename = String.format("%s.json", filenameStem);
+    private void verifyAgainstTestData(List<ResolvedEvent> actualEvents, String filenameStem) {
+        ResolvedEvent[] actualEventsArray = actualEvents.toArray(new ResolvedEvent[0]);
 
-        InputStream stream = getClass().getClassLoader().getResourceAsStream(filename);
+        TestResolvedEvent[] expectedEvents = TestDataLoader.loadSerializedTestData(filenameStem);
+        for (int i = 0; i < expectedEvents.length; i++) {
+            TestResolvedEvent expected = expectedEvents[i];
+            ResolvedEvent actual = actualEventsArray[i];
 
-        JsonMapper mapper = JsonMapper.builder()
-                .addModule(new JavaTimeModule())
-                .build();
-        try {
-            return mapper.readValue(stream, TestResolvedEvent[].class);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            expected.assertEquals(actual);
         }
     }
 }

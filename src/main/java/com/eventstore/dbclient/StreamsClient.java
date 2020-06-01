@@ -105,7 +105,7 @@ public class StreamsClient {
 
     // region Read From Stream
 
-    public CompletableFuture<ReadStreamResult> readStream(
+    public CompletableFuture<ReadResult> readStream(
             @NotNull Direction direction,
             @NotNull String streamName,
             @NotNull StreamRevision from,
@@ -123,46 +123,30 @@ public class StreamsClient {
         StreamsOuterClass.ReadReq request = StreamsOuterClass.ReadReq.newBuilder()
                 .setOptions(opts)
                 .build();
+        return readInternal(request);
+    }
 
-        CompletableFuture<ReadStreamResult> result = new CompletableFuture<>();
-        ArrayList<ResolvedEvent> resolvedEvents = new ArrayList<>();
-
-        _stub.read(request, new StreamObserver<StreamsOuterClass.ReadResp>() {
-            private boolean completed = false;
-
-            @Override
-            public void onNext(StreamsOuterClass.ReadResp value) {
-                if (value.hasStreamNotFound()) {
-                    result.completeExceptionally(new StreamNotFoundException());
-                    this.completed = true;
-                    return;
-                }
-
-                if (value.hasEvent()) {
-                    resolvedEvents.add(ResolvedEvent.fromWire(value.getEvent()));
-                }
-            }
-
-            @Override
-            public void onCompleted() {
-                if (this.completed) {
-                    return;
-                }
-
-                result.complete(new ReadStreamResult(resolvedEvents));
-            }
-
-            @Override
-            public void onError(Throwable t) {
-                if (this.completed) {
-                    return;
-                }
-
-                result.completeExceptionally(t);
-            }
-        });
-
-        return result;
+    public CompletableFuture<ReadResult> readAll(
+            Direction direction,
+            Position position,
+            int count,
+            boolean resolveLinks
+    ) {
+        StreamsOuterClass.ReadReq.Options.Builder opts = defaultReadOptions.clone()
+                .setAll(StreamsOuterClass.ReadReq.Options.AllOptions.newBuilder()
+                        .setPosition(StreamsOuterClass.ReadReq.Options.Position.newBuilder()
+                                .setCommitPosition(position.getCommitUnsigned())
+                                .setPreparePosition(position.getPrepareUnsigned())))
+                .setResolveLinks(resolveLinks)
+                .setCount(count)
+                .setNoFilter(Shared.Empty.getDefaultInstance())
+                .setReadDirection(direction == Direction.Forward ?
+                        StreamsOuterClass.ReadReq.Options.ReadDirection.Forwards :
+                        StreamsOuterClass.ReadReq.Options.ReadDirection.Backwards);
+        StreamsOuterClass.ReadReq request = StreamsOuterClass.ReadReq.newBuilder()
+                .setOptions(opts)
+                .build();
+        return readInternal(request);
     }
 
     // endregion
@@ -263,6 +247,47 @@ public class StreamsClient {
             public void onCompleted() {
             }
         };
+    }
+
+    private CompletableFuture<ReadResult> readInternal(StreamsOuterClass.ReadReq request)  {
+        CompletableFuture<ReadResult> future = new CompletableFuture<>();
+        ArrayList<ResolvedEvent> resolvedEvents = new ArrayList<>();
+
+        _stub.read(request, new StreamObserver<StreamsOuterClass.ReadResp>() {
+            private boolean completed = false;
+
+            @Override
+            public void onNext(StreamsOuterClass.ReadResp value) {
+                if (value.hasStreamNotFound()) {
+                    future.completeExceptionally(new StreamNotFoundException());
+                    this.completed = true;
+                    return;
+                }
+
+                if (value.hasEvent()) {
+                    resolvedEvents.add(ResolvedEvent.fromWire(value.getEvent()));
+                }
+            }
+
+            @Override
+            public void onCompleted() {
+                if (this.completed) {
+                    return;
+                }
+
+                future.complete(new ReadResult(resolvedEvents));
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                if (this.completed) {
+                    return;
+                }
+
+                future.completeExceptionally(t);
+            }
+        });
+        return future;
     }
 
     private CompletableFuture<WriteResult> appendInternal(
@@ -415,7 +440,6 @@ public class StreamsClient {
 
         return future;
     }
-
 
     // endregion
 
