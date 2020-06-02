@@ -2,10 +2,10 @@ package com.eventstore.dbclient;
 
 import java.util.List;
 
-public class ReadStreamResult {
+public class ReadResult {
     private final List<ResolvedEvent> events;
 
-    public ReadStreamResult(List<ResolvedEvent> events) {
+    public ReadResult(List<ResolvedEvent> events) {
         this.events = events;
     }
 
