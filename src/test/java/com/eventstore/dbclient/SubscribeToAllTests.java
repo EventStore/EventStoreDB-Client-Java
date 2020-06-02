@@ -5,11 +5,9 @@ import org.junit.Test;
 import testcontainers.module.EventStoreStreamsClient;
 import testcontainers.module.EventStoreTestDBContainer;
 
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
-import java.util.regex.Pattern;
 
 import static org.junit.Assert.*;
 
@@ -118,11 +116,11 @@ public class SubscribeToAllTests {
             }
         };
 
-        CompletableFuture<Subscription> future = client.instance.subscribeToAll(Position.START,
-                false, listener,
-                new SubscriptionFilter(
-                        new EventTypeFilter(Optional.empty(),
-                                new RegularFilterExpression(Pattern.compile("^eventType-194$")))));
+        SubscriptionFilter filter = SubscriptionFilter.newBuilder()
+                .withEventTypeRegularExpression("^eventType-194$")
+                .build();
+
+        CompletableFuture<Subscription> future = client.instance.subscribeToAll(Position.START, false, listener, filter);
         Subscription result = future.get();
 
         assertNotNull(result.getSubscriptionId());
