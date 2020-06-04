@@ -52,13 +52,9 @@ public class SubscribeToAllTests {
     public void testAllSubscriptionWithFilterDeliversCorrectEvents() throws InterruptedException, ExecutionException {
         final TestPosition[] expectedPositions = TestDataLoader.loadSerializedPositions(
                 "all-positions-filtered-stream194-e0-e30");
-        final long[] expectedStreamVersion = TestDataLoader.loadSerializedStreamVersions(
+        final long[] expectedStreamVersions = TestDataLoader.loadSerializedStreamVersions(
                 "all-versions-filtered-stream194-e0-e30");
 
-        final long[] expectedStreamVersions = new long[]{
-                194, 394, 594, 794, 994, 1194, 1394, 1594, 1794, 1994, 140, 141, 142, 143, 144,
-                145, 146, 147, 148, 149, 340, 341, 342, 343, 344, 345, 346, 347, 348, 349
-        };
         assertEquals(expectedPositions.length, expectedStreamVersions.length);
 
         final CountDownLatch receivedEvents = new CountDownLatch(expectedStreamVersions.length);
