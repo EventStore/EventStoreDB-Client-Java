@@ -42,7 +42,7 @@ public class ReadStreamTests {
     private void verifyAgainstTestData(List<ResolvedEvent> actualEvents, String filenameStem) {
         ResolvedEvent[] actualEventsArray = actualEvents.toArray(new ResolvedEvent[0]);
 
-        TestResolvedEvent[] expectedEvents = TestDataLoader.loadSerializedTestData(filenameStem);
+        TestResolvedEvent[] expectedEvents = TestDataLoader.loadSerializedResolvedEvents(filenameStem);
         for (int i = 0; i < expectedEvents.length; i++) {
             TestResolvedEvent expected = expectedEvents[i];
             ResolvedEvent actual = actualEventsArray[i];

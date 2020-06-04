@@ -435,8 +435,7 @@ public class StreamsClient {
             }
         };
 
-        _stub.withDeadlineAfter(this._timeouts.subscriptionTimeout, this._timeouts.subscriptionTimeoutUnit)
-                .read(readReq, observer);
+        _stub.read(readReq, observer);
 
         return future;
     }
