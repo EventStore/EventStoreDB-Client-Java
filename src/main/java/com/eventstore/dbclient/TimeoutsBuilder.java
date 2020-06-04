@@ -9,10 +9,17 @@ public class TimeoutsBuilder {
     long subscriptionTimeout;
     TimeUnit subscriptionTimeoutUnit;
 
+    long readGossipTimeout;
+    TimeUnit readGossipTimeoutUnit;
+
     public static TimeoutsBuilder newBuilder() {
         TimeoutsBuilder builder = new TimeoutsBuilder();
         builder.shutdownTimeout = Timeouts.DEFAULT.shutdownTimeout;
         builder.shutdownTimeoutUnit = Timeouts.DEFAULT.shutdownTimeoutUnit;
+        builder.subscriptionTimeout = Timeouts.DEFAULT.subscriptionTimeout;
+        builder.subscriptionTimeoutUnit = Timeouts.DEFAULT.subscriptionTimeoutUnit;
+        builder.readGossipTimeout = Timeouts.DEFAULT.readGossipTimeout;
+        builder.readGossipTimeoutUnit = Timeouts.DEFAULT.readGossipTimeoutUnit;
         return builder;
     }
 
@@ -28,8 +35,14 @@ public class TimeoutsBuilder {
         return this;
     }
 
+    public TimeoutsBuilder withReadGossipTimeout(final long timeout, final TimeUnit timeoutUnit) {
+        readGossipTimeout = timeout;
+        readGossipTimeoutUnit = timeoutUnit;
+        return this;
+    }
+
     public Timeouts build() {
-        return new Timeouts(shutdownTimeout, shutdownTimeoutUnit, subscriptionTimeout, subscriptionTimeoutUnit);
+        return new Timeouts(shutdownTimeout, shutdownTimeoutUnit, subscriptionTimeout, subscriptionTimeoutUnit, readGossipTimeout, readGossipTimeoutUnit);
     }
 
     private TimeoutsBuilder() {
