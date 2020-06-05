@@ -2,12 +2,14 @@ package com.eventstore.dbclient;
 
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.testcontainers.shaded.com.fasterxml.jackson.core.type.TypeReference;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 class TestDataLoader {
-    static TestResolvedEvent[] loadSerializedTestData(String filenameStem) {
+    static TestResolvedEvent[] loadSerializedResolvedEvents(String filenameStem) {
         String filename = String.format("%s.json", filenameStem);
 
         InputStream stream = TestDataLoader.class.getClassLoader().getResourceAsStream(filename);
@@ -17,6 +19,32 @@ class TestDataLoader {
                 .build();
         try {
             return mapper.readValue(stream, TestResolvedEvent[].class);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    static TestPosition[] loadSerializedPositions(String filenameStem) {
+        String filename = String.format("%s.json", filenameStem);
+
+        InputStream stream = TestDataLoader.class.getClassLoader().getResourceAsStream(filename);
+
+        JsonMapper mapper = JsonMapper.builder().build();
+        try {
+            return mapper.readValue(stream, TestPosition[].class);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    static long[] loadSerializedStreamVersions(String filenameStem) {
+        String filename = String.format("%s.json", filenameStem);
+
+        InputStream stream = TestDataLoader.class.getClassLoader().getResourceAsStream(filename);
+
+        JsonMapper mapper = JsonMapper.builder().build();
+        try {
+            return mapper.readValue(stream, long[].class);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
