@@ -1,0 +1,13 @@
+Describe change in active voice, ideally in under 60 chars
+
+Provide a more detailed summary including the motivations for the change, any
+downstream impacts, and limitations of the approaches taken.  If other
+competing approaches were considered, include a summary of those and why they
+were not used instead. The body should describe _why_ the changes were made
+rather than the detail of what changes were made, which is easily identifiable
+from the diff.
+
+Wrap the body at 72 characters.
+
+For more information on writing Git commit messages which are likely to be
+merged without modification, see see https://chris.beams.io/posts/git-commit/
