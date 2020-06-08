@@ -73,7 +73,9 @@ public class StreamsClient {
             @NotNull StreamRevision expectedRevision,
             @NotNull List<ProposedEvent> proposedEvents) {
         StreamsOuterClass.AppendReq.Options.Builder options = StreamsOuterClass.AppendReq.Options.newBuilder()
-                .setStreamName(streamName)
+                .setStreamIdentifier(Shared.StreamIdentifier.newBuilder()
+                        .setStreamName(ByteString.copyFromUtf8(streamName))
+                        .build())
                 .setRevision(expectedRevision.getValueUnsigned());
 
         return appendInternal(options, proposedEvents);
@@ -84,7 +86,9 @@ public class StreamsClient {
             @NotNull SpecialStreamRevision expectedRevision,
             @NotNull List<ProposedEvent> proposedEvents) {
         StreamsOuterClass.AppendReq.Options.Builder options = StreamsOuterClass.AppendReq.Options.newBuilder()
-                .setStreamName(streamName);
+                .setStreamIdentifier(Shared.StreamIdentifier.newBuilder()
+                        .setStreamName(ByteString.copyFromUtf8(streamName))
+                        .build());
 
         switch (expectedRevision) {
             case NO_STREAM:
@@ -159,7 +163,9 @@ public class StreamsClient {
     ) {
         StreamsOuterClass.DeleteReq req = StreamsOuterClass.DeleteReq.newBuilder()
                 .setOptions(StreamsOuterClass.DeleteReq.Options.newBuilder()
-                        .setStreamName(streamName)
+                        .setStreamIdentifier(Shared.StreamIdentifier.newBuilder()
+                                .setStreamName(ByteString.copyFromUtf8(streamName))
+                                .build())
                         .setRevision(expectedRevision.getValueUnsigned()))
                 .build();
 
@@ -249,7 +255,7 @@ public class StreamsClient {
         };
     }
 
-    private CompletableFuture<ReadResult> readInternal(StreamsOuterClass.ReadReq request)  {
+    private CompletableFuture<ReadResult> readInternal(StreamsOuterClass.ReadReq request) {
         CompletableFuture<ReadResult> future = new CompletableFuture<>();
         ArrayList<ResolvedEvent> resolvedEvents = new ArrayList<>();
 
@@ -333,7 +339,9 @@ public class StreamsClient {
                     currentRevision = new StreamRevision(wev.getCurrentRevision());
                 }
 
-                throw new WrongExpectedVersionException(options.getStreamName(), expectedRevision, currentRevision);
+                String streamName = options.getStreamIdentifier().getStreamName().toStringUtf8();
+
+                throw new WrongExpectedVersionException(streamName, expectedRevision, currentRevision);
             }
 
             throw new IllegalStateException("AppendResponse has neither Success or WrongExpectedVersion variants");
@@ -446,7 +454,9 @@ public class StreamsClient {
 
     private static StreamsOuterClass.ReadReq.Options.StreamOptions toStreamOptions(String streamName, StreamRevision revision) {
         StreamsOuterClass.ReadReq.Options.StreamOptions.Builder builder = StreamsOuterClass.ReadReq.Options.StreamOptions.newBuilder()
-                .setStreamName(streamName);
+                .setStreamIdentifier(Shared.StreamIdentifier.newBuilder()
+                        .setStreamName(ByteString.copyFromUtf8(streamName))
+                        .build());
 
         if (revision == StreamRevision.END) {
             return builder.setEnd(Shared.Empty.getDefaultInstance())

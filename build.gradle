@@ -5,6 +5,7 @@ plugins {
     id "java"
     id "com.google.protobuf" version "0.8.12"
     id "idea"
+    id "de.undercouch.download" version "4.0.4"
 }
 
 group 'com.eventstore'
@@ -21,6 +22,14 @@ sourceSets {
             srcDirs "build/generated/source/proto/main/java"
         }
     }
+}
+
+task updateServerProtos(type: Download) {
+    src([
+        "https://raw.githubusercontent.com/EventStore/EventStore/master/src/Protos/Grpc/shared.proto",
+        "https://raw.githubusercontent.com/EventStore/EventStore/master/src/Protos/Grpc/streams.proto"
+    ])
+    dest "src/main/proto"
 }
 
 dependencies {

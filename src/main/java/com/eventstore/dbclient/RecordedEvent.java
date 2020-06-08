@@ -113,7 +113,7 @@ public class RecordedEvent {
         }
 
         return new RecordedEvent(
-                wireEvent.getStreamName(),
+                wireEvent.getStreamIdentifier().getStreamName().toStringUtf8(),
                 new StreamRevision(wireEvent.getStreamRevision()),
                 eventId,
                 new Position(wireEvent.getCommitPosition(), wireEvent.getPreparePosition()),
