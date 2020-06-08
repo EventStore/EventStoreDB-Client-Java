@@ -4,6 +4,7 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 plugins {
     id "java"
     id "com.google.protobuf" version "0.8.12"
+    id "idea"
 }
 
 group 'com.eventstore'
