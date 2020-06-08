@@ -22,7 +22,7 @@ public class EventStoreTestDBContainer extends GenericContainer<EventStoreTestDB
     static {
         NAME = "eventstore-client-grpc-testdata";
         IMAGE = "docker.pkg.github.com/eventstore/eventstore-client-grpc-testdata/" + NAME;
-        IMAGE_TAG = "20.6.0-rc.28-buster-slim";
+        IMAGE_TAG = "20.6.0-rc.36-buster-slim";
         HEALTH_CHECK = new HealthCheck()
                 .withInterval(1000000000L)
                 .withTimeout(1000000000L)

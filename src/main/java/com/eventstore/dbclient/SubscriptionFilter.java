@@ -70,7 +70,7 @@ public class SubscriptionFilter {
 
         StreamsOuterClass.ReadReq.Options.FilterOptions.Builder optsB = StreamsOuterClass.ReadReq.Options.FilterOptions.newBuilder();
         if (filter instanceof StreamFilter) {
-            optsB.setStreamName(expression);
+            optsB.setStreamIdentifier(expression);
         }
         if (filter instanceof EventTypeFilter) {
             optsB.setEventType(expression);
