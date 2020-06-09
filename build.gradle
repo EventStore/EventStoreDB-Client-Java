@@ -4,6 +4,8 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 plugins {
     id "java"
     id "com.google.protobuf" version "0.8.12"
+    id "maven-publish"
+
     id "idea"
     id "de.undercouch.download" version "4.0.4"
 }
@@ -26,8 +28,8 @@ sourceSets {
 
 task updateServerProtos(type: Download) {
     src([
-        "https://raw.githubusercontent.com/EventStore/EventStore/master/src/Protos/Grpc/shared.proto",
-        "https://raw.githubusercontent.com/EventStore/EventStore/master/src/Protos/Grpc/streams.proto"
+            "https://raw.githubusercontent.com/EventStore/EventStore/master/src/Protos/Grpc/shared.proto",
+            "https://raw.githubusercontent.com/EventStore/EventStore/master/src/Protos/Grpc/streams.proto"
     ])
     dest "src/main/proto"
 }
@@ -75,6 +77,24 @@ test {
     useJUnit()
 
     maxHeapSize = '1G'
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/EventStore/EventStoreDB-Client-Java")
+            credentials {
+                username = "eventstore"
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
+    publications {
+        gpr(MavenPublication) {
+            from(components.java)
+        }
+    }
 }
 
 tasks.withType(Test) {
