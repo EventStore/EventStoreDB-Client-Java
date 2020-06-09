@@ -40,3 +40,8 @@ jobs:
         uses: eskatos/gradle-command-action@v1
         with:
           arguments: test
+
+      - name: Publish GitHub Packages
+        uses: eskatos/gradle-command-action@v1
+        with:
+          arguments: publish
