@@ -85,8 +85,8 @@ publishing {
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/EventStore/EventStoreDB-Client-Java")
             credentials {
-                username = "eventstore"
-                password = System.getenv("GITHUB_TOKEN")
+                username = System.getenv("GPR_USER")
+                password = System.getenv("GPR_TOKEN")
             }
         }
     }
