@@ -1,12 +1,12 @@
 package com.eventstore.dbclient;
 
 public abstract class SubscriptionListener {
-    void onEvent(Subscription subscription, ResolvedEvent event) {
+    public void onEvent(Subscription subscription, ResolvedEvent event) {
     }
 
-    void onError(Subscription subscription, Throwable throwable) {
+    public void onError(Subscription subscription, Throwable throwable) {
     }
 
-    void onCancelled(Subscription subscription) {
+    public void onCancelled(Subscription subscription) {
     }
 }
