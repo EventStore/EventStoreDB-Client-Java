@@ -27,17 +27,17 @@ public class SubscribeToStreamTests {
 
         SubscriptionListener listener = new SubscriptionListener() {
             @Override
-            void onEvent(Subscription subscription, ResolvedEvent event) {
+            public void onEvent(Subscription subscription, ResolvedEvent event) {
                 receivedEvents.countDown();
             }
 
             @Override
-            void onCancelled(Subscription subscription) {
+            public void onCancelled(Subscription subscription) {
                 cancellation.countDown();
             }
 
             @Override
-            void onError(Subscription subscription, Throwable throwable) {
+            public void onError(Subscription subscription, Throwable throwable) {
                 fail(throwable.getMessage());
             }
         };
@@ -60,19 +60,19 @@ public class SubscribeToStreamTests {
             public int current = 0;
 
             @Override
-            void onEvent(Subscription subscription, ResolvedEvent event) {
+            public void onEvent(Subscription subscription, ResolvedEvent event) {
                 assertEquals(new StreamRevision(current), event.getEvent().getStreamRevision());
                 current += 1;
                 receivedEvents.countDown();
             }
 
             @Override
-            void onCancelled(Subscription subscription) {
+            public void onCancelled(Subscription subscription) {
                 cancellation.countDown();
             }
 
             @Override
-            void onError(Subscription subscription, Throwable throwable) {
+            public void onError(Subscription subscription, Throwable throwable) {
                 fail(throwable.getMessage());
             }
         }
@@ -104,7 +104,7 @@ public class SubscribeToStreamTests {
             public int current = 0;
 
             @Override
-            void onEvent(Subscription subscription, ResolvedEvent event) {
+            public void onEvent(Subscription subscription, ResolvedEvent event) {
                 assertEquals(new StreamRevision(current), event.getEvent().getStreamRevision());
                 current += 1;
 
@@ -125,12 +125,12 @@ public class SubscribeToStreamTests {
             }
 
             @Override
-            void onCancelled(Subscription subscription) {
+            public void onCancelled(Subscription subscription) {
                 cancellation.countDown();
             }
 
             @Override
-            void onError(Subscription subscription, Throwable throwable) {
+            public void onError(Subscription subscription, Throwable throwable) {
                 fail(throwable.getMessage());
             }
         }
