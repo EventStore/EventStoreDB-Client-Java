@@ -1,0 +1,68 @@
+import groovy.time.TimeCategory
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.api.tasks.testing.logging.TestLogEvent
+
+ext.testsResults = []
+
+allprojects { project ->
+    tasks.withType(Test) { testTask ->
+        testTask.testLogging { logging ->
+            events TestLogEvent.FAILED,
+                    TestLogEvent.SKIPPED,
+                    TestLogEvent.STANDARD_OUT,
+                    TestLogEvent.STANDARD_ERROR
+
+            exceptionFormat TestExceptionFormat.FULL
+            showExceptions true
+            showCauses true
+            showStackTraces true
+        }
+
+        ignoreFailures = true // Always try to run all tests for all modules
+
+        afterSuite { desc, result ->
+
+            if (desc.parent) return // Only summarize results for whole modules
+
+            String summary = "${testTask.project.name}:${testTask.name} results: ${result.resultType} " +
+                    "(" +
+                    "${result.testCount} tests, " +
+                    "${result.successfulTestCount} successes, " +
+                    "${result.failedTestCount} failures, " +
+                    "${result.skippedTestCount} skipped" +
+                    ") " +
+                    "in ${TimeCategory.minus(new Date(result.endTime), new Date(result.startTime))}" +
+                    "\n" +
+                    "Report file: ${testTask.reports.html.entryPoint}"
+
+            // Add reports in `testsResults`, keep failed suites at the end
+            if (result.resultType == TestResult.ResultType.SUCCESS) {
+                rootProject.testsResults.add(0, summary)
+            } else {
+                rootProject.testsResults += summary
+            }
+        }
+    }
+}
+
+gradle.buildFinished {
+    def allResults = rootProject.ext.testsResults
+
+    if (!allResults.isEmpty()) {
+        printResults allResults
+    }
+}
+
+private static void printResults(allResults) {
+    def maxLength = allResults*.readLines().flatten().collect { it.length() }.max()
+
+    println "┌${"${"─" * maxLength}"}┐"
+
+    println allResults.collect {
+        it.readLines().collect {
+            "│" + it + " " * (maxLength - it.length()) + "│"
+        }.join("\n")
+    }.join("\n├${"${"─" * maxLength}"}┤\n")
+
+    println "└${"${"─" * maxLength}"}┘"
+}
