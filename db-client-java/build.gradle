@@ -2,6 +2,7 @@ apply plugin: 'java-library'
 apply from: rootProject.file('gradle/proto.gradle')
 apply from: rootProject.file('gradle/spotbugs.gradle')
 apply from: rootProject.file('gradle/updateProtos.gradle')
+apply from: rootProject.file('gradle/publishing.gradle')
 
 dependencies {
 	implementation "javax.annotation:javax.annotation-api:${annotationApiVersion}"
