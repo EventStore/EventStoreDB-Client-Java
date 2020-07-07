@@ -1,1 +1,3 @@
-rootProject.name = 'db-client-java'
+rootProject.name = 'EventStoreDB-Client-Java'
+
+include 'db-client-java'

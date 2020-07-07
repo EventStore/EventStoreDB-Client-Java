@@ -1,0 +1,9 @@
+apply plugin: 'de.undercouch.download'
+
+task updateServerProtos(type: Download) {
+    src([
+            "https://raw.githubusercontent.com/EventStore/EventStore/master/src/Protos/Grpc/shared.proto",
+            "https://raw.githubusercontent.com/EventStore/EventStore/master/src/Protos/Grpc/streams.proto"
+    ])
+    dest "db-client-java/src/main/proto"
+}
