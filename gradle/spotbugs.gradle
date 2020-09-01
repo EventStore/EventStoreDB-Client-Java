@@ -1,7 +1,0 @@
-apply plugin: 'com.github.spotbugs'
-
-spotbugs {
-    ignoreFailures = false
-    effort = 'max'
-    excludeFilter = rootProject.file('gradle/config/spotbugs_exclude.xml')
-}
