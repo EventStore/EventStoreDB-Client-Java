@@ -1,5 +1,6 @@
 package com.eventstore.dbclient;
 
+import com.eventstore.dbclient.proto.persistentsubscriptions.Persistent;
 import com.eventstore.dbclient.proto.streams.StreamsOuterClass;
 
 public class ResolvedEvent {
@@ -20,6 +21,13 @@ public class ResolvedEvent {
     }
 
     static ResolvedEvent fromWire(StreamsOuterClass.ReadResp.ReadEvent wireEvent) {
+        RecordedEvent event = wireEvent.hasEvent() ? RecordedEvent.fromWire(wireEvent.getEvent()) : null;
+        RecordedEvent link = wireEvent.hasLink() ? RecordedEvent.fromWire(wireEvent.getLink()) : null;
+
+        return new ResolvedEvent(event, link);
+    }
+
+    static ResolvedEvent fromWire(Persistent.ReadResp.ReadEvent wireEvent) {
         RecordedEvent event = wireEvent.hasEvent() ? RecordedEvent.fromWire(wireEvent.getEvent()) : null;
         RecordedEvent link = wireEvent.hasLink() ? RecordedEvent.fromWire(wireEvent.getLink()) : null;
 

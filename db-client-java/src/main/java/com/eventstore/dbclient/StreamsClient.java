@@ -78,15 +78,14 @@ public class StreamsClient {
 
     public CompletableFuture<WriteResult> appendToStream(
             @NotNull String streamName,
-            @NotNull StreamRevision expectedRevision,
+            @NotNull ExpectedRevision expectedRevision,
             @NotNull List<ProposedEvent> proposedEvents) {
         StreamsOuterClass.AppendReq.Options.Builder options = StreamsOuterClass.AppendReq.Options.newBuilder()
                 .setStreamIdentifier(Shared.StreamIdentifier.newBuilder()
                         .setStreamName(ByteString.copyFromUtf8(streamName))
-                        .build())
-                .setRevision(expectedRevision.getValueUnsigned());
+                        .build());
 
-        return appendInternal(options, proposedEvents);
+        return appendInternal(expectedRevision.applyOnWire(options), proposedEvents);
     }
 
     public CompletableFuture<WriteResult> appendToStream(
@@ -383,16 +382,21 @@ public class StreamsClient {
             requestStream.onNext(StreamsOuterClass.AppendReq.newBuilder().setOptions(options).build());
 
             for (ProposedEvent e : proposedEvents) {
+                StreamsOuterClass.AppendReq.ProposedMessage.Builder msgBuilder = StreamsOuterClass.AppendReq.ProposedMessage.newBuilder()
+                        .setId(Shared.UUID.newBuilder()
+                                .setStructured(Shared.UUID.Structured.newBuilder()
+                                        .setMostSignificantBits(e.getEventId().getMostSignificantBits())
+                                        .setLeastSignificantBits(e.getEventId().getLeastSignificantBits())))
+                        .setData(ByteString.copyFrom(e.getEventData()))
+                        .putMetadata(SystemMetadataKeys.CONTENT_TYPE, e.getContentType())
+                        .putMetadata(SystemMetadataKeys.TYPE, e.getEventType());
+
+                if (e.getUserMetadata() != null) {
+                    msgBuilder.setCustomMetadata(ByteString.copyFrom(e.getUserMetadata()));
+                }
+
                 requestStream.onNext(StreamsOuterClass.AppendReq.newBuilder()
-                        .setProposedMessage(StreamsOuterClass.AppendReq.ProposedMessage.newBuilder()
-                                .setId(Shared.UUID.newBuilder()
-                                        .setStructured(Shared.UUID.Structured.newBuilder()
-                                                .setMostSignificantBits(e.getEventId().getMostSignificantBits())
-                                                .setLeastSignificantBits(e.getEventId().getLeastSignificantBits())))
-                                .setData(ByteString.copyFrom(e.getEventData()))
-                                .setCustomMetadata(ByteString.copyFrom(e.getUserMetadata()))
-                                .putMetadata(SystemMetadataKeys.CONTENT_TYPE, e.getContentType())
-                                .putMetadata(SystemMetadataKeys.TYPE, e.getEventType()))
+                        .setProposedMessage(msgBuilder)
                         .build());
             }
             requestStream.onCompleted();

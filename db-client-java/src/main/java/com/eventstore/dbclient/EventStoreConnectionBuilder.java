@@ -8,6 +8,7 @@ public class EventStoreConnectionBuilder {
     private SslContext _sslContext = null;
     private Endpoint endpoint = null;
     private boolean requiresLeader = false;
+    private boolean insecure = false;
 
     public EventStoreConnectionBuilder() {
         _timeouts = Timeouts.DEFAULT;
@@ -24,7 +25,7 @@ public class EventStoreConnectionBuilder {
     }
 
     public EventStoreConnectionBuilder insecure() {
-        _sslContext = null;
+        this.insecure = true;
         return this;
     }
 
@@ -47,7 +48,7 @@ public class EventStoreConnectionBuilder {
     }
 
     public EventStoreConnection createSingleNodeConnection(Endpoint endpoint) {
-        return new EventStoreConnection(endpoint, null, null, _sslContext, _defaultUserCredentials, NodePreference.RANDOM, requiresLeader, _timeouts);
+        return new EventStoreConnection(endpoint, null, null, _sslContext, _defaultUserCredentials, NodePreference.RANDOM, requiresLeader, insecure, _timeouts);
     }
 
     public EventStoreConnection createClusterConnectionUsingSeeds(Endpoint[] endpoints) {
@@ -55,7 +56,7 @@ public class EventStoreConnectionBuilder {
     }
 
     public EventStoreConnection createClusterConnectionUsingSeeds(Endpoint[] endpoints, NodePreference nodePreference) {
-        return new EventStoreConnection(null, endpoints, null, _sslContext, _defaultUserCredentials, nodePreference, requiresLeader, _timeouts);
+        return new EventStoreConnection(null, endpoints, null, _sslContext, _defaultUserCredentials, nodePreference, requiresLeader, insecure, _timeouts);
     }
 
     public EventStoreConnection createClusterConnectionUsingDns(String domain) {
@@ -63,6 +64,6 @@ public class EventStoreConnectionBuilder {
     }
 
     public EventStoreConnection createClusterConnectionUsingDns(String domain, NodePreference nodePreference) {
-        return new EventStoreConnection(null, null, domain, _sslContext, _defaultUserCredentials, nodePreference, requiresLeader, _timeouts);
+        return new EventStoreConnection(null, null, domain, _sslContext, _defaultUserCredentials, nodePreference, requiresLeader, insecure, _timeouts);
     }
 }

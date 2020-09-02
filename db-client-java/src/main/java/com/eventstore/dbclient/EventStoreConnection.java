@@ -20,8 +20,9 @@ public class EventStoreConnection {
     private UserCredentials userCredentials = null;
     private NodePreference nodePreference;
     private boolean requiresLeader;
+    private boolean insecure;
 
-    public EventStoreConnection(Endpoint endpoint, Endpoint[] gossipSeeds, String domain, SslContext sslContext, UserCredentials userCredentials, NodePreference nodePreference, boolean requiresLeader, Timeouts timeouts) {
+    public EventStoreConnection(Endpoint endpoint, Endpoint[] gossipSeeds, String domain, SslContext sslContext, UserCredentials userCredentials, NodePreference nodePreference, boolean requiresLeader, boolean insecure, Timeouts timeouts) {
         this.endpoint = endpoint;
         this.gossipSeeds = gossipSeeds;
         this.domain = domain;
@@ -30,17 +31,7 @@ public class EventStoreConnection {
         this.timeouts = timeouts;
         this.nodePreference = nodePreference;
         this.requiresLeader = requiresLeader;
-
-        if (sslContext == null) {
-            try {
-                this.sslContext = GrpcSslContexts.
-                        forClient().
-                        trustManager(InsecureTrustManagerFactory.INSTANCE).
-                        build();
-            } catch (SSLException e) {
-                throw new RuntimeException(e);
-            }
-        }
+        this.insecure = insecure;
     }
 
     public static EventStoreConnectionBuilder builder() {
@@ -51,10 +42,14 @@ public class EventStoreConnection {
         return new StreamsClient(createManagedChannel(), userCredentials, requiresLeader, timeouts);
     }
 
+    public PersistentClient newPersistentClient() {
+        return new PersistentClient(createManagedChannel(), userCredentials, requiresLeader, timeouts);
+    }
+
     private ManagedChannel createManagedChannel() {
-        ManagedChannel channel = null;
         List<InetSocketAddress> addresses = null;
         String target = domain != null ? domain : "";
+        NettyChannelBuilder builder = null;
 
         if (gossipSeeds != null) {
             addresses = new ArrayList<>();
@@ -72,19 +67,21 @@ public class EventStoreConnection {
                     .getDefaultRegistry()
                     .register(new ClusterResolverFactory(addresses, nodePreference, timeouts, sslContext));
 
-            channel = NettyChannelBuilder
-                    .forTarget(target)
-                    .userAgent("Event Store Client (Java)")
-                    .sslContext(sslContext)
-                    .build();
+            builder = NettyChannelBuilder
+                    .forTarget(target);
         } else {
-            channel = NettyChannelBuilder
-                    .forAddress(endpoint.getHostname(), endpoint.getPort())
-                    .userAgent("Event Store Client (Java)")
-                    .sslContext(sslContext)
-                    .build();
+            builder = NettyChannelBuilder
+                    .forAddress(endpoint.getHostname(), endpoint.getPort());
         }
 
-        return channel;
+        if (insecure) {
+            builder.usePlaintext();
+        } else if (sslContext != null) {
+            builder.sslContext(sslContext);
+        }
+
+        return builder
+                .userAgent("Event Store Client (Java)")
+                .build();
     }
 }
