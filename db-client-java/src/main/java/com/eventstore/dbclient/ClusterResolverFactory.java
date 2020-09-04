@@ -130,26 +130,26 @@ public class ClusterResolverFactory extends NameResolverProvider {
                     switch (nodePreference) {
                         case LEADER:
                             if (o1.getState().equals(ClusterInfo.MemberState.LEADER)) {
-                                return 1;
+                                return -1;
                             }
                             if (o2.getState().equals(ClusterInfo.MemberState.LEADER)) {
-                                return -1;
+                                return 1;
                             }
                             return 0;
                         case FOLLOWER:
                             if (o1.getState().equals(ClusterInfo.MemberState.FOLLOWER)) {
-                                return 1;
+                                return -1;
                             }
                             if (o2.getState().equals(ClusterInfo.MemberState.FOLLOWER)) {
-                                return -1;
+                                return 1;
                             }
                             return 0;
                         case READ_ONLY_REPLICA:
                             if (o1.getState().equals(ClusterInfo.MemberState.READ_ONLY_REPLICA)) {
-                                return 1;
+                                return -1;
                             }
                             if (o2.getState().equals(ClusterInfo.MemberState.READ_ONLY_REPLICA)) {
-                                return -1;
+                                return 1;
                             }
                             return 0;
                         case RANDOM:
@@ -160,8 +160,7 @@ public class ClusterResolverFactory extends NameResolverProvider {
                             return 1;
                     }
                     return 0;
-                })
-                .findAny();
+                }).findFirst();
     }
 
     @Override
