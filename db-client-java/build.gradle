@@ -17,10 +17,10 @@ dependencies {
     implementation "javax.validation:validation-api:${validationApiVersion}"
 
     implementation "com.google.protobuf:protobuf-java:${protobufVersion}"
-
     implementation "io.grpc:grpc-netty-shaded:${grpcVersion}"
     implementation "io.grpc:grpc-stub:${grpcVersion}"
     implementation "io.grpc:grpc-protobuf:${grpcVersion}"
+	implementation 'dnsjava:dnsjava:3.2.2'
 
     testImplementation "junit:junit:${junitVersion}"
     testImplementation "org.slf4j:slf4j-nop:${slf4jNopVersion}"

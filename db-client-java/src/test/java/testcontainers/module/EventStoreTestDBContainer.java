@@ -1,7 +1,7 @@
 package testcontainers.module;
 
+import com.eventstore.dbclient.EventStoreConnection;
 import com.eventstore.dbclient.StreamsClient;
-import com.eventstore.dbclient.Timeouts;
 import com.eventstore.dbclient.UserCredentials;
 import com.github.dockerjava.api.model.HealthCheck;
 import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
@@ -56,11 +56,13 @@ public class EventStoreTestDBContainer extends GenericContainer<EventStoreTestDB
     public StreamsClient getStreamsClient() {
         final String address = getContainerIpAddress();
         final int port = getMappedPort(DB_HTTP_PORT);
-        final SslContext sslContext = getClientSslContext();
-        final UserCredentials creds = new UserCredentials("admin", "changeit");
-        final Timeouts timeouts = Timeouts.DEFAULT;
 
-        return new StreamsClient(address, port, creds, timeouts, sslContext);
+        return EventStoreConnection
+                .builder()
+                .insecure()
+                .defaultUserCredentials(new UserCredentials("admin", "changeit"))
+                .createSingleNodeConnection(address, port)
+                .newStreamsClient();
     }
 
     private SslContext getClientSslContext() {

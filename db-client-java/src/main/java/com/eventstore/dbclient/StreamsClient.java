@@ -44,18 +44,26 @@ public class StreamsClient {
         this(NettyChannelBuilder.forAddress(host, port)
                 .userAgent("Event Store Client (Java) v1.0.0-SNAPSHOT")
                 .sslContext(sslContext)
-                .build(), defaultCredentials, timeouts);
+                .build(), defaultCredentials, false, timeouts);
     }
 
     public StreamsClient(
             @NotNull ManagedChannel channel,
-            @NotNull UserCredentials credentials,
+            UserCredentials credentials,
+            boolean requiresLeader,
             @NotNull Timeouts timeouts) {
         _channel = channel;
         _timeouts = timeouts;
 
         Metadata headers = new Metadata();
-        headers.put(Metadata.Key.of("authorization", Metadata.ASCII_STRING_MARSHALLER), credentials.basicAuthHeader());
+
+        if (credentials != null) {
+            headers.put(Metadata.Key.of("authorization", Metadata.ASCII_STRING_MARSHALLER), credentials.basicAuthHeader());
+        }
+
+        if (requiresLeader) {
+            headers.put(Metadata.Key.of("requires-leader", Metadata.ASCII_STRING_MARSHALLER), String.valueOf(requiresLeader));
+        }
 
         _stub = MetadataUtils.attachHeaders(StreamsGrpc.newStub(_channel), headers);
     }
@@ -246,6 +254,18 @@ public class StreamsClient {
 
             @Override
             public void onError(Throwable t) {
+                if (t instanceof StatusRuntimeException) {
+                    StatusRuntimeException e = (StatusRuntimeException) t;
+                    String leaderHost = e.getTrailers().get(Metadata.Key.of("leader-endpoint-host", Metadata.ASCII_STRING_MARSHALLER));
+                    String leaderPort = e.getTrailers().get(Metadata.Key.of("leader-endpoint-port", Metadata.ASCII_STRING_MARSHALLER));
+
+                    if (leaderHost != null && leaderPort != null) {
+                        NotLeaderException reason = new NotLeaderException(leaderHost, Integer.valueOf(leaderPort));
+                        dest.completeExceptionally(reason);
+                        return;
+                    }
+                }
+
                 dest.completeExceptionally(t);
             }
 
@@ -288,6 +308,18 @@ public class StreamsClient {
             public void onError(Throwable t) {
                 if (this.completed) {
                     return;
+                }
+
+                if (t instanceof StatusRuntimeException) {
+                    StatusRuntimeException e = (StatusRuntimeException) t;
+                    String leaderHost = e.getTrailers().get(Metadata.Key.of("leader-endpoint-host", Metadata.ASCII_STRING_MARSHALLER));
+                    String leaderPort = e.getTrailers().get(Metadata.Key.of("leader-endpoint-port", Metadata.ASCII_STRING_MARSHALLER));
+
+                    if (leaderHost != null && leaderPort != null) {
+                        NotLeaderException reason = new NotLeaderException(leaderHost, Integer.valueOf(leaderPort));
+                        future.completeExceptionally(reason);
+                        return;
+                    }
                 }
 
                 future.completeExceptionally(t);
@@ -364,6 +396,16 @@ public class StreamsClient {
                         .build());
             }
             requestStream.onCompleted();
+        } catch (StatusRuntimeException e) {
+            String leaderHost = e.getTrailers().get(Metadata.Key.of("leader-endpoint-host", Metadata.ASCII_STRING_MARSHALLER));
+            String leaderPort = e.getTrailers().get(Metadata.Key.of("leader-endpoint-port", Metadata.ASCII_STRING_MARSHALLER));
+
+            if (leaderHost != null && leaderPort != null) {
+                NotLeaderException reason = new NotLeaderException(leaderHost, Integer.valueOf(leaderPort));
+                result.completeExceptionally(reason);
+            } else {
+                result.completeExceptionally(e);
+            }
         } catch (RuntimeException e) {
             result.completeExceptionally(e);
         }
@@ -427,10 +469,18 @@ public class StreamsClient {
             @Override
             public void onError(Throwable throwable) {
                 if (throwable instanceof StatusRuntimeException) {
-                    Status s = ((StatusRuntimeException) throwable).getStatus();
-                    if (s.getCode() == Status.Code.CANCELLED) {
+                    StatusRuntimeException e = (StatusRuntimeException) throwable;
+                    if (e.getStatus().getCode() == Status.Code.CANCELLED) {
                         listener.onCancelled(this._subscription);
                         return;
+                    }
+
+                    String leaderHost = e.getTrailers().get(Metadata.Key.of("leader-endpoint-host", Metadata.ASCII_STRING_MARSHALLER));
+                    String leaderPort = e.getTrailers().get(Metadata.Key.of("leader-endpoint-port", Metadata.ASCII_STRING_MARSHALLER));
+
+                    if (leaderHost != null && leaderPort != null) {
+                        NotLeaderException reason = new NotLeaderException(leaderHost, Integer.valueOf(leaderPort));
+                        listener.onError(this._subscription, reason);
                     }
                 }
 
