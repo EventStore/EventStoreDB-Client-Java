@@ -1,6 +1,7 @@
 package testcontainers.module;
 
 import com.eventstore.dbclient.EventStoreConnection;
+import com.eventstore.dbclient.PersistentClient;
 import com.eventstore.dbclient.StreamsClient;
 import com.eventstore.dbclient.UserCredentials;
 import com.github.dockerjava.api.model.HealthCheck;
@@ -53,16 +54,23 @@ public class EventStoreTestDBContainer extends GenericContainer<EventStoreTestDB
         waitingFor(Wait.forHealthcheck());
     }
 
-    public StreamsClient getStreamsClient() {
+    public EventStoreConnection getConnection() {
         final String address = getContainerIpAddress();
         final int port = getMappedPort(DB_HTTP_PORT);
 
         return EventStoreConnection
                 .builder()
-                .insecure()
+                .sslContext(getClientSslContext())
                 .defaultUserCredentials(new UserCredentials("admin", "changeit"))
-                .createSingleNodeConnection(address, port)
-                .newStreamsClient();
+                .createSingleNodeConnection(address, port);
+    }
+
+    public StreamsClient getStreamsClient() {
+        return getConnection().newStreamsClient();
+    }
+
+    public PersistentClient getPersistentClient() {
+        return getConnection().newPersistentClient();
     }
 
     private SslContext getClientSslContext() {

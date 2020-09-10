@@ -1,5 +1,6 @@
 package com.eventstore.dbclient;
 
+import com.eventstore.dbclient.proto.persistentsubscriptions.Persistent;
 import com.eventstore.dbclient.proto.shared.Shared;
 import com.eventstore.dbclient.proto.streams.StreamsOuterClass;
 
@@ -104,6 +105,25 @@ public class RecordedEvent {
     }
 
     static RecordedEvent fromWire(StreamsOuterClass.ReadResp.ReadEvent.RecordedEvent wireEvent) {
+        UUID eventId;
+        if (wireEvent.getId().hasStructured()) {
+            Shared.UUID.Structured structured = wireEvent.getId().getStructured();
+            eventId = new UUID(structured.getMostSignificantBits(), structured.getLeastSignificantBits());
+        } else {
+            eventId = UUID.fromString(wireEvent.getId().getString());
+        }
+
+        return new RecordedEvent(
+                wireEvent.getStreamIdentifier().getStreamName().toStringUtf8(),
+                new StreamRevision(wireEvent.getStreamRevision()),
+                eventId,
+                new Position(wireEvent.getCommitPosition(), wireEvent.getPreparePosition()),
+                wireEvent.getMetadataMap(),
+                wireEvent.getData().toByteArray(),
+                wireEvent.getCustomMetadata().toByteArray());
+    }
+
+    static RecordedEvent fromWire(Persistent.ReadResp.ReadEvent.RecordedEvent wireEvent) {
         UUID eventId;
         if (wireEvent.getId().hasStructured()) {
             Shared.UUID.Structured structured = wireEvent.getId().getStructured();

@@ -148,7 +148,7 @@ public class SubscribeToStreamTests {
                 "application/octet-stream", eventData, eventMetaData));
 
         CompletableFuture<WriteResult> writeFuture = client.instance.appendToStream(testStreamName,
-                new StreamRevision(5999), events);
+                ExpectedRevision.expectedRevision(5999), events);
         WriteResult writeResult = writeFuture.get();
 
         assertEquals(new StreamRevision(6000), writeResult.getNextExpectedRevision());
