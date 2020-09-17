@@ -7,11 +7,37 @@ import testcontainers.module.EventStoreStreamsClient;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+
+class Foo {
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Foo foo1 = (Foo) o;
+        return foo == foo1.foo;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(foo);
+    }
+
+    private boolean foo;
+
+    public boolean isFoo() {
+        return foo;
+    }
+
+    public void setFoo(boolean foo) {
+        this.foo = foo;
+    }
+}
 
 public class AppendTests {
     @Rule
@@ -26,11 +52,15 @@ public class AppendTests {
         final String eventType = "TestEvent";
         final String eventId = "38fffbc2-339e-11ea-8c7b-784f43837872";
         final byte[] eventMetaData = new byte[]{0xd, 0xe, 0xa, 0xd};
-        final byte[] eventData = new byte[]{0xb, 0xe, 0xe, 0xf};
+
+        ProposedEvent event = ProposedEvent.builderAsJson(eventType, new Foo())
+                .metadataAsBytes(eventMetaData)
+                .eventId(UUID.fromString(eventId))
+                .build();
 
         // Append event
         List<ProposedEvent> events = new ArrayList<>();
-        events.add(new ProposedEvent(UUID.fromString(eventId), eventType, "application/octet-stream", eventData, eventMetaData));
+        events.add(event);
 
         CompletableFuture<WriteResult> appendFuture = client.instance.appendToStream(streamName, SpecialStreamRevision.NO_STREAM, events);
         WriteResult appendResult = appendFuture.get();
@@ -48,6 +78,6 @@ public class AppendTests {
         assertEquals(eventType, first.getEventType());
         assertEquals(eventId, first.getEventId().toString());
         assertArrayEquals(eventMetaData, first.getUserMetadata());
-        assertArrayEquals(eventData, first.getEventData());
+        assertEquals(new Foo(), first.getEventdataAs(Foo.class));
     }
 }

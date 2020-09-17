@@ -36,5 +36,13 @@ public final class ProposedEvent {
     public byte[] getUserMetadata() {
         return userMetadata;
     }
+
+    public static <A> ProposedEventBuilder builderAsJson(String eventType, A payload) {
+        return ProposedEventBuilder.json(eventType, payload);
+    }
+
+    public static <A> ProposedEventBuilder builderAsBinary(String eventType, byte[] payload) {
+        return ProposedEventBuilder.binary(eventType, payload);
+    }
 }
 
