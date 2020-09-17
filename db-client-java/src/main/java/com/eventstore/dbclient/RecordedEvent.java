@@ -3,8 +3,10 @@ package com.eventstore.dbclient;
 import com.eventstore.dbclient.proto.persistentsubscriptions.Persistent;
 import com.eventstore.dbclient.proto.shared.Shared;
 import com.eventstore.dbclient.proto.streams.StreamsOuterClass;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 
 import javax.validation.constraints.NotNull;
+import java.io.IOException;
 import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
@@ -28,6 +30,8 @@ public class RecordedEvent {
     private final Position position;
     @NotNull
     private final String contentType;
+
+    private static final JsonMapper mapper = new JsonMapper();
 
     public RecordedEvent(
             @NotNull String eventStreamId,
@@ -83,6 +87,10 @@ public class RecordedEvent {
 
     public byte[] getEventData() {
         return eventData;
+    }
+
+    public <A> A getEventdataAs(Class<A> clazz) throws IOException {
+        return mapper.readValue(this.getEventData(), clazz);
     }
 
     public byte[] getUserMetadata() {

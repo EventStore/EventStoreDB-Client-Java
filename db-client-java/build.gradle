@@ -21,13 +21,13 @@ dependencies {
     implementation "io.grpc:grpc-stub:${grpcVersion}"
     implementation "io.grpc:grpc-protobuf:${grpcVersion}"
 	implementation 'dnsjava:dnsjava:3.2.2'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.1'
 
     testImplementation "junit:junit:${junitVersion}"
     testImplementation "org.slf4j:slf4j-nop:${slf4jNopVersion}"
     testImplementation "org.testcontainers:testcontainers:${testcontainersVersion}"
 
     testImplementation platform("com.fasterxml.jackson:jackson-bom:${jacksonVersion}")
-    testImplementation 'com.fasterxml.jackson.core:jackson-databind'
     testImplementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 }
 
