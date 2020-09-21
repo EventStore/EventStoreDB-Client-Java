@@ -18,34 +18,53 @@ public class ReadAllTests {
 
     @Test
     public void testReadAllEventsForwardFromZeroPosition() throws ExecutionException, InterruptedException {
-        CompletableFuture<ReadResult> future = client.instance.readAll(Direction.Forward, Position.START, 10, false);
-        ReadResult result = future.get();
+        Streams streams = Streams.createWithDefaultCredentials(server.getConnectionNew(), "admin", "changeit");
+        ReadResult result = streams.readAll()
+                .forward()
+                .fromStart()
+                .notResolveLinks()
+                .execute(10)
+                .get();
         verifyAgainstTestData(result.getEvents(), "all-e0-e10");
     }
 
     @Test
     public void testReadAllEventsForwardFromNonZeroPosition() throws ExecutionException, InterruptedException {
-        CompletableFuture<ReadResult> future = client.instance.readAll(Direction.Forward,
-                new Position(1788, 1788),
-                10, false);
-        ReadResult result = future.get();
+        Streams streams = Streams.createWithDefaultCredentials(server.getConnectionNew(), "admin", "changeit");
+        ReadResult result = streams.readAll()
+                .forward()
+                .fromPosition(new Position(1788, 1788))
+                .notResolveLinks()
+                .execute(10)
+                .get();
+
         verifyAgainstTestData(result.getEvents(), "all-c1788-p1788");
     }
 
     @Test
     public void testReadAllEventsBackwardsFromZeroPosition() throws ExecutionException, InterruptedException {
-        CompletableFuture<ReadResult> future = client.instance.readAll(
-                Direction.Backward, Position.END, 10, false);
-        ReadResult result = future.get();
+        Streams streams = Streams.createWithDefaultCredentials(server.getConnectionNew(),"admin", "changeit");
+        ReadResult result = streams.readAll()
+                .backward()
+                .fromEnd()
+                .notResolveLinks()
+                .execute(10)
+                .get();
+
         verifyAgainstTestData(result.getEvents(), "all-back-e0-e10");
     }
 
     @Test
     public void testReadAllEventsBackwardsFromNonZeroPosition() throws ExecutionException, InterruptedException {
-        CompletableFuture<ReadResult> future = client.instance.readAll(
-                Direction.Backward, new Position(3386, 3386),
-                10, false);
-        ReadResult result = future.get();
+        EventStoreNodeConnection connection = server.getConnectionNew();
+        Streams streams = Streams.createWithDefaultCredentials(server.getConnectionNew(),"admin", "changeit");
+        ReadResult result = streams.readAll()
+                .backward()
+                .fromPosition(new Position(3386, 3386))
+                .notResolveLinks()
+                .execute(10)
+                .get();
+
         verifyAgainstTestData(result.getEvents(), "all-back-c3386-p3386");
     }
 

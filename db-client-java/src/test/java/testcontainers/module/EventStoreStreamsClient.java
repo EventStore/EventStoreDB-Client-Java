@@ -4,7 +4,6 @@ import org.junit.rules.ExternalResource;
 
 public class EventStoreStreamsClient extends ExternalResource {
     private final EventStoreTestDBContainer server;
-    public com.eventstore.dbclient.StreamsClient instance;
 
     public EventStoreStreamsClient(EventStoreTestDBContainer server) {
         this.server = server;
@@ -13,8 +12,6 @@ public class EventStoreStreamsClient extends ExternalResource {
     @Override
     protected void before() throws Throwable {
         super.before();
-
-        this.instance = this.server.getStreamsClient();
     }
 
     @Override
@@ -22,7 +19,7 @@ public class EventStoreStreamsClient extends ExternalResource {
         super.after();
 
         try {
-            this.instance.shutdown();
+            this.server.getConnectionNew().shutdown();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

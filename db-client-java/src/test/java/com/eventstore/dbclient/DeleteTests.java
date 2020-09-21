@@ -17,10 +17,16 @@ public class DeleteTests {
     public final EventStoreStreamsClient client = new EventStoreStreamsClient(server);
 
     @Test
+    /**
+    * TODO - Update the test as described in the comment below.
+    * */
     public void testCanDeleteStream() throws Throwable {
-        CompletableFuture<DeleteResult> future = client.instance.softDelete("dataset20M-1800",
-                new StreamRevision(1999));
-        DeleteResult result = future.get();
+        Streams streams = Streams.create(server.getConnectionNew());
+        DeleteResult result = streams.deleteStream("dataset20M-1800")
+                .softDelete()
+                .expectedRevision(ExpectedRevision.expectedRevision(1999))
+                .execute()
+                .get();
 
         // The ideal actual test here would be that the stream does not exist, but since this
         // client does not currently have reads we can't do that. In lieu, we ensure that the

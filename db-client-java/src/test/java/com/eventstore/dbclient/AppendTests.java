@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Future;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -48,6 +50,8 @@ public class AppendTests {
 
     @Test
     public void testAppendSingleEventNoStream() throws Throwable {
+        Streams streams = Streams.create(server.getConnectionNew());
+
         final String streamName = "testIntegrationAppendSingleEventNoStream";
         final String eventType = "TestEvent";
         final String eventId = "38fffbc2-339e-11ea-8c7b-784f43837872";
@@ -58,18 +62,21 @@ public class AppendTests {
                 .eventId(UUID.fromString(eventId))
                 .build();
 
-        // Append event
-        List<ProposedEvent> events = new ArrayList<>();
-        events.add(event);
-
-        CompletableFuture<WriteResult> appendFuture = client.instance.appendToStream(streamName, SpecialStreamRevision.NO_STREAM, events);
-        WriteResult appendResult = appendFuture.get();
+        WriteResult appendResult = streams.appendStream(streamName)
+                .expectedRevision(ExpectedRevision.NO_STREAM)
+                .addEvent(event)
+                .execute()
+                .get();
 
         assertEquals(new StreamRevision(0), appendResult.getNextExpectedRevision());
 
         // Ensure appended event is readable
-        CompletableFuture<ReadResult> readFuture = client.instance.readStream(Direction.Backward, streamName, StreamRevision.END, 1, false);
-        ReadResult readResult = readFuture.get();
+        ReadResult readResult = streams.readStream(streamName)
+                .fromEnd()
+                .backward()
+                .execute(1)
+                .get();
+
         List<ResolvedEvent> readEvents = readResult.getEvents();
         assertEquals(1, readEvents.size());
         RecordedEvent first = readEvents.get(0).getEvent();

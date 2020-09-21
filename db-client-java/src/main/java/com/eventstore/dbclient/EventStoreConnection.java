@@ -38,10 +38,6 @@ public class EventStoreConnection {
         return new EventStoreConnectionBuilder();
     }
 
-    public StreamsClient newStreamsClient() {
-        return new StreamsClient(createManagedChannel(), userCredentials, requiresLeader, timeouts);
-    }
-
     public PersistentClient newPersistentClient() {
         return new PersistentClient(createManagedChannel(), userCredentials, requiresLeader, timeouts);
     }

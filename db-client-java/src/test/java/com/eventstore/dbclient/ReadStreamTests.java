@@ -17,25 +17,27 @@ public class ReadStreamTests {
 
     @Test
     public void testReadStreamForward10EventsFromPositionStart() throws Throwable {
-        CompletableFuture<ReadResult> future = client.instance.readStream(
-                Direction.Forward,
-                "dataset20M-1800",
-                StreamRevision.START,
-                10,
-                false);
-        ReadResult result = future.get();
+        Streams streams = Streams.create(server.getConnectionNew());
+         ReadResult result = streams.readStream("dataset20M-1800")
+                 .forward()
+                 .fromStart()
+                 .notResolveLinks()
+                 .execute(10)
+                 .get();
+
         verifyAgainstTestData(result.getEvents(), "dataset20M-1800-e0-e10");
     }
 
     @Test
     public void testReadStreamBackward10EventsFromPositionEnd() throws Throwable {
-        CompletableFuture<ReadResult> future = client.instance.readStream(
-                Direction.Backward,
-                "dataset20M-1800",
-                StreamRevision.END,
-                10,
-                false);
-        ReadResult result = future.get();
+        Streams streams = Streams.create(server.getConnectionNew());
+        ReadResult result = streams.readStream("dataset20M-1800")
+                .backward()
+                .fromEnd()
+                .notResolveLinks()
+                .execute(10)
+                .get();
+
         verifyAgainstTestData(result.getEvents(), "dataset20M-1800-e1999-e1990");
     }
 
