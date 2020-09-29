@@ -20,6 +20,8 @@ public class SubscribeToAllTests {
 
     @Test
     public void testAllSubscriptionDeliversAllowsCancellationDuringStream() throws InterruptedException, ExecutionException {
+        Streams streams = Streams.createWithDefaultCredentials(server.getConnectionNew(), "admin", "changeit");
+
         final CountDownLatch receivedEvents = new CountDownLatch(1000);
         final CountDownLatch cancellation = new CountDownLatch(1);
 
@@ -40,8 +42,10 @@ public class SubscribeToAllTests {
             }
         };
 
-        CompletableFuture<Subscription> future = client.instance.subscribeToAll(Position.START, false, listener);
-        Subscription result = future.get();
+        Subscription result = streams.subscribeToAll(listener)
+                .fromStart()
+                .execute()
+                .get();
 
         receivedEvents.await();
         result.stop();
@@ -50,6 +54,7 @@ public class SubscribeToAllTests {
 
     @Test
     public void testAllSubscriptionWithFilterDeliversCorrectEvents() throws InterruptedException, ExecutionException {
+        Streams streams = Streams.createWithDefaultCredentials(server.getConnectionNew(), "admin", "changeit");;
         final TestPosition[] expectedPositions = TestDataLoader.loadSerializedPositions(
                 "all-positions-filtered-stream194-e0-e30");
         final long[] expectedStreamVersions = TestDataLoader.loadSerializedStreamVersions(
@@ -89,8 +94,11 @@ public class SubscribeToAllTests {
                 .withEventTypePrefix("eventType-194")
                 .build();
 
-        CompletableFuture<Subscription> future = client.instance.subscribeToAll(Position.START, false, listener, filter);
-        Subscription result = future.get();
+        Subscription result = streams.subscribeToAll(listener)
+                .fromStart()
+                .filter(filter)
+                .execute()
+                .get();
 
         assertNotNull(result.getSubscriptionId());
         assertNotEquals("", result.getSubscriptionId());

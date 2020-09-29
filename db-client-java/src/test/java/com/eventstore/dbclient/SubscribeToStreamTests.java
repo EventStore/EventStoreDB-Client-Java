@@ -22,6 +22,8 @@ public class SubscribeToStreamTests {
 
     @Test
     public void testStreamSubscriptionDeliversAllowsCancellationDuringStream() throws InterruptedException, ExecutionException {
+        Streams streams = Streams.create(server.getConnectionNew());
+
         final CountDownLatch receivedEvents = new CountDownLatch(1000);
         final CountDownLatch cancellation = new CountDownLatch(1);
 
@@ -42,9 +44,9 @@ public class SubscribeToStreamTests {
             }
         };
 
-        CompletableFuture<Subscription> future = client.instance
-                .subscribeToStream("dataset20M-0", StreamRevision.START, false, listener);
-        Subscription result = future.get();
+        Subscription result = streams.subscribeToStream("dataset20M-0", listener)
+                .execute()
+                .get();
 
         receivedEvents.await();
         result.stop();
@@ -53,6 +55,8 @@ public class SubscribeToStreamTests {
 
     @Test
     public void testStreamSubscriptionDeliversAllEventsInStream() throws InterruptedException, ExecutionException {
+        Streams streams = Streams.create(server.getConnectionNew());
+
         final CountDownLatch receivedEvents = new CountDownLatch(6000);
         final CountDownLatch cancellation = new CountDownLatch(1);
 
@@ -78,9 +82,9 @@ public class SubscribeToStreamTests {
         }
 
         CountingListener listener = new CountingListener();
-        CompletableFuture<Subscription> future = client.instance
-                .subscribeToStream("dataset20M-0", StreamRevision.START, false, listener);
-        Subscription result = future.get();
+        Subscription result = streams.subscribeToStream("dataset20M-0", listener)
+                .execute()
+                .get();
 
         receivedEvents.await();
         result.stop();
@@ -89,6 +93,8 @@ public class SubscribeToStreamTests {
 
     @Test
     public void testStreamSubscriptionDeliversAllEventsInStreamAndListensForNewEvents() throws Throwable {
+        Streams streams = Streams.create(server.getConnectionNew());
+
         final CountDownLatch receivedEvents = new CountDownLatch(6000);
         final CountDownLatch appendedEvents = new CountDownLatch(1);
         final CountDownLatch cancellation = new CountDownLatch(1);
@@ -137,19 +143,23 @@ public class SubscribeToStreamTests {
 
         // Listen to everything already in the stream
         CountingListener listener = new CountingListener();
-        CompletableFuture<Subscription> subscriptionFuture = client.instance.
-                subscribeToStream(testStreamName, StreamRevision.START, false, listener);
-        Subscription subscription = subscriptionFuture.get();
+        Subscription subscription = streams.subscribeToStream(testStreamName, listener)
+                .execute()
+                .get();
+
         receivedEvents.await();
 
         // Write a new event
-        ArrayList<ProposedEvent> events = new ArrayList<>();
-        events.add(new ProposedEvent(UUID.fromString(eventId), eventType,
-                "application/octet-stream", eventData, eventMetaData));
+        ProposedEvent event = ProposedEventBuilder.binary(eventType, eventData)
+                .eventId(UUID.fromString(eventId))
+                .metadataAsBytes(eventMetaData)
+                .build();
 
-        CompletableFuture<WriteResult> writeFuture = client.instance.appendToStream(testStreamName,
-                ExpectedRevision.expectedRevision(5999), events);
-        WriteResult writeResult = writeFuture.get();
+        WriteResult writeResult = streams.appendStream(testStreamName)
+                .addEvent(event)
+                .expectedRevision(ExpectedRevision.expectedRevision(5999))
+                .execute()
+                .get();
 
         assertEquals(new StreamRevision(6000), writeResult.getNextExpectedRevision());
 
