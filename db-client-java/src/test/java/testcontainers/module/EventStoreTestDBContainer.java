@@ -51,30 +51,22 @@ public class EventStoreTestDBContainer extends GenericContainer<EventStoreTestDB
         waitingFor(Wait.forHealthcheck());
     }
 
-    public EventStoreConnection getConnection() {
+    public EventStoreDBConnection getConnection() {
         final String address = getContainerIpAddress();
         final int port = getMappedPort(DB_HTTP_PORT);
 
-        return EventStoreConnection
+        return Connections
                 .builder()
                 .sslContext(getClientSslContext())
-                .defaultUserCredentials(new UserCredentials("admin", "changeit"))
                 .createSingleNodeConnection(address, port);
     }
 
-    public EventStoreNodeConnection getConnectionNew() {
-        final String address = getContainerIpAddress();
-        final int port = getMappedPort(DB_HTTP_PORT);
-
-        return EventStoreConnection
-                .builder()
-                .sslContext(getClientSslContext())
-                .defaultUserCredentials(new UserCredentials("admin", "changeit"))
-                .createSingleNodeConnectionNew(address, port);
+    public Streams getStreamsAPI() {
+        return Streams.createWithDefaultCredentials(getConnection(), "admin", "changeit");
     }
 
-    public PersistentClient getPersistentClient() {
-        return getConnection().newPersistentClient();
+    public PersistentSubscriptions getPersistentSubscriptionsAPI() {
+        return PersistentSubscriptions.createWithDefaultCredentials(getConnection(), "admin", "changeit");
     }
 
     private SslContext getClientSslContext() {

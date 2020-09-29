@@ -5,13 +5,9 @@ import org.junit.Test;
 import testcontainers.module.EventStoreTestDBContainer;
 import testcontainers.module.EventStoreStreamsClient;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.Future;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -50,7 +46,7 @@ public class AppendTests {
 
     @Test
     public void testAppendSingleEventNoStream() throws Throwable {
-        Streams streams = Streams.create(server.getConnectionNew());
+        Streams streams = server.getStreamsAPI();
 
         final String streamName = "testIntegrationAppendSingleEventNoStream";
         final String eventType = "TestEvent";

@@ -5,7 +5,6 @@ import org.junit.Test;
 import testcontainers.module.EventStoreStreamsClient;
 import testcontainers.module.EventStoreTestDBContainer;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 
@@ -15,12 +14,9 @@ public class SubscribeToAllTests {
     @Rule
     public final EventStoreTestDBContainer server = new EventStoreTestDBContainer(false);
 
-    @Rule
-    public final EventStoreStreamsClient client = new EventStoreStreamsClient(server);
-
     @Test
     public void testAllSubscriptionDeliversAllowsCancellationDuringStream() throws InterruptedException, ExecutionException {
-        Streams streams = Streams.createWithDefaultCredentials(server.getConnectionNew(), "admin", "changeit");
+        Streams streams = server.getStreamsAPI();
 
         final CountDownLatch receivedEvents = new CountDownLatch(1000);
         final CountDownLatch cancellation = new CountDownLatch(1);
@@ -54,7 +50,7 @@ public class SubscribeToAllTests {
 
     @Test
     public void testAllSubscriptionWithFilterDeliversCorrectEvents() throws InterruptedException, ExecutionException {
-        Streams streams = Streams.createWithDefaultCredentials(server.getConnectionNew(), "admin", "changeit");;
+        Streams streams = Streams.createWithDefaultCredentials(server.getConnection(), "admin", "changeit");;
         final TestPosition[] expectedPositions = TestDataLoader.loadSerializedPositions(
                 "all-positions-filtered-stream194-e0-e30");
         final long[] expectedStreamVersions = TestDataLoader.loadSerializedStreamVersions(

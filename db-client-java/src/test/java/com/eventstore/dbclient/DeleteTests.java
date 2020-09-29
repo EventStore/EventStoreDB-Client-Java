@@ -5,8 +5,6 @@ import org.junit.Test;
 import testcontainers.module.EventStoreTestDBContainer;
 import testcontainers.module.EventStoreStreamsClient;
 
-import java.util.concurrent.CompletableFuture;
-
 import static org.junit.Assert.assertTrue;
 
 public class DeleteTests {
@@ -21,7 +19,7 @@ public class DeleteTests {
     * TODO - Update the test as described in the comment below.
     * */
     public void testCanDeleteStream() throws Throwable {
-        Streams streams = Streams.create(server.getConnectionNew());
+        Streams streams = server.getStreamsAPI();
         DeleteResult result = streams.deleteStream("dataset20M-1800")
                 .softDelete()
                 .expectedRevision(ExpectedRevision.expectedRevision(1999))

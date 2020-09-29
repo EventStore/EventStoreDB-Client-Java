@@ -7,7 +7,7 @@ public class SubscribeToStream extends AbstractRegularSubscription {
     private String streamName;
     private StreamRevision startRevision;
 
-    public SubscribeToStream(EventStoreNodeConnection connection, String streamName, SubscriptionListener listener, UserCredentials credentials) {
+    public SubscribeToStream(EventStoreDBConnection connection, String streamName, SubscriptionListener listener, UserCredentials credentials) {
         super(connection);
 
         this.streamName = streamName;

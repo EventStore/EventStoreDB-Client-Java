@@ -6,19 +6,15 @@ import testcontainers.module.EventStoreStreamsClient;
 import testcontainers.module.EventStoreTestDBContainer;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 public class ReadAllTests {
     @Rule
     public final EventStoreTestDBContainer server = new EventStoreTestDBContainer(false);
 
-    @Rule
-    public final EventStoreStreamsClient client = new EventStoreStreamsClient(server);
-
     @Test
     public void testReadAllEventsForwardFromZeroPosition() throws ExecutionException, InterruptedException {
-        Streams streams = Streams.createWithDefaultCredentials(server.getConnectionNew(), "admin", "changeit");
+        Streams streams = server.getStreamsAPI();
         ReadResult result = streams.readAll()
                 .forward()
                 .fromStart()
@@ -30,7 +26,7 @@ public class ReadAllTests {
 
     @Test
     public void testReadAllEventsForwardFromNonZeroPosition() throws ExecutionException, InterruptedException {
-        Streams streams = Streams.createWithDefaultCredentials(server.getConnectionNew(), "admin", "changeit");
+        Streams streams = server.getStreamsAPI();
         ReadResult result = streams.readAll()
                 .forward()
                 .fromPosition(new Position(1788, 1788))
@@ -43,7 +39,7 @@ public class ReadAllTests {
 
     @Test
     public void testReadAllEventsBackwardsFromZeroPosition() throws ExecutionException, InterruptedException {
-        Streams streams = Streams.createWithDefaultCredentials(server.getConnectionNew(),"admin", "changeit");
+        Streams streams = server.getStreamsAPI();
         ReadResult result = streams.readAll()
                 .backward()
                 .fromEnd()
@@ -56,8 +52,7 @@ public class ReadAllTests {
 
     @Test
     public void testReadAllEventsBackwardsFromNonZeroPosition() throws ExecutionException, InterruptedException {
-        EventStoreNodeConnection connection = server.getConnectionNew();
-        Streams streams = Streams.createWithDefaultCredentials(server.getConnectionNew(),"admin", "changeit");
+        Streams streams = server.getStreamsAPI();
         ReadResult result = streams.readAll()
                 .backward()
                 .fromPosition(new Position(3386, 3386))

@@ -19,7 +19,7 @@ public class EventStoreStreamsClient extends ExternalResource {
         super.after();
 
         try {
-            this.server.getConnectionNew().shutdown();
+            this.server.getConnection().shutdown();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

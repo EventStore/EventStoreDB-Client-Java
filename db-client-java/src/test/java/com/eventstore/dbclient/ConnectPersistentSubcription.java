@@ -41,22 +41,18 @@ public class ConnectPersistentSubcription {
     @Rule
     public final EventStoreTestDBContainer server = new EventStoreTestDBContainer(false);
 
-    @Rule
-    public final EventStoreStreamsClient client = new EventStoreStreamsClient(server);
-
     @Test
     public void testConnectPersistentSub() throws Throwable {
-        PersistentClient client = server.getPersistentClient();
-        Streams streams = Streams.createWithDefaultCredentials(server.getConnectionNew(), "admin", "changeit");
+        PersistentSubscriptions persistent = server.getPersistentSubscriptionsAPI();
+        Streams streams = server.getStreamsAPI();
         String streamName = "aStream-" + UUID.randomUUID().toString();
 
-        PersistentSubscriptionSettings settings = PersistentSubscriptionSettings.builder().build();
-        client.create(settings, streamName, "aGroup").get();
+        persistent.create(streamName, "aGroup")
+                .execute()
+                .get();
 
         ProposedEventBuilder builder = ProposedEvent.builderAsJson("foobar", new ConnectPersistentSubcription.Foo());
         AppendToStream appendCommand = streams.appendStream(streamName);
-
-        List<ProposedEvent> events = new ArrayList<>();
 
         for (int i = 0; i < 3; ++i) {
             appendCommand.addEvent(builder.build());
@@ -67,7 +63,7 @@ public class ConnectPersistentSubcription {
         appendCommand.execute().get();
 
 
-        client.connect(streamName, "aGroup", 32, new PersistentSubscriptionListener() {
+        persistent.connect(streamName, "aGroup", new PersistentSubscriptionListener() {
             private int count = 0;
 
             @Override
@@ -91,9 +87,7 @@ public class ConnectPersistentSubcription {
             public void onCancelled(PersistentSubscription subscription) {
                 result.complete(count);
             }
-        }).get();
-
-        events.clear();
+        }).execute(32).get();
 
         AppendToStream appendCommand2 = streams.appendStream(streamName);
         for (int i = 0; i < 3; ++i) {

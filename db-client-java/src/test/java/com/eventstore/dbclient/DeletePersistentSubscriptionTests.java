@@ -2,18 +2,21 @@ package com.eventstore.dbclient;
 
 import org.junit.Rule;
 import org.junit.Test;
-import testcontainers.module.EventStoreStreamsClient;
 import testcontainers.module.EventStoreTestDBContainer;
 
-public class CreatePersistentSubscriptionTests {
+public class DeletePersistentSubscriptionTests {
     @Rule
     public final EventStoreTestDBContainer server = new EventStoreTestDBContainer(false);
 
     @Test
-    public void testCreatePersistentSub() throws Throwable { {
+    public void testDeletePersistentSub() throws Throwable { {
         PersistentSubscriptions persistent = server.getPersistentSubscriptionsAPI();
 
-        persistent.create("aStream", "aGroup")
+        persistent.create("aStream", "aGroupUpd")
+                .execute()
+                .get();
+
+        persistent.delete("aStream", "aGroupUpd")
                 .execute()
                 .get();
     }}

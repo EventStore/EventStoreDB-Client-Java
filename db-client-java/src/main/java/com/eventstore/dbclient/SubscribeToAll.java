@@ -7,7 +7,7 @@ public class SubscribeToAll extends AbstractRegularSubscription {
     private Position position;
     protected SubscriptionFilter filter;
 
-    public SubscribeToAll(EventStoreNodeConnection connection, SubscriptionListener listener, UserCredentials credentials) {
+    public SubscribeToAll(EventStoreDBConnection connection, SubscriptionListener listener, UserCredentials credentials) {
         super(connection);
 
         this.metadata = new ConnectionMetadata();

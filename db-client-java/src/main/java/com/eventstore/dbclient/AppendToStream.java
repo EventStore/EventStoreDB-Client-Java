@@ -16,14 +16,14 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class AppendToStream {
-    private EventStoreNodeConnection connection;
+    private EventStoreDBConnection connection;
     private String streamName;
     private ExpectedRevision expectedRevision;
     private List<ProposedEvent> events;
     private Timeouts timeouts;
     private ConnectionMetadata metadata;
 
-    public AppendToStream(EventStoreNodeConnection connection, String streamName, UserCredentials credentials) {
+    public AppendToStream(EventStoreDBConnection connection, String streamName, UserCredentials credentials) {
         this.connection = connection;
         this.streamName = streamName;
         this.expectedRevision = ExpectedRevision.ANY;
