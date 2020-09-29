@@ -6,18 +6,14 @@ import testcontainers.module.EventStoreStreamsClient;
 import testcontainers.module.EventStoreTestDBContainer;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 public class ReadStreamTests {
     @Rule
     public final EventStoreTestDBContainer server = new EventStoreTestDBContainer(false);
 
-    @Rule
-    public final EventStoreStreamsClient client = new EventStoreStreamsClient(server);
-
     @Test
     public void testReadStreamForward10EventsFromPositionStart() throws Throwable {
-        Streams streams = Streams.create(server.getConnectionNew());
+        Streams streams = server.getStreamsAPI();
          ReadResult result = streams.readStream("dataset20M-1800")
                  .forward()
                  .fromStart()
@@ -30,7 +26,7 @@ public class ReadStreamTests {
 
     @Test
     public void testReadStreamBackward10EventsFromPositionEnd() throws Throwable {
-        Streams streams = Streams.create(server.getConnectionNew());
+        Streams streams = server.getStreamsAPI();
         ReadResult result = streams.readStream("dataset20M-1800")
                 .backward()
                 .fromEnd()

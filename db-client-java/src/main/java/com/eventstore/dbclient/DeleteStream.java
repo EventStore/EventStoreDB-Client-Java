@@ -10,14 +10,14 @@ import io.grpc.stub.MetadataUtils;
 import java.util.concurrent.CompletableFuture;
 
 public class DeleteStream {
-    private EventStoreNodeConnection connection;
+    private EventStoreDBConnection connection;
     private String streamName;
     private ExpectedRevision expectedRevision;
     private ConnectionMetadata metadata;
     private Timeouts timeouts;
     private boolean softDelete;
 
-    public DeleteStream(EventStoreNodeConnection connection, String streamName, UserCredentials credentials) {
+    public DeleteStream(EventStoreDBConnection connection, String streamName, UserCredentials credentials) {
         this.connection = connection;
         this.streamName = streamName;
         this.metadata = new ConnectionMetadata();

@@ -1,15 +1,7 @@
 package com.eventstore.dbclient;
 
 import com.eventstore.dbclient.proto.shared.Shared;
-import com.eventstore.dbclient.proto.streams.StreamsGrpc;
 import com.eventstore.dbclient.proto.streams.StreamsOuterClass;
-import io.grpc.Metadata;
-import io.grpc.StatusRuntimeException;
-import io.grpc.stub.MetadataUtils;
-import io.grpc.stub.StreamObserver;
-
-import java.util.ArrayList;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * TODO - Implement a better way to handle very long stream to not end
@@ -22,7 +14,7 @@ public class ReadStream extends AbstractRead {
     private boolean resolveLinks;
     private Direction direction;
 
-    public ReadStream(EventStoreNodeConnection connection, String streamName, UserCredentials credentials) {
+    public ReadStream(EventStoreDBConnection connection, String streamName, UserCredentials credentials) {
         super(connection);
 
         this.streamName = streamName;

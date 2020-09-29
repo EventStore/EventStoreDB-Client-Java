@@ -9,12 +9,11 @@ import org.xbill.DNS.TextParseException;
 import org.xbill.DNS.Type;
 
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Function;
 
-public class ClusterConnection implements EventStoreNodeConnection {
+public class EventStoreDBClusterConnection implements EventStoreDBConnection {
     private static final Set<ClusterInfo.MemberState> invalidStates;
     private static final Random random = new Random();
     private volatile boolean shutdown = false;
@@ -46,7 +45,7 @@ public class ClusterConnection implements EventStoreNodeConnection {
     private final Timeouts timeouts;
     private LinkedBlockingQueue<Msg> messages;
 
-    public ClusterConnection(List<InetSocketAddress> seedNodes, String domainName, NodePreference nodePreference, Timeouts timeouts, SslContext sslContext) {
+    public EventStoreDBClusterConnection(List<InetSocketAddress> seedNodes, String domainName, NodePreference nodePreference, Timeouts timeouts, SslContext sslContext) {
         this.seedNodes = seedNodes;
         this.nodePreference = nodePreference;
         this.sslContext = sslContext;
@@ -195,7 +194,7 @@ public class ClusterConnection implements EventStoreNodeConnection {
     @Override
     public <A> CompletableFuture<A> run(Function<ManagedChannel, CompletableFuture<A>> action) {
         final CompletableFuture<A> result = new CompletableFuture<>();
-        final ClusterConnection self = this;
+        final EventStoreDBClusterConnection self = this;
 
         this.messages.add(new RunWorkItem(new WorkItem() {
             @Override
@@ -282,6 +281,19 @@ public class ClusterConnection implements EventStoreNodeConnection {
         return true;
     }
 
+    private void closeConnection() {
+        if (this.channel != null) {
+            try {
+                this.channel.shutdown().awaitTermination(Timeouts.DEFAULT.shutdownTimeout, Timeouts.DEFAULT.shutdownTimeoutUnit);
+            } catch (InterruptedException e) {
+                // FIXME - Do proper logging.
+                e.printStackTrace();
+            } finally {
+                this.channel = null;
+            }
+        }
+    }
+
     @Override
     public void shutdown() throws InterruptedException {
         sendMessage(new Shutdown());
@@ -302,7 +314,7 @@ public class ClusterConnection implements EventStoreNodeConnection {
     }
 
     interface Msg {
-        boolean accept(ClusterConnection self);
+        boolean accept(EventStoreDBClusterConnection self);
     }
 
     class CreateChannel implements Msg {
@@ -320,7 +332,7 @@ public class ClusterConnection implements EventStoreNodeConnection {
         }
 
         @Override
-        public boolean accept(ClusterConnection self) {
+        public boolean accept(EventStoreDBClusterConnection self) {
             return self.createNewChannel(previousId, channel);
         }
     }
@@ -333,7 +345,7 @@ public class ClusterConnection implements EventStoreNodeConnection {
         }
 
         @Override
-        public boolean accept(ClusterConnection self) {
+        public boolean accept(EventStoreDBClusterConnection self) {
             return self.runWorkItem(item);
         }
 
@@ -344,7 +356,8 @@ public class ClusterConnection implements EventStoreNodeConnection {
 
     class Shutdown implements Msg {
         @Override
-        public boolean accept(ClusterConnection self) {
+        public boolean accept(EventStoreDBClusterConnection self) {
+            self.closeConnection();
             return false;
         }
     }

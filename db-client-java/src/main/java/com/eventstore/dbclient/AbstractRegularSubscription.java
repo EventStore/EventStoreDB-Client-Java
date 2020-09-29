@@ -22,9 +22,9 @@ public abstract class AbstractRegularSubscription{
     protected boolean resolveLinks;
     protected SubscriptionListener listener;
     protected Checkpointer checkpointer = null;
-    private EventStoreNodeConnection connection;
+    private EventStoreDBConnection connection;
 
-    protected AbstractRegularSubscription(EventStoreNodeConnection connection) {
+    protected AbstractRegularSubscription(EventStoreDBConnection connection) {
         this.connection = connection;
     }
 

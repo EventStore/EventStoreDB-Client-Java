@@ -5,9 +5,7 @@ import org.junit.Test;
 import testcontainers.module.EventStoreStreamsClient;
 import testcontainers.module.EventStoreTestDBContainer;
 
-import java.util.ArrayList;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 
@@ -17,12 +15,9 @@ public class SubscribeToStreamTests {
     @Rule
     public final EventStoreTestDBContainer server = new EventStoreTestDBContainer(false);
 
-    @Rule
-    public final EventStoreStreamsClient client = new EventStoreStreamsClient(server);
-
     @Test
     public void testStreamSubscriptionDeliversAllowsCancellationDuringStream() throws InterruptedException, ExecutionException {
-        Streams streams = Streams.create(server.getConnectionNew());
+        Streams streams = server.getStreamsAPI();
 
         final CountDownLatch receivedEvents = new CountDownLatch(1000);
         final CountDownLatch cancellation = new CountDownLatch(1);
@@ -55,7 +50,7 @@ public class SubscribeToStreamTests {
 
     @Test
     public void testStreamSubscriptionDeliversAllEventsInStream() throws InterruptedException, ExecutionException {
-        Streams streams = Streams.create(server.getConnectionNew());
+        Streams streams = Streams.create(server.getConnection());
 
         final CountDownLatch receivedEvents = new CountDownLatch(6000);
         final CountDownLatch cancellation = new CountDownLatch(1);
@@ -93,7 +88,7 @@ public class SubscribeToStreamTests {
 
     @Test
     public void testStreamSubscriptionDeliversAllEventsInStreamAndListensForNewEvents() throws Throwable {
-        Streams streams = Streams.create(server.getConnectionNew());
+        Streams streams = Streams.create(server.getConnection());
 
         final CountDownLatch receivedEvents = new CountDownLatch(6000);
         final CountDownLatch appendedEvents = new CountDownLatch(1);

@@ -9,7 +9,7 @@ public class ReadAll extends AbstractRead {
     private boolean resolveLinks;
     private Direction direction;
 
-    public ReadAll(EventStoreNodeConnection connection, UserCredentials credentials) {
+    public ReadAll(EventStoreDBConnection connection, UserCredentials credentials) {
         super(connection);
 
         this.metadata = new ConnectionMetadata();

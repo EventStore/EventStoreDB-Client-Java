@@ -14,10 +14,10 @@ import java.util.concurrent.CompletableFuture;
 public abstract class AbstractRead {
     protected static final StreamsOuterClass.ReadReq.Options.Builder defaultReadOptions;
 
-    private EventStoreNodeConnection connection;
+    private EventStoreDBConnection connection;
     protected ConnectionMetadata metadata;
 
-    protected AbstractRead(EventStoreNodeConnection connection) {
+    protected AbstractRead(EventStoreDBConnection connection) {
         this.connection = connection;
     }
 

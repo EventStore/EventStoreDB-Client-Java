@@ -7,16 +7,18 @@ import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
-public class StaticEventStoreNodeConnection implements EventStoreNodeConnection {
-    private String host;
-    private int port;
-    private ManagedChannel channel;
-    private SslContext context;
+public class SingleNodeEventStoreDBConnection implements EventStoreDBConnection {
+    private final String host;
+    private final int port;
+    private final ManagedChannel channel;
+    private final SslContext context;
+    private final Timeouts timeouts;
 
-    public StaticEventStoreNodeConnection(String host, int port, SslContext context) {
+    public SingleNodeEventStoreDBConnection(String host, int port, Timeouts timeouts, SslContext context) {
         this.host = host;
         this.port = port;
         this.context = context;
+        this.timeouts = timeouts;
         this.channel = createChannel();
     }
 
@@ -40,6 +42,6 @@ public class StaticEventStoreNodeConnection implements EventStoreNodeConnection 
 
     @Override
     public void shutdown() throws InterruptedException {
-        this.channel.shutdown().awaitTermination(Timeouts.DEFAULT.shutdownTimeout, Timeouts.DEFAULT.shutdownTimeoutUnit);
+        this.channel.shutdown().awaitTermination(this.timeouts.shutdownTimeout, this.timeouts.shutdownTimeoutUnit);
     }
 }
