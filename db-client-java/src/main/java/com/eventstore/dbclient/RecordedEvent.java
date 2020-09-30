@@ -89,7 +89,7 @@ public class RecordedEvent {
         return eventData;
     }
 
-    public <A> A getEventdataAs(Class<A> clazz) throws IOException {
+    public <A> A getEventDataAs(Class<A> clazz) throws IOException {
         return mapper.readValue(this.getEventData(), clazz);
     }
 

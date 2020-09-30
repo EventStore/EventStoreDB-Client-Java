@@ -26,9 +26,6 @@ class AccountCreated {
     private UUID id;
     private String login;
 
-    public AccountCreated()
-    {}
-
     public UUID getId() {
         return id;
     }
@@ -83,7 +80,7 @@ public class Main {
                 .get(0);
 
         AccountCreated writtenEvent = resolvedEvent.getOriginalEvent()
-                .getEventdataAs(AccountCreated.class);
+                .getEventDataAs(AccountCreated.class);
     }
 }
 ```

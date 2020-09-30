@@ -81,6 +81,6 @@ public class AppendTests {
         assertEquals(eventType, first.getEventType());
         assertEquals(eventId, first.getEventId().toString());
         assertArrayEquals(eventMetaData, first.getUserMetadata());
-        assertEquals(new Foo(), first.getEventdataAs(Foo.class));
+        assertEquals(new Foo(), first.getEventDataAs(Foo.class));
     }
 }
