@@ -20,6 +20,10 @@ public class ResolvedEvent {
         return link;
     }
 
+    public RecordedEvent getOriginalEvent() {
+        return this.link != null ? this.link : this.event;
+    }
+
     static ResolvedEvent fromWire(StreamsOuterClass.ReadResp.ReadEvent wireEvent) {
         RecordedEvent event = wireEvent.hasEvent() ? RecordedEvent.fromWire(wireEvent.getEvent()) : null;
         RecordedEvent link = wireEvent.hasLink() ? RecordedEvent.fromWire(wireEvent.getLink()) : null;
