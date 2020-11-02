@@ -55,4 +55,26 @@ public class ConnectionBuilder {
     public EventStoreDBConnection createClusterConnectionUsingDns(String domain, NodePreference nodePreference) {
         return new EventStoreDBClusterConnection(null, domain, nodePreference, _timeouts, _sslContext);
     }
+
+    public EventStoreDBConnection createConnectionFromConnectionSettings(ConnectionSettings connectionSettings) {
+
+        ConnectionBuilder builder = new ConnectionBuilder();
+
+//        if (connectionSettings.tls) {
+//            builder.sslContext();
+//        }
+
+        if (connectionSettings.dnsDiscover) {
+            return builder.createClusterConnectionUsingDns(connectionSettings.hosts[0].getHostname(), connectionSettings.nodePreference);
+        }
+
+        if (connectionSettings.hosts.length > 1) {
+            return builder.createClusterConnectionUsingSeeds(
+                    connectionSettings.hosts,
+                    connectionSettings.nodePreference
+            );
+        }
+
+        return builder.createSingleNodeConnection(connectionSettings.hosts[0]);
+    }
 }
