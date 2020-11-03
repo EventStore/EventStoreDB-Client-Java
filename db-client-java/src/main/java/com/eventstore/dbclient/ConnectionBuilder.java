@@ -1,7 +1,11 @@
 package com.eventstore.dbclient;
 
+import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext;
+import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
+import io.grpc.netty.shaded.io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 
+import javax.net.ssl.SSLException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 
@@ -60,21 +64,31 @@ public class ConnectionBuilder {
 
         ConnectionBuilder builder = new ConnectionBuilder();
 
-//        if (connectionSettings.tls) {
-//            builder.sslContext();
-//        }
+        if (connectionSettings.isTls()) {
+            try {
+                SslContextBuilder sslContext = GrpcSslContexts.forClient();
 
-        if (connectionSettings.dnsDiscover) {
-            return builder.createClusterConnectionUsingDns(connectionSettings.hosts[0].getHostname(), connectionSettings.nodePreference);
+                if (!connectionSettings.isTlsVerifyCert()) {
+                    sslContext.trustManager(InsecureTrustManagerFactory.INSTANCE);
+                }
+
+                builder.sslContext(sslContext.build());
+            } catch (SSLException e) {
+                throw new RuntimeException(e);
+            }
         }
 
-        if (connectionSettings.hosts.length > 1) {
+        if (connectionSettings.isDnsDiscover()) {
+            return builder.createClusterConnectionUsingDns(connectionSettings.getHosts()[0].getHostname(), connectionSettings.getNodePreference());
+        }
+
+        if (connectionSettings.getHosts().length > 1) {
             return builder.createClusterConnectionUsingSeeds(
-                    connectionSettings.hosts,
-                    connectionSettings.nodePreference
+                    connectionSettings.getHosts(),
+                    connectionSettings.getNodePreference()
             );
         }
 
-        return builder.createSingleNodeConnection(connectionSettings.hosts[0]);
+        return builder.createSingleNodeConnection(connectionSettings.getHosts()[0]);
     }
 }

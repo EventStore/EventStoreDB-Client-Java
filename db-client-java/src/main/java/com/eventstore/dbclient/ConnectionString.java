@@ -18,7 +18,6 @@ public class ConnectionString {
             "maxDiscoverAttempts",
             "discoveryInterval",
             "gossipTimeout",
-            "tlsVerifyCert",
             "throwOnAppendFailure",
             "defaultCredentials"
     );

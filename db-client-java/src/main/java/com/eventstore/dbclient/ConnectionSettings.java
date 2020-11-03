@@ -1,16 +1,57 @@
 package com.eventstore.dbclient;
 
 public class ConnectionSettings {
-    public boolean dnsDiscover;
-    public int maxDiscoverAttempts;
-    public int discoveryInterval;
-    public int gossipTimeout;
-    public NodePreference nodePreference;
-    public boolean tls;
-    public boolean tlsVerifyCert;
-    public boolean throwOnAppendFailure;
-    public Credentials defaultCredentials;
-    public Endpoint[] hosts;
+    private boolean dnsDiscover;
+    private int maxDiscoverAttempts;
+    private int discoveryInterval;
+    private int gossipTimeout;
+    private NodePreference nodePreference;
+    private boolean tls;
+    private boolean tlsVerifyCert;
+    private boolean throwOnAppendFailure;
+    private Credentials defaultCredentials;
+    private Endpoint[] hosts;
+
+    public boolean isDnsDiscover() {
+        return dnsDiscover;
+    }
+
+    public int getMaxDiscoverAttempts() {
+        return maxDiscoverAttempts;
+    }
+
+    public int getDiscoveryInterval() {
+        return discoveryInterval;
+    }
+
+    public int getGossipTimeout() {
+        return gossipTimeout;
+    }
+
+    public NodePreference getNodePreference() {
+        return nodePreference;
+    }
+
+    public boolean isTls() {
+        return tls;
+    }
+
+    public boolean isTlsVerifyCert() {
+        return tlsVerifyCert;
+    }
+
+    public boolean isThrowOnAppendFailure() {
+        return throwOnAppendFailure;
+    }
+
+    public Credentials getDefaultCredentials() {
+        return defaultCredentials;
+    }
+
+    public Endpoint[] getHosts() {
+        return hosts;
+    }
+
 
     public ConnectionSettings(
             boolean dnsDiscover,

@@ -1,16 +1,11 @@
 package com.eventstore.dbclient;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.stream.IntStream;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.junit.Assert;
 import org.junit.Test;
@@ -97,19 +92,19 @@ public class ParseValidConnectionStringTests {
     }
 
     public void assertEquals(ConnectionSettings settings, ConnectionSettings other) {
-        Assert.assertEquals(settings.dnsDiscover, other.dnsDiscover);
-        Assert.assertEquals(settings.maxDiscoverAttempts, other.maxDiscoverAttempts);
-        Assert.assertEquals(settings.discoveryInterval, other.discoveryInterval);
-        Assert.assertEquals(settings.gossipTimeout, other.gossipTimeout);
-        Assert.assertEquals(settings.nodePreference, other.nodePreference);
-        Assert.assertEquals(settings.tls, other.tls);
-        Assert.assertEquals(settings.tlsVerifyCert, other.tlsVerifyCert);
-        Assert.assertEquals(settings.throwOnAppendFailure, other.throwOnAppendFailure);
+        Assert.assertEquals(settings.isDnsDiscover(), other.isDnsDiscover());
+        Assert.assertEquals(settings.getMaxDiscoverAttempts(), other.getMaxDiscoverAttempts());
+        Assert.assertEquals(settings.getDiscoveryInterval(), other.getDiscoveryInterval());
+        Assert.assertEquals(settings.getGossipTimeout(), other.getGossipTimeout());
+        Assert.assertEquals(settings.getNodePreference(), other.getNodePreference());
+        Assert.assertEquals(settings.isTls(), other.isTls());
+        Assert.assertEquals(settings.isTlsVerifyCert(), other.isTlsVerifyCert());
+        Assert.assertEquals(settings.isThrowOnAppendFailure(), other.isThrowOnAppendFailure());
 
-        Assert.assertEquals(settings.hosts.length, other.hosts.length);
-        IntStream.range(0, settings.hosts.length).forEach((i) -> {
-            Assert.assertEquals(settings.hosts[i].getHostname(), other.hosts[i].getHostname());
-            Assert.assertEquals(settings.hosts[i].getPort(), other.hosts[i].getPort());
+        Assert.assertEquals(settings.getHosts().length, other.getHosts().length);
+        IntStream.range(0, settings.getHosts().length).forEach((i) -> {
+            Assert.assertEquals(settings.getHosts()[i].getHostname(), other.getHosts()[i].getHostname());
+            Assert.assertEquals(settings.getHosts()[i].getPort(), other.getHosts()[i].getPort());
         });
     }
 
