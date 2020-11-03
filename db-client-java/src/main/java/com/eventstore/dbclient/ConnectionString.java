@@ -14,7 +14,7 @@ public class ConnectionString {
     private int nextPosition = 0;
     private String connectionString;
     private final ConnectionSettingsBuilder settings = ConnectionSettings.builder();
-    private List<String> notCurrentlySupported = Arrays.asList(
+    private final List<String> notCurrentlySupported = Arrays.asList(
             "maxDiscoverAttempts",
             "discoveryInterval",
             "gossipTimeout",
@@ -32,7 +32,7 @@ public class ConnectionString {
     }
 
     private ConnectionSettings parseConnectionString(String connectionString) throws ParseError {
-        this.connectionString = connectionString;
+        this.connectionString = connectionString.trim().replaceAll("/+$", "");
         return this.parseProtocol();
     }
 
@@ -95,7 +95,7 @@ public class ConnectionString {
     private ConnectionSettings parseHosts(boolean mustMatch) throws ParseError {
         this.position = nextPosition;
         String expected = "<URL encoded username>:<Url encoded password>";
-        String pattern = "^(?:(?<host>[^$\\-_+!?*'(),;\\[\\]{}|\"%~#<>=&]+)[,/]?)";
+        String pattern = "^(?:(?<host>[^$+!?*'(),;\\[\\]{}|\"%~#<>=&/]+)[,/]?)";
         Pattern r = Pattern.compile(pattern);
         Matcher m = r.matcher(this.getRemaining());
         boolean found = m.find();
@@ -144,7 +144,7 @@ public class ConnectionString {
             return this.settings.buildConnectionSettings();
         }
         String expected = first ? "?key=value" : "&key=value";
-        String pattern = first ? "^(?:[" + "?" : "&" + "](?<key>[^=]+)=(?<value>[^&?]+))";
+        String pattern = "^(?:" + (first ?  "\\?" : "&") + "(?<key>[^=]+)=(?<value>[^&?]+))";
         Pattern r = Pattern.compile(pattern);
         Matcher m = r.matcher(this.getRemaining());
         boolean found = m.find();
@@ -170,7 +170,7 @@ public class ConnectionString {
                     NodePreference preference = NodePreference.valueOf(value.toUpperCase());
                     this.settings.nodePreference(preference);
                 } catch (IllegalArgumentException e) {
-                    throw new ParseError(this.connectionString, keyPosition, this.nextPosition, NodePreference.values().toString());
+                    throw new ParseError(this.connectionString, keyPosition, this.nextPosition, Arrays.toString(NodePreference.values()));
                 }
                 break;
             }

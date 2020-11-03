@@ -1,6 +1,8 @@
 package com.eventstore.dbclient;
 
 
+import com.fasterxml.jackson.databind.json.JsonMapper;
+
 import java.util.LinkedList;
 
 public class ConnectionSettingsBuilder {
