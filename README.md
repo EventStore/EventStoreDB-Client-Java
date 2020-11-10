@@ -1,13 +1,13 @@
-# Event Store Client SDK for Java
+# EventStoreDB Client SDK for Java
 
-This repository contains an [Event Store][es] Client SDK written in Java for use with languages on the JVM. It is
+This repository contains an [EventStoreDB][es] Client SDK written in Java for use with languages on the JVM. It is
 compatible with Java 8 and above.
 
 Note: This client is currently under active development and further API changes are expected. Feedback is very welcome.
 
 ## Developing
 
-The SDK is built using [`Gradle`][gradle]. Integration tests run against a server using Docker, with the [Event Store gRPC
+The SDK is built using [`Gradle`][gradle]. Integration tests run against a server using Docker, with the [EventStoreDB gRPC
 Client Test Container][container]. Packages are not currently published to Maven Central, but will be once this library
 approaches release.
 
@@ -15,7 +15,7 @@ approaches release.
 
 This client is compatible with version `20.6.1` upwards.
 
-Server setup instructions can be found here [EventStoreDB Docs], follow the docker setup for the simplest configuration.
+Server setup instructions can be found in the [docs], follow the docker setup for the simplest configuration.
 
 ## Example
 
@@ -87,17 +87,17 @@ public class Main {
 
 ## Support
 
-Information on support can be found here: [EventStoreDB Support]
+Information on support can be found on our website: [Event Store Support][support]
 
 ## Documentation
 
-Documentation for EventStoreDB can be found here: [EventStoreDB Docs]
+Documentation for EventStoreDB can be found in the [docs].
 
 Bear in mind that this client is not yet properly documented. We are working hard on a new version of the documentation.
 
 ## Community
 
-We have a community discussion space at [EventStoreDB Discuss].
+We have a community discussion space at [Event Store Discuss][discuss].
 
 ## Contributing
 
@@ -109,6 +109,6 @@ review our [Contributing Guide][contributing] and [Code of Conduct][code-of-cond
 [container]: https://github.com/EventStore/EventStore-Client-gRPC-TestData
 [contributing]: https://github.com/EventStore/EventStoreDB-Client-Java/tree/master/CONTRIBUTING.md
 [code-of-conduct]: https://github.com/EventStore/EventStoreDB-Client-Java/tree/master/CODE-OF-CONDUCT.md
-[eventstoredb support]: https://eventstore.com/support/
-[eventstoredb docs]: https://developers.eventstore.com/server/20.6/server/installation/
-[eventstoredb discuss]: https://discuss.eventstore.com/
+[support]: https://eventstore.com/support/
+[docs]: https://developers.eventstore.com/server/20.6/server/installation/
+[discuss]: https://discuss.eventstore.com/
