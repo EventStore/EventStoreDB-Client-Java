@@ -1,7 +1,11 @@
 package com.eventstore.dbclient;
 
+import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext;
+import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
+import io.grpc.netty.shaded.io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 
+import javax.net.ssl.SSLException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 
@@ -54,5 +58,37 @@ public class ConnectionBuilder {
 
     public EventStoreDBConnection createClusterConnectionUsingDns(String domain, NodePreference nodePreference) {
         return new EventStoreDBClusterConnection(null, domain, nodePreference, _timeouts, _sslContext);
+    }
+
+    public EventStoreDBConnection createConnectionFromConnectionSettings(ConnectionSettings connectionSettings) {
+
+        ConnectionBuilder builder = new ConnectionBuilder();
+
+        if (connectionSettings.isTls()) {
+            try {
+                SslContextBuilder sslContext = GrpcSslContexts.forClient();
+
+                if (!connectionSettings.isTlsVerifyCert()) {
+                    sslContext.trustManager(InsecureTrustManagerFactory.INSTANCE);
+                }
+
+                builder.sslContext(sslContext.build());
+            } catch (SSLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        if (connectionSettings.isDnsDiscover()) {
+            return builder.createClusterConnectionUsingDns(connectionSettings.getHosts()[0].getHostname(), connectionSettings.getNodePreference());
+        }
+
+        if (connectionSettings.getHosts().length > 1) {
+            return builder.createClusterConnectionUsingSeeds(
+                    connectionSettings.getHosts(),
+                    connectionSettings.getNodePreference()
+            );
+        }
+
+        return builder.createSingleNodeConnection(connectionSettings.getHosts()[0]);
     }
 }
