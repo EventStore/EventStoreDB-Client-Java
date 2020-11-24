@@ -10,15 +10,15 @@ import io.grpc.stub.MetadataUtils;
 import java.util.concurrent.CompletableFuture;
 
 public class DeleteStream {
-    private EventStoreDBConnection connection;
+    private GrpcClient client;
     private String streamName;
     private ExpectedRevision expectedRevision;
     private ConnectionMetadata metadata;
     private Timeouts timeouts;
     private boolean softDelete;
 
-    public DeleteStream(EventStoreDBConnection connection, String streamName, UserCredentials credentials) {
-        this.connection = connection;
+    public DeleteStream(GrpcClient client, String streamName, UserCredentials credentials) {
+        this.client = client;
         this.streamName = streamName;
         this.metadata = new ConnectionMetadata();
         this.timeouts = Timeouts.DEFAULT;
@@ -72,7 +72,7 @@ public class DeleteStream {
     }
 
     public CompletableFuture<DeleteResult> execute() {
-        return this.connection.run(channel -> {
+        return this.client.run(channel -> {
             Metadata headers = this.metadata.build();
             StreamsGrpc.StreamsStub client = MetadataUtils.attachHeaders(StreamsGrpc.newStub(channel), headers);
 

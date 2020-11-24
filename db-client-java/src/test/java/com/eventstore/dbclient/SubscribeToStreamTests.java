@@ -2,7 +2,6 @@ package com.eventstore.dbclient;
 
 import org.junit.Rule;
 import org.junit.Test;
-import testcontainers.module.EventStoreStreamsClient;
 import testcontainers.module.EventStoreTestDBContainer;
 
 import java.util.UUID;
@@ -50,7 +49,7 @@ public class SubscribeToStreamTests {
 
     @Test
     public void testStreamSubscriptionDeliversAllEventsInStream() throws InterruptedException, ExecutionException {
-        Streams streams = Streams.create(server.getConnection());
+        Streams streams = server.getStreamsAPI();
 
         final CountDownLatch receivedEvents = new CountDownLatch(6000);
         final CountDownLatch cancellation = new CountDownLatch(1);
@@ -88,7 +87,7 @@ public class SubscribeToStreamTests {
 
     @Test
     public void testStreamSubscriptionDeliversAllEventsInStreamAndListensForNewEvents() throws Throwable {
-        Streams streams = Streams.create(server.getConnection());
+        Streams streams = server.getStreamsAPI();
 
         final CountDownLatch receivedEvents = new CountDownLatch(6000);
         final CountDownLatch appendedEvents = new CountDownLatch(1);
@@ -145,7 +144,7 @@ public class SubscribeToStreamTests {
         receivedEvents.await();
 
         // Write a new event
-        ProposedEvent event = ProposedEventBuilder.binary(eventType, eventData)
+        EventData event = EventDataBuilder.binary(eventType, eventData)
                 .eventId(UUID.fromString(eventId))
                 .metadataAsBytes(eventMetaData)
                 .build();

@@ -11,14 +11,14 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 public class CreatePersistentSubscription {
-    private final EventStoreDBConnection connection;
+    private final GrpcClient client;
     private final String stream;
     private final String group;
     private PersistentSubscriptionSettings settings;
     private ConnectionMetadata metadata;
 
-    public CreatePersistentSubscription(EventStoreDBConnection connection, String stream, String group, UserCredentials credentials) {
-        this.connection = connection;
+    public CreatePersistentSubscription(GrpcClient client, String stream, String group, UserCredentials credentials) {
+        this.client = client;
         this.stream = stream;
         this.group = group;
         this.settings = PersistentSubscriptionSettings.builder().build();
@@ -41,7 +41,7 @@ public class CreatePersistentSubscription {
     }
 
     public CompletableFuture execute() {
-        return this.connection.run(channel -> {
+        return this.client.run(channel -> {
             CompletableFuture result = new CompletableFuture();
             Metadata headers = this.metadata.build();
             PersistentSubscriptionsGrpc.PersistentSubscriptionsStub client = MetadataUtils.attachHeaders(PersistentSubscriptionsGrpc.newStub(channel), headers);

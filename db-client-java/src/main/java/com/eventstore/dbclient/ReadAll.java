@@ -9,8 +9,8 @@ public class ReadAll extends AbstractRead {
     private boolean resolveLinks;
     private Direction direction;
 
-    public ReadAll(EventStoreDBConnection connection, UserCredentials credentials) {
-        super(connection);
+    public ReadAll(GrpcClient client, UserCredentials credentials) {
+        super(client);
 
         this.metadata = new ConnectionMetadata();
         this.resolveLinks = false;

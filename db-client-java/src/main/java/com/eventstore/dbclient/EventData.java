@@ -2,14 +2,14 @@ package com.eventstore.dbclient;
 
 import java.util.UUID;
 
-public final class ProposedEvent {
+public final class EventData {
     private final UUID eventId;
     private final String eventType;
     private final String contentType;
     private final byte[] eventData;
     private final byte[] userMetadata;
 
-    public ProposedEvent(UUID eventId, String eventType, String contentType, byte[] eventData, byte[] userMetadata) {
+    public EventData(UUID eventId, String eventType, String contentType, byte[] eventData, byte[] userMetadata) {
         this.eventId = eventId;
         this.eventType = eventType;
         this.contentType = contentType;
@@ -37,12 +37,12 @@ public final class ProposedEvent {
         return userMetadata;
     }
 
-    public static <A> ProposedEventBuilder builderAsJson(String eventType, A payload) {
-        return ProposedEventBuilder.json(eventType, payload);
+    public static <A> EventDataBuilder builderAsJson(String eventType, A payload) {
+        return EventDataBuilder.json(eventType, payload);
     }
 
-    public static <A> ProposedEventBuilder builderAsBinary(String eventType, byte[] payload) {
-        return ProposedEventBuilder.binary(eventType, payload);
+    public static EventDataBuilder builderAsBinary(String eventType, byte[] payload) {
+        return EventDataBuilder.binary(eventType, payload);
     }
 }
 

@@ -13,7 +13,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Function;
 
-public class EventStoreDBClusterConnection implements EventStoreDBConnection {
+public class EventStoreDBClusterClient implements GrpcClient {
     private static final Set<ClusterInfo.MemberState> invalidStates;
     private static final Random random = new Random();
     private volatile boolean shutdown = false;
@@ -45,7 +45,7 @@ public class EventStoreDBClusterConnection implements EventStoreDBConnection {
     private final Timeouts timeouts;
     private LinkedBlockingQueue<Msg> messages;
 
-    public EventStoreDBClusterConnection(List<InetSocketAddress> seedNodes, String domainName, NodePreference nodePreference, Timeouts timeouts, SslContext sslContext) {
+    public EventStoreDBClusterClient(List<InetSocketAddress> seedNodes, String domainName, NodePreference nodePreference, Timeouts timeouts, SslContext sslContext) {
         this.seedNodes = seedNodes;
         this.nodePreference = nodePreference;
         this.sslContext = sslContext;
@@ -194,7 +194,7 @@ public class EventStoreDBClusterConnection implements EventStoreDBConnection {
     @Override
     public <A> CompletableFuture<A> run(Function<ManagedChannel, CompletableFuture<A>> action) {
         final CompletableFuture<A> result = new CompletableFuture<>();
-        final EventStoreDBClusterConnection self = this;
+        final EventStoreDBClusterClient self = this;
 
         this.messages.add(new RunWorkItem(new WorkItem() {
             @Override
@@ -314,7 +314,7 @@ public class EventStoreDBClusterConnection implements EventStoreDBConnection {
     }
 
     interface Msg {
-        boolean accept(EventStoreDBClusterConnection self);
+        boolean accept(EventStoreDBClusterClient self);
     }
 
     class CreateChannel implements Msg {
@@ -332,7 +332,7 @@ public class EventStoreDBClusterConnection implements EventStoreDBConnection {
         }
 
         @Override
-        public boolean accept(EventStoreDBClusterConnection self) {
+        public boolean accept(EventStoreDBClusterClient self) {
             return self.createNewChannel(previousId, channel);
         }
     }
@@ -345,7 +345,7 @@ public class EventStoreDBClusterConnection implements EventStoreDBConnection {
         }
 
         @Override
-        public boolean accept(EventStoreDBClusterConnection self) {
+        public boolean accept(EventStoreDBClusterClient self) {
             return self.runWorkItem(item);
         }
 
@@ -356,7 +356,7 @@ public class EventStoreDBClusterConnection implements EventStoreDBConnection {
 
     class Shutdown implements Msg {
         @Override
-        public boolean accept(EventStoreDBClusterConnection self) {
+        public boolean accept(EventStoreDBClusterClient self) {
             self.closeConnection();
             return false;
         }

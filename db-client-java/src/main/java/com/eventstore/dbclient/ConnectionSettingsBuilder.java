@@ -1,8 +1,6 @@
 package com.eventstore.dbclient;
 
 
-import com.fasterxml.jackson.databind.json.JsonMapper;
-
 import java.util.LinkedList;
 
 public class ConnectionSettingsBuilder {
@@ -14,11 +12,11 @@ public class ConnectionSettingsBuilder {
     private boolean _tls = true;
     private boolean _tlsVerifyCert = true;
     private boolean _throwOnAppendFailure = true;
-    private ConnectionSettings.Credentials _defaultCredentials;
+    private ClientSettings.Credentials _defaultCredentials;
     private LinkedList<Endpoint> _hosts = new LinkedList<>();
 
-    public ConnectionSettings buildConnectionSettings() {
-        return new ConnectionSettings(_dnsDiscover,
+    public ClientSettings buildConnectionSettings() {
+        return new ClientSettings(_dnsDiscover,
                 _maxDiscoverAttempts,
                 _discoveryInterval,
                 _gossipTimeout,
@@ -72,7 +70,7 @@ public class ConnectionSettingsBuilder {
     }
 
     public ConnectionSettingsBuilder defaultCredentials(String username, String password) {
-        this._defaultCredentials = new ConnectionSettings.Credentials(username, password);
+        this._defaultCredentials = new ClientSettings.Credentials(username, password);
         return this;
     }
 

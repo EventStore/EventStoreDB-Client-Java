@@ -1,6 +1,6 @@
 package com.eventstore.dbclient;
 
-public class ConnectionSettings {
+public class ClientSettings {
     private boolean dnsDiscover;
     private int maxDiscoverAttempts;
     private int discoveryInterval;
@@ -53,7 +53,7 @@ public class ConnectionSettings {
     }
 
 
-    public ConnectionSettings(
+    public ClientSettings(
             boolean dnsDiscover,
             int maxDiscoverAttempts,
             int discoveryInterval,
@@ -88,6 +88,10 @@ public class ConnectionSettings {
         public Credentials(String login, String password) {
             this.login = login;
             this.password = password;
+        }
+
+        public UserCredentials toUserCredentials() {
+            return new UserCredentials(login, password);
         }
     }
 }

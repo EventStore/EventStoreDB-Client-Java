@@ -13,7 +13,7 @@ public class ConnectionString {
     private int position = 0;
     private int nextPosition = 0;
     private String connectionString;
-    private final ConnectionSettingsBuilder settings = ConnectionSettings.builder();
+    private final ConnectionSettingsBuilder settings = ClientSettings.builder();
     private final List<String> notCurrentlySupported = Arrays.asList(
             "maxDiscoverAttempts",
             "discoveryInterval",
@@ -22,20 +22,28 @@ public class ConnectionString {
             "defaultCredentials"
     );
 
-    public static ConnectionSettings parse(String connectionString) throws ParseError {
+    public static ClientSettings parse(String connectionString) throws ParseError {
         return new ConnectionString().parseConnectionString(connectionString);
+    }
+
+    public static ClientSettings parseOrThrow(String connectionString) {
+        try {
+            return ConnectionString.parse(connectionString);
+        } catch (ParseError e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private String getRemaining() {
         return this.connectionString.substring(this.position);
     }
 
-    private ConnectionSettings parseConnectionString(String connectionString) throws ParseError {
+    private ClientSettings parseConnectionString(String connectionString) throws ParseError {
         this.connectionString = connectionString.trim().replaceAll("/+$", "");
         return this.parseProtocol();
     }
 
-    private ConnectionSettings parseProtocol() throws ParseError {
+    private ClientSettings parseProtocol() throws ParseError {
         this.position = nextPosition;
         String expected = "esdb:// or esdb+discover://";
         String pattern = "^(?<protocol>[^:]+)://";
@@ -61,7 +69,7 @@ public class ConnectionString {
         throw new ParseError(this.connectionString, this.position, this.nextPosition, expected);
     }
 
-    private ConnectionSettings parseCredentials() throws ParseError {
+    private ClientSettings parseCredentials() throws ParseError {
         this.position = nextPosition;
         String expected = "<URL encoded username>:<Url encoded password>";
         String pattern = "^(?:(?<credentials>[^:]+:[^@]+)@)";
@@ -91,7 +99,7 @@ public class ConnectionString {
         throw new ParseError(this.connectionString, this.position, this.nextPosition, expected);
     }
 
-    private ConnectionSettings parseHosts(boolean mustMatch) throws ParseError {
+    private ClientSettings parseHosts(boolean mustMatch) throws ParseError {
         this.position = nextPosition;
         String expected = "<URL encoded username>:<Url encoded password>";
         String pattern = "^(?:(?<host>[^$+!?*'(),;\\[\\]{}|\"%~#<>=&/]+)[,/]?)";
@@ -137,7 +145,7 @@ public class ConnectionString {
         return this.parseSearchParams(true);
     }
 
-    private ConnectionSettings parseSearchParams(boolean first) throws ParseError {
+    private ClientSettings parseSearchParams(boolean first) throws ParseError {
         this.position = nextPosition;
         if (this.position == this.connectionString.length()) {
             return this.settings.buildConnectionSettings();

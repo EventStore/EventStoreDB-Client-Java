@@ -16,7 +16,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class ConnectPersistentSubscription {
     private static final Persistent.ReadReq.Options.Builder defaultReadOptions;
-    private final EventStoreDBConnection connection;
+    private final GrpcClient connection;
     private final String stream;
     private final String group;
     private final PersistentSubscriptionListener listener;
@@ -28,7 +28,7 @@ public class ConnectPersistentSubscription {
                         .setStructured(Shared.Empty.getDefaultInstance()));
     }
 
-    public ConnectPersistentSubscription(EventStoreDBConnection connection, String stream, String group, UserCredentials credentials, PersistentSubscriptionListener listener) {
+    public ConnectPersistentSubscription(GrpcClient connection, String stream, String group, UserCredentials credentials, PersistentSubscriptionListener listener) {
         this.connection = connection;
         this.stream = stream;
         this.group = group;

@@ -2,13 +2,8 @@ package testcontainers.module;
 
 import com.eventstore.dbclient.*;
 import com.github.dockerjava.api.model.HealthCheck;
-import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
-import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext;
-import io.grpc.netty.shaded.io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
-
-import javax.net.ssl.SSLException;
 
 public class EventStoreTestDBContainer extends GenericContainer<EventStoreTestDBContainer> {
     public static final String NAME;
@@ -20,7 +15,7 @@ public class EventStoreTestDBContainer extends GenericContainer<EventStoreTestDB
     static {
         NAME = "eventstore-client-grpc-testdata";
         IMAGE = "docker.pkg.github.com/eventstore/eventstore-client-grpc-testdata/" + NAME;
-        IMAGE_TAG = "20.6.0-buster-slim";
+        IMAGE_TAG = "20.6.1-buster-slim";
         HEALTH_CHECK = new HealthCheck()
                 .withInterval(1000000000L)
                 .withTimeout(1000000000L)
@@ -41,7 +36,7 @@ public class EventStoreTestDBContainer extends GenericContainer<EventStoreTestDB
 
         addExposedPorts(1113, 2113);
 
-        withEnv("EVENTSTORE_DEV", "true");
+        withEnv("EVENTSTORE_INSECURE", "true");
         if (!emptyDatabase) {
             withEnv("EVENTSTORE_MEM_DB", "false");
             withEnv("EVENTSTORE_DB", "/data/integration-tests");
@@ -51,32 +46,19 @@ public class EventStoreTestDBContainer extends GenericContainer<EventStoreTestDB
         waitingFor(Wait.forHealthcheck());
     }
 
-    public EventStoreDBConnection getConnection() {
+    public Client getClient() {
         final String address = getContainerIpAddress();
         final int port = getMappedPort(DB_HTTP_PORT);
+        final ClientSettings settings = ConnectionString.parseOrThrow(String.format("esdb://%s:%d?tls=false", address, port));
 
-        return Connections
-                .builder()
-                .sslContext(getClientSslContext())
-                .createSingleNodeConnection(address, port);
+        return Client.create(settings);
     }
 
     public Streams getStreamsAPI() {
-        return Streams.createWithDefaultCredentials(getConnection(), "admin", "changeit");
+        return getClient().streams();
     }
 
     public PersistentSubscriptions getPersistentSubscriptionsAPI() {
-        return PersistentSubscriptions.createWithDefaultCredentials(getConnection(), "admin", "changeit");
-    }
-
-    private SslContext getClientSslContext() {
-        try {
-            return GrpcSslContexts.
-                    forClient().
-                    trustManager(InsecureTrustManagerFactory.INSTANCE).
-                    build();
-        } catch (SSLException ex) {
-            return null;
-        }
+        return getClient().persistentSubscriptions();
     }
 }

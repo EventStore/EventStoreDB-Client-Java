@@ -16,15 +16,15 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class AppendToStream {
-    private EventStoreDBConnection connection;
+    private GrpcClient client;
     private String streamName;
     private ExpectedRevision expectedRevision;
-    private List<ProposedEvent> events;
+    private List<EventData> events;
     private Timeouts timeouts;
     private ConnectionMetadata metadata;
 
-    public AppendToStream(EventStoreDBConnection connection, String streamName, UserCredentials credentials) {
-        this.connection = connection;
+    public AppendToStream(GrpcClient client, String streamName, UserCredentials credentials) {
+        this.client = client;
         this.streamName = streamName;
         this.expectedRevision = ExpectedRevision.ANY;
         this.events = new ArrayList<>();
@@ -67,18 +67,18 @@ public class AppendToStream {
         return this;
     }
 
-    public AppendToStream addEvent(ProposedEvent event) {
+    public AppendToStream addEvent(EventData event) {
         this.events.add(event);
 
         return this;
     }
 
-    public AppendToStream addEvents(ProposedEvent ... events) {
+    public AppendToStream addEvents(EventData... events) {
         this.addEvents(Arrays.stream(events).iterator());
         return this;
     }
 
-    public AppendToStream addEvents(Iterator<ProposedEvent> events) {
+    public AppendToStream addEvents(Iterator<EventData> events) {
         while (events.hasNext()) {
             this.events.add(events.next());
         }
@@ -87,7 +87,7 @@ public class AppendToStream {
     }
 
     public CompletableFuture<WriteResult> execute() {
-        return this.connection.run(channel -> {
+        return this.client.run(channel -> {
             Metadata headers = this.metadata.build();
             CompletableFuture<WriteResult> result = new CompletableFuture<>();
             StreamsOuterClass.AppendReq.Options.Builder options = this.expectedRevision.applyOnWire(StreamsOuterClass.AppendReq.Options.newBuilder()
@@ -146,7 +146,7 @@ public class AppendToStream {
             try {
                 requestStream.onNext(StreamsOuterClass.AppendReq.newBuilder().setOptions(options).build());
 
-                for (ProposedEvent e : this.events) {
+                for (EventData e : this.events) {
                     StreamsOuterClass.AppendReq.ProposedMessage.Builder msgBuilder = StreamsOuterClass.AppendReq.ProposedMessage.newBuilder()
                             .setId(Shared.UUID.newBuilder()
                                     .setStructured(Shared.UUID.Structured.newBuilder()

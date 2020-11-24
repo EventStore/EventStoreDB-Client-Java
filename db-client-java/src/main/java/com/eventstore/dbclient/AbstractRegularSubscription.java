@@ -22,10 +22,10 @@ public abstract class AbstractRegularSubscription{
     protected boolean resolveLinks;
     protected SubscriptionListener listener;
     protected Checkpointer checkpointer = null;
-    private EventStoreDBConnection connection;
+    private GrpcClient client;
 
-    protected AbstractRegularSubscription(EventStoreDBConnection connection) {
-        this.connection = connection;
+    protected AbstractRegularSubscription(GrpcClient client) {
+        this.client = client;
     }
 
     static {
@@ -40,7 +40,7 @@ public abstract class AbstractRegularSubscription{
     protected abstract StreamsOuterClass.ReadReq.Options.Builder createOptions();
 
     public CompletableFuture<Subscription> execute() {
-        return this.connection.run(channel -> {
+        return this.client.run(channel -> {
             StreamsOuterClass.ReadReq readReq = StreamsOuterClass.ReadReq.newBuilder()
                     .setOptions(createOptions())
                     .build();
