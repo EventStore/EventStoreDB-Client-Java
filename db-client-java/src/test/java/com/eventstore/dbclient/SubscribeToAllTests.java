@@ -2,7 +2,6 @@ package com.eventstore.dbclient;
 
 import org.junit.Rule;
 import org.junit.Test;
-import testcontainers.module.EventStoreStreamsClient;
 import testcontainers.module.EventStoreTestDBContainer;
 
 import java.util.concurrent.CountDownLatch;
@@ -50,7 +49,6 @@ public class SubscribeToAllTests {
 
     @Test
     public void testAllSubscriptionWithFilterDeliversCorrectEvents() throws InterruptedException, ExecutionException {
-        Streams streams = Streams.createWithDefaultCredentials(server.getConnection(), "admin", "changeit");;
         final TestPosition[] expectedPositions = TestDataLoader.loadSerializedPositions(
                 "all-positions-filtered-stream194-e0-e30");
         final long[] expectedStreamVersions = TestDataLoader.loadSerializedStreamVersions(
@@ -90,7 +88,8 @@ public class SubscribeToAllTests {
                 .withEventTypePrefix("eventType-194")
                 .build();
 
-        Subscription result = streams.subscribeToAll(listener)
+        Subscription result = server.getClient().streams()
+                .subscribeToAll(listener)
                 .fromStart()
                 .filter(filter)
                 .execute()

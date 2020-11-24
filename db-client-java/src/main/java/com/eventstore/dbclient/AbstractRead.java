@@ -14,11 +14,11 @@ import java.util.concurrent.CompletableFuture;
 public abstract class AbstractRead {
     protected static final StreamsOuterClass.ReadReq.Options.Builder defaultReadOptions;
 
-    private EventStoreDBConnection connection;
+    private GrpcClient client;
     protected ConnectionMetadata metadata;
 
-    protected AbstractRead(EventStoreDBConnection connection) {
-        this.connection = connection;
+    protected AbstractRead(GrpcClient client) {
+        this.client = client;
     }
 
     static {
@@ -34,7 +34,7 @@ public abstract class AbstractRead {
     }
 
     public CompletableFuture<ReadResult> execute(long count) {
-        return this.connection.run(channel -> {
+        return this.client.run(channel -> {
             StreamsOuterClass.ReadReq request = StreamsOuterClass.ReadReq.newBuilder()
                     .setOptions(createOptions(count))
                     .build();

@@ -7,8 +7,8 @@ public class SubscribeToAll extends AbstractRegularSubscription {
     private Position position;
     protected SubscriptionFilter filter;
 
-    public SubscribeToAll(EventStoreDBConnection connection, SubscriptionListener listener, UserCredentials credentials) {
-        super(connection);
+    public SubscribeToAll(GrpcClient client, SubscriptionListener listener, UserCredentials credentials) {
+        super(client);
 
         this.metadata = new ConnectionMetadata();
         this.resolveLinks = false;

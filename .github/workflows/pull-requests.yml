@@ -36,4 +36,4 @@ jobs:
       - name: Build and Test
         uses: eskatos/gradle-command-action@v1
         with:
-          arguments: test
+          arguments: test -PossrhUsername="" -PossrhPassword=""

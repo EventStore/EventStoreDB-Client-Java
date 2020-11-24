@@ -39,7 +39,7 @@ jobs:
       - name: Build and Test
         uses: eskatos/gradle-command-action@v1
         with:
-          arguments: test
+          arguments: test -PossrhUsername="" -PossrhPassword=""
 
   publish:
     name: Publish Snapshot Packages
@@ -67,7 +67,7 @@ jobs:
       - name: Publish GitHub Packages
         uses: eskatos/gradle-command-action@v1
         with:
-          arguments: publish
+          arguments: publish -PossrhUsername="" -PossrhPassword=""
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

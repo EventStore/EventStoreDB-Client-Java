@@ -3,13 +3,15 @@
 This repository contains an [EventStoreDB][es] Client SDK written in Java for use with languages on the JVM. It is
 compatible with Java 8 and above.
 
-Note: This client is currently under active development and further API changes are expected. Feedback is very welcome.
+*Note: This client is currently under active development and further API changes are expected. Feedback is very welcome.*
+
+## Access to binaries
+EventStore Ltd publishes GA (general availability) versions to [Maven Central].
 
 ## Developing
 
 The SDK is built using [`Gradle`][gradle]. Integration tests run against a server using Docker, with the [EventStoreDB gRPC
-Client Test Container][container]. Packages are not currently published to Maven Central, but will be once this library
-approaches release.
+Client Test Container][container].
 
 ## EventStoreDB Server Compatibility
 
@@ -44,35 +46,36 @@ class AccountCreated {
 }
 ```
 ```java
-import com.eventstore.dbclient.Connections;
-import com.eventstore.dbclient.EventStoreDBConnection;
-import com.eventstore.dbclient.ProposedEvent;
+import com.eventstore.dbclient.Client;
+import com.eventstore.dbclient.ClientSettings;
+import com.eventstore.dbclient.ConnectionString;
+import com.eventstore.dbclient.GrpcClient;
+import com.eventstore.dbclient.EventData;
 import com.eventstore.dbclient.WriteResult;
 import com.eventstore.dbclient.ReadResult;
-import com.eventstore.dbclient.Streams;
 
 public class Main {
     public static void main(String args[]) {
-        EventStoreDBConnection connection = Connections.builder()
-                .createSingleNodeConnection("localhost", 2113);
-
-        Streams streamsAPI = Streams.create(connection);
+        ClientSettings setts = ConnectionString.parseOrThrow("esdb://localhost:2113");
+        Client client = Client.create(setts);                        
 
         AccountCreated createdEvent = new AccountCreated();
 
         createdEvent.setId(UUID.randomUUID());
         createdEvent.setLogin("ouros");
 
-        ProposedEvent event = ProposedEvent
+        EventData event = EventData
                 .builderAsJson("account-created", createdEvent)
                 .build();
 
-        WriteResult writeResult = streamsAPI.appendStream("accounts")
+        WriteResult writeResult = client.streams()
+                .appendStream("accounts")
                 .addEvent(event)
                 .execute()
                 .get();
 
-        ResolvedEvent resolvedEvent = streamsAPI.readStream("accounts")
+        ResolvedEvent resolvedEvent = client.streams()
+                .readStream("accounts")
                 .fromStart()
                 .execute(1)
                 .get()
@@ -81,6 +84,8 @@ public class Main {
 
         AccountCreated writtenEvent = resolvedEvent.getOriginalEvent()
                 .getEventDataAs(AccountCreated.class);
+    
+        // Doing something productive...
     }
 }
 ```
@@ -112,3 +117,4 @@ review our [Contributing Guide][contributing] and [Code of Conduct][code-of-cond
 [support]: https://eventstore.com/support/
 [docs]: https://developers.eventstore.com/server/20.6/server/installation/
 [discuss]: https://discuss.eventstore.com/
+[Maven Central]: https://search.maven.org/artifact/com.eventstore/db-client-java

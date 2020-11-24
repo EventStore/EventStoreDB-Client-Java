@@ -27,19 +27,19 @@ public class ConnectionBuilder {
         return this;
     }
 
-    public EventStoreDBConnection createSingleNodeConnection(Endpoint endpoint) {
-        return new SingleNodeEventStoreDBConnection(endpoint.getHostname(), endpoint.getPort(), _timeouts, _sslContext);
+    public GrpcClient createSingleNodeConnection(Endpoint endpoint) {
+        return new SingleNodeClient(endpoint.getHostname(), endpoint.getPort(), _timeouts, _sslContext);
     }
 
-    public EventStoreDBConnection createSingleNodeConnection(String hostname, int port) {
+    public GrpcClient createSingleNodeConnection(String hostname, int port) {
         return createSingleNodeConnection(new Endpoint(hostname, port));
     }
 
-    public EventStoreDBConnection createClusterConnectionUsingSeeds(Endpoint[] endpoints) {
+    public GrpcClient createClusterConnectionUsingSeeds(Endpoint[] endpoints) {
         return createClusterConnectionUsingSeeds(endpoints, NodePreference.RANDOM);
     }
 
-    public EventStoreDBConnection createClusterConnectionUsingSeeds(Endpoint[] endpoints, NodePreference nodePreference) {
+    public GrpcClient createClusterConnectionUsingSeeds(Endpoint[] endpoints, NodePreference nodePreference) {
         ArrayList<InetSocketAddress> addresses = new ArrayList<>();
 
         for (int i = 0; i < endpoints.length; ++i) {
@@ -49,26 +49,26 @@ public class ConnectionBuilder {
             addresses.add(address);
         }
 
-        return new EventStoreDBClusterConnection(addresses, null, nodePreference, _timeouts, _sslContext);
+        return new EventStoreDBClusterClient(addresses, null, nodePreference, _timeouts, _sslContext);
     }
 
-    public EventStoreDBConnection createClusterConnectionUsingDns(String domain) {
+    public GrpcClient createClusterConnectionUsingDns(String domain) {
         return createClusterConnectionUsingDns(domain, NodePreference.RANDOM);
     }
 
-    public EventStoreDBConnection createClusterConnectionUsingDns(String domain, NodePreference nodePreference) {
-        return new EventStoreDBClusterConnection(null, domain, nodePreference, _timeouts, _sslContext);
+    public GrpcClient createClusterConnectionUsingDns(String domain, NodePreference nodePreference) {
+        return new EventStoreDBClusterClient(null, domain, nodePreference, _timeouts, _sslContext);
     }
 
-    public EventStoreDBConnection createConnectionFromConnectionSettings(ConnectionSettings connectionSettings) {
+    public GrpcClient createConnectionFromConnectionSettings(ClientSettings clientSettings) {
 
         ConnectionBuilder builder = new ConnectionBuilder();
 
-        if (connectionSettings.isTls()) {
+        if (clientSettings.isTls()) {
             try {
                 SslContextBuilder sslContext = GrpcSslContexts.forClient();
 
-                if (!connectionSettings.isTlsVerifyCert()) {
+                if (!clientSettings.isTlsVerifyCert()) {
                     sslContext.trustManager(InsecureTrustManagerFactory.INSTANCE);
                 }
 
@@ -78,17 +78,17 @@ public class ConnectionBuilder {
             }
         }
 
-        if (connectionSettings.isDnsDiscover()) {
-            return builder.createClusterConnectionUsingDns(connectionSettings.getHosts()[0].getHostname(), connectionSettings.getNodePreference());
+        if (clientSettings.isDnsDiscover()) {
+            return builder.createClusterConnectionUsingDns(clientSettings.getHosts()[0].getHostname(), clientSettings.getNodePreference());
         }
 
-        if (connectionSettings.getHosts().length > 1) {
+        if (clientSettings.getHosts().length > 1) {
             return builder.createClusterConnectionUsingSeeds(
-                    connectionSettings.getHosts(),
-                    connectionSettings.getNodePreference()
+                    clientSettings.getHosts(),
+                    clientSettings.getNodePreference()
             );
         }
 
-        return builder.createSingleNodeConnection(connectionSettings.getHosts()[0]);
+        return builder.createSingleNodeConnection(clientSettings.getHosts()[0]);
     }
 }

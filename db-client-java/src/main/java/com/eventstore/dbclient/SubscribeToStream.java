@@ -7,8 +7,8 @@ public class SubscribeToStream extends AbstractRegularSubscription {
     private String streamName;
     private StreamRevision startRevision;
 
-    public SubscribeToStream(EventStoreDBConnection connection, String streamName, SubscriptionListener listener, UserCredentials credentials) {
-        super(connection);
+    public SubscribeToStream(GrpcClient client, String streamName, SubscriptionListener listener, UserCredentials credentials) {
+        super(client);
 
         this.streamName = streamName;
         this.metadata = new ConnectionMetadata();

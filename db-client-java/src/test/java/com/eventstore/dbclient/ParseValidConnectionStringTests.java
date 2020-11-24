@@ -91,7 +91,7 @@ public class ParseValidConnectionStringTests {
         });
     }
 
-    public void assertEquals(ConnectionSettings settings, ConnectionSettings other) {
+    public void assertEquals(ClientSettings settings, ClientSettings other) {
         Assert.assertEquals(settings.isDnsDiscover(), other.isDnsDiscover());
         Assert.assertEquals(settings.getMaxDiscoverAttempts(), other.getMaxDiscoverAttempts());
         Assert.assertEquals(settings.getDiscoveryInterval(), other.getDiscoveryInterval());
@@ -117,14 +117,14 @@ public class ParseValidConnectionStringTests {
     @Test
     public void test() throws ParseError, JsonProcessingException {
 
-        ConnectionSettings expectedSettings = this.parseJson(jsonSettings);
-        ConnectionSettings parsedSettings = ConnectionString.parse(connectionString);
+        ClientSettings expectedSettings = this.parseJson(jsonSettings);
+        ClientSettings parsedSettings = ConnectionString.parse(connectionString);
 
         this.assertEquals(expectedSettings, parsedSettings);
     }
 
-    private ConnectionSettings parseJson(String input) throws JsonProcessingException {
-        ConnectionSettingsBuilder builder = ConnectionSettings.builder();
+    private ClientSettings parseJson(String input) throws JsonProcessingException {
+        ConnectionSettingsBuilder builder = ClientSettings.builder();
         JsonNode tree = mapper.readTree(input);
 
         builder

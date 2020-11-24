@@ -16,8 +16,7 @@ plugins {
 }
 
 group = 'com.eventstore'
-version = '0.1'
-//archivesBaseName = 'eventstoredb-client-java'
+version = '0.2'
 
 dependencies {
     implementation "javax.annotation:javax.annotation-api:${annotationApiVersion}"

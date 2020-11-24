@@ -11,13 +11,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 public class UpdatePersistentSubscription {
-    private final EventStoreDBConnection connection;
+    private final GrpcClient connection;
     private final String stream;
     private final String group;
     private PersistentSubscriptionSettings settings;
     private ConnectionMetadata metadata;
 
-    public UpdatePersistentSubscription(EventStoreDBConnection connection, String stream, String group, UserCredentials credentials) {
+    public UpdatePersistentSubscription(GrpcClient connection, String stream, String group, UserCredentials credentials) {
         this.connection = connection;
         this.stream = stream;
         this.group = group;

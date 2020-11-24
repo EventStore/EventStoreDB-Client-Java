@@ -53,7 +53,7 @@ public class AppendTests {
         final String eventId = "38fffbc2-339e-11ea-8c7b-784f43837872";
         final byte[] eventMetaData = new byte[]{0xd, 0xe, 0xa, 0xd};
 
-        ProposedEvent event = ProposedEvent.builderAsJson(eventType, new Foo())
+        EventData event = EventData.builderAsJson(eventType, new Foo())
                 .metadataAsBytes(eventMetaData)
                 .eventId(UUID.fromString(eventId))
                 .build();

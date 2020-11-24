@@ -3,11 +3,8 @@ package com.eventstore.dbclient;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
-import testcontainers.module.EventStoreStreamsClient;
 import testcontainers.module.EventStoreTestDBContainer;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -51,7 +48,7 @@ public class ConnectPersistentSubcription {
                 .execute()
                 .get();
 
-        ProposedEventBuilder builder = ProposedEvent.builderAsJson("foobar", new ConnectPersistentSubcription.Foo());
+        EventDataBuilder builder = EventData.builderAsJson("foobar", new ConnectPersistentSubcription.Foo());
         AppendToStream appendCommand = streams.appendStream(streamName);
 
         for (int i = 0; i < 3; ++i) {

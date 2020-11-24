@@ -14,8 +14,8 @@ public class ReadStream extends AbstractRead {
     private boolean resolveLinks;
     private Direction direction;
 
-    public ReadStream(EventStoreDBConnection connection, String streamName, UserCredentials credentials) {
-        super(connection);
+    public ReadStream(GrpcClient client, String streamName, UserCredentials credentials) {
+        super(client);
 
         this.streamName = streamName;
         this.metadata = new ConnectionMetadata();

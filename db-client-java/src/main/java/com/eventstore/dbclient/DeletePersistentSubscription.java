@@ -11,13 +11,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 public class DeletePersistentSubscription {
-    private final EventStoreDBConnection connection;
+    private final GrpcClient client;
     private final String stream;
     private final String group;
     private ConnectionMetadata metadata;
 
-    public DeletePersistentSubscription(EventStoreDBConnection connection, String stream, String group, UserCredentials credentials) {
-        this.connection = connection;
+    public DeletePersistentSubscription(GrpcClient client, String stream, String group, UserCredentials credentials) {
+        this.client = client;
         this.stream = stream;
         this.group = group;
         this.metadata = new ConnectionMetadata();
@@ -33,7 +33,7 @@ public class DeletePersistentSubscription {
     }
 
     public CompletableFuture execute() {
-        return this.connection.run(channel -> {
+        return this.client.run(channel -> {
             CompletableFuture result = new CompletableFuture();
             Metadata headers = this.metadata.build();
             PersistentSubscriptionsGrpc.PersistentSubscriptionsStub client = MetadataUtils.attachHeaders(PersistentSubscriptionsGrpc.newStub(channel), headers);
