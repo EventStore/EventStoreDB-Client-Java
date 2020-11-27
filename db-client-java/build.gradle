@@ -19,15 +19,15 @@ group = 'com.eventstore'
 version = '0.2'
 
 dependencies {
-    implementation "javax.annotation:javax.annotation-api:${annotationApiVersion}"
-    implementation "javax.validation:validation-api:${validationApiVersion}"
+    api "javax.annotation:javax.annotation-api:${annotationApiVersion}"
+    api "javax.validation:validation-api:${validationApiVersion}"
 
-    implementation "com.google.protobuf:protobuf-java:${protobufVersion}"
-    implementation "io.grpc:grpc-netty-shaded:${grpcVersion}"
-    implementation "io.grpc:grpc-stub:${grpcVersion}"
-    implementation "io.grpc:grpc-protobuf:${grpcVersion}"
-	implementation 'dnsjava:dnsjava:3.2.2'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.1'
+    api "com.google.protobuf:protobuf-java:${protobufVersion}"
+    api "io.grpc:grpc-netty-shaded:${grpcVersion}"
+    api "io.grpc:grpc-stub:${grpcVersion}"
+    api "io.grpc:grpc-protobuf:${grpcVersion}"
+    api 'dnsjava:dnsjava:3.2.2'
+    api 'com.fasterxml.jackson.core:jackson-databind:2.11.1'
 
     testImplementation "junit:junit:${junitVersion}"
     testImplementation "org.slf4j:slf4j-nop:${slf4jNopVersion}"
