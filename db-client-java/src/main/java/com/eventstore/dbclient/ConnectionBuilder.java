@@ -52,12 +52,12 @@ public class ConnectionBuilder {
         return new EventStoreDBClusterClient(addresses, null, nodePreference, _timeouts, _sslContext);
     }
 
-    public GrpcClient createClusterConnectionUsingDns(String domain) {
-        return createClusterConnectionUsingDns(domain, NodePreference.RANDOM);
+    public GrpcClient createClusterConnectionUsingDns(Endpoint endpoint) {
+        return createClusterConnectionUsingDns(endpoint, NodePreference.RANDOM);
     }
 
-    public GrpcClient createClusterConnectionUsingDns(String domain, NodePreference nodePreference) {
-        return new EventStoreDBClusterClient(null, domain, nodePreference, _timeouts, _sslContext);
+    public GrpcClient createClusterConnectionUsingDns(Endpoint endpoint, NodePreference nodePreference) {
+        return new EventStoreDBClusterClient(null, endpoint, nodePreference, _timeouts, _sslContext);
     }
 
     public GrpcClient createConnectionFromConnectionSettings(ClientSettings clientSettings) {
@@ -79,7 +79,7 @@ public class ConnectionBuilder {
         }
 
         if (clientSettings.isDnsDiscover()) {
-            return builder.createClusterConnectionUsingDns(clientSettings.getHosts()[0].getHostname(), clientSettings.getNodePreference());
+            return builder.createClusterConnectionUsingDns(clientSettings.getHosts()[0], clientSettings.getNodePreference());
         }
 
         if (clientSettings.getHosts().length > 1) {
