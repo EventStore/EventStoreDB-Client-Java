@@ -10,24 +10,35 @@ plugins {
     id 'java-library'
     id 'com.google.protobuf' version '0.8.12'
     id 'idea'
-    id 'maven'
     id 'maven-publish'
     id 'signing'
 }
 
 group = 'com.eventstore'
-version = '0.3'
+version = '0.4'
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+configurations {
+    exposedRuntime {
+        canBeResolved = false
+        canBeConsumed = true
+    }
+}
 
 dependencies {
-    api "javax.annotation:javax.annotation-api:${annotationApiVersion}"
-    api "javax.validation:validation-api:${validationApiVersion}"
+    implementation "javax.annotation:javax.annotation-api:${annotationApiVersion}"
+    implementation "javax.validation:validation-api:${validationApiVersion}"
 
-    api "com.google.protobuf:protobuf-java:${protobufVersion}"
-    api "io.grpc:grpc-netty-shaded:${grpcVersion}"
-    api "io.grpc:grpc-stub:${grpcVersion}"
-    api "io.grpc:grpc-protobuf:${grpcVersion}"
-    api 'dnsjava:dnsjava:3.2.2'
-    api 'com.fasterxml.jackson.core:jackson-databind:2.11.1'
+    implementation "com.google.protobuf:protobuf-java:${protobufVersion}"
+    implementation "io.grpc:grpc-netty-shaded:${grpcVersion}"
+    implementation "io.grpc:grpc-stub:${grpcVersion}"
+    implementation "io.grpc:grpc-protobuf:${grpcVersion}"
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.1'
+    implementation 'dnsjava:dnsjava:3.2.2'
 
     testImplementation "junit:junit:${junitVersion}"
     testImplementation "org.slf4j:slf4j-nop:${slf4jNopVersion}"
@@ -61,95 +72,58 @@ protobuf {
     }
 }
 
-task javadocJar(type: Jar) {
-    archiveClassifier = 'javadoc'
-    from javadoc
-}
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = 'db-client-java'
 
-task sourcesJar(type: Jar) {
-    archiveClassifier = 'sources'
-    from sourceSets.main.allSource
-}
+            from components.java
+            pom {
+                name = 'EventStoreDB Client Java'
+                // packaging 'jar'
+                // optionally artifactId can be defined here
+                description = 'EventStoreDB gRPC Java client'
+                url = 'https://eventstore.com'
 
-artifacts {
-    archives javadocJar, sourcesJar
+                scm {
+                    connection = 'https://github.com/EventStore/EventStoreDB-Client-Java.git'
+                    developerConnection = 'https://github.com/EventStore/EventStoreDB-Client-Java.git'
+                    url = 'https://github.com/EventStore/EventStoreDB-Client-Java'
+                }
+
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'ylaupa'
+                        name = 'Yorick Laupa'
+                        email = 'yorick.laupa@eventstore.com'
+                    }
+                }    
+            }    
+        }
+    }
+
+    repositories {
+        maven {
+            url = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+            credentials {
+                username = ossrhUsername
+                password = ossrhPassword
+            }
+        }
+    }
 }
 
 signing {
     useGpgCmd()
     sign configurations.archives
 }
-
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
-
-            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
-
-            pom.project {
-                name 'EventStoreDB Client Java'
-                packaging 'jar'
-                // optionally artifactId can be defined here
-                description 'EventStoreDB gRPC Java client'
-                url 'https://eventstore.com'
-
-                scm {
-                    connection 'https://github.com/EventStore/EventStoreDB-Client-Java.git'
-                    developerConnection 'https://github.com/EventStore/EventStoreDB-Client-Java.git'
-                    url 'https://github.com/EventStore/EventStoreDB-Client-Java'
-                }
-
-                licenses {
-                    license {
-                        name 'The Apache License, Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                    }
-                }
-
-                developers {
-                    developer {
-                        id 'ylaupa'
-                        name 'Yorick Laupa'
-                        email 'yorick.laupa@eventstore.com'
-                    }
-                }
-            }
-        }
-    }
-}
-
-
-//publishing {
-//    publications {
-//        Snapshot(MavenPublication) {
-//            from(components.java)
-//        }
-//    }
-//
-//    repositories {
-//        maven {
-//            url = 'https://oss.sonatype.org/content/repositories/snapshots'
-//        }
-//    }
-//
-////    repositories {
-////        maven {
-////            name = "GitHubPackages"
-////            url = uri("https://maven.pkg.github.com/EventStore/EventStoreDB-Client-Java")
-////            credentials {
-////                username = System.getenv("GITHUB_ACTOR")
-////                password = System.getenv("GITHUB_TOKEN")
-////            }
-////        }
-////    }
-//}
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
