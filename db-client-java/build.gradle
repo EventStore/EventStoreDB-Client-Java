@@ -15,7 +15,7 @@ plugins {
 }
 
 group = 'com.eventstore'
-version = '0.4'
+version = '0.5'
 
 java {
     withJavadocJar()
@@ -122,6 +122,7 @@ publishing {
 signing {
     useGpgCmd()
     sign configurations.archives
+    sign publishing.publications.mavenJava
 }
 
 sourceCompatibility = JavaVersion.VERSION_1_8
