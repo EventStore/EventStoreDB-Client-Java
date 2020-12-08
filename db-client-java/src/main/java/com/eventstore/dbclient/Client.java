@@ -33,7 +33,7 @@ public class Client {
         }
 
         if (settings.isDnsDiscover()) {
-            this.client = builder.createClusterConnectionUsingDns(settings.getHosts()[0].getHostname(), settings.getNodePreference());
+            this.client = builder.createClusterConnectionUsingDns(settings.getHosts()[0], settings.getNodePreference());
             return;
         }
 

@@ -87,7 +87,7 @@ public class ConnectionString {
                 this.nextPosition += m.end();
                 String[] credentials = m.group("credentials").split(":");
                 String username = URLDecoder.decode(credentials[0], "utf-8");
-                String password = URLDecoder.decode(credentials[0], "utf-8");
+                String password = URLDecoder.decode(credentials[1], "utf-8");
                 this.settings.defaultCredentials(username, password);
             } catch (UnsupportedEncodingException e) {
                 throw new ParseError(this.connectionString, this.position, this.nextPosition, expected);

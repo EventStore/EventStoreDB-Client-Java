@@ -3,10 +3,6 @@ package com.eventstore.dbclient;
 import io.grpc.*;
 import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext;
-import org.xbill.DNS.Lookup;
-import org.xbill.DNS.SRVRecord;
-import org.xbill.DNS.TextParseException;
-import org.xbill.DNS.Type;
 
 import java.net.InetSocketAddress;
 import java.util.*;
@@ -40,18 +36,19 @@ public class EventStoreDBClusterClient implements GrpcClient {
 
     private List<InetSocketAddress> seedNodes;
     private final NodePreference nodePreference;
-    private final String domainName;
+    private final Endpoint domainEndpoint;
     private final SslContext sslContext;
     private final Timeouts timeouts;
     private LinkedBlockingQueue<Msg> messages;
 
-    public EventStoreDBClusterClient(List<InetSocketAddress> seedNodes, String domainName, NodePreference nodePreference, Timeouts timeouts, SslContext sslContext) {
+    public EventStoreDBClusterClient(List<InetSocketAddress> seedNodes, Endpoint domainEndpoint, NodePreference nodePreference, Timeouts timeouts, SslContext sslContext) {
         this.seedNodes = seedNodes;
         this.nodePreference = nodePreference;
         this.sslContext = sslContext;
         this.timeouts = timeouts;
-        this.domainName = domainName;
+        this.domainEndpoint = domainEndpoint;
         this.currentChannelId = UUID.randomUUID();
+        this.messages = new LinkedBlockingQueue<>();
 
         try {
             this.messages.put(new CreateChannel(this.currentChannelId));
@@ -109,16 +106,7 @@ public class EventStoreDBClusterClient implements GrpcClient {
             Collections.shuffle(candidates);
         } else {
             candidates = new ArrayList<>();
-            try {
-                org.xbill.DNS.Record[] records = new Lookup(this.domainName, Type.SRV).run();
-                for (int i = 0; i < records.length; ++i) {
-                    SRVRecord record = (SRVRecord) records[i];
-
-                    candidates.add(new InetSocketAddress(record.getName().toString(true), record.getPort()));
-                }
-            } catch (TextParseException e) {
-                return new Tuple<>(null, e);
-            }
+            candidates.add(new InetSocketAddress(this.domainEndpoint.getHostname(), this.domainEndpoint.getPort()));
         }
 
         for (InetSocketAddress seed : candidates) {
