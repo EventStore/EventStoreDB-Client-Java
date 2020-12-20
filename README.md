@@ -90,6 +90,44 @@ public class Main {
 }
 ```
 
+## Projections
+
+This client currently supports creating and getting the result of a continuous projection.
+
+Create a projection:
+```java
+client.projections()
+    .createContinuous(PROJECTION_NAME, PROJECTION_JS, false)
+    .execute()
+    .get();
+```
+
+Define a class in which to deserialize the result:
+```java
+public class CountResult {
+
+    private int count;
+
+    public int getCount() {
+        return count;
+    }
+
+    public void setCount(final int count) {
+        this.count = count;
+    }
+}
+```
+
+Get the result:
+```java
+CountResult result = client.projections()
+    .getResult(PROJECTION_NAME, CountResult.class)
+    .execute()
+    .get();
+```
+
+For further details please see [the projection management tests](src/test/java/com/eventstore/dbclient/ProjectionManagementTests.java).
+
 ## Support
 
 Information on support can be found on our website: [Event Store Support][support]

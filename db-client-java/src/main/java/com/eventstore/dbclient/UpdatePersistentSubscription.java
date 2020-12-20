@@ -86,7 +86,7 @@ public class UpdatePersistentSubscription {
                     .setOptions(builder)
                     .build();
 
-            client.update(req, GrpcUtils.convertSingleResponse(result, Function.identity()));
+            client.update(req, GrpcUtils.convertSingleResponse(result));
 
             return result;
         });

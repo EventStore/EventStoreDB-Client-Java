@@ -86,7 +86,7 @@ public class CreatePersistentSubscription {
                     .setOptions(builder)
                     .build();
 
-            client.create(req, GrpcUtils.convertSingleResponse(result, Function.identity()));
+            client.create(req, GrpcUtils.convertSingleResponse(result));
 
             return result;
         });
