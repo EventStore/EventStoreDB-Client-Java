@@ -12,8 +12,17 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 public final class GrpcUtils {
-    static public <ReqT, RespT, TargetT> ClientResponseObserver<ReqT, RespT> convertSingleResponse(
-            CompletableFuture<TargetT> dest, Function<RespT, TargetT> converter) {
+
+
+    static public <ReqT, RespT> ClientResponseObserver<ReqT, RespT> convertSingleResponse(
+            CompletableFuture<RespT> dest) {
+
+        return convertSingleResponse(dest, x -> x);
+    }
+
+    static public <ReqT, RespT, TargetT, ExceptionT extends Throwable> ClientResponseObserver<ReqT, RespT> convertSingleResponse(
+            CompletableFuture<TargetT> dest, ThrowingFunction<RespT, TargetT, ExceptionT> converter) {
+
         return new ClientResponseObserver<ReqT, RespT>() {
             @Override
             public void beforeStart(ClientCallStreamObserver<ReqT> requestStream) {

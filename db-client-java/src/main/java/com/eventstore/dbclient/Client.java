@@ -63,4 +63,8 @@ public class Client {
     public void shutdown() throws InterruptedException {
         this.client.shutdown();
     }
+
+    public Projections projections() {
+        return new Projections(this.client, this.credentials);
+    }
 }

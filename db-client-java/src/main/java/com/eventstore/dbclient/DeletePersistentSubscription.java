@@ -52,7 +52,7 @@ public class DeletePersistentSubscription {
                     .setOptions(options)
                     .build();
 
-            client.delete(req, GrpcUtils.convertSingleResponse(result, Function.identity()));
+            client.delete(req, GrpcUtils.convertSingleResponse(result));
 
             return result;
         });
