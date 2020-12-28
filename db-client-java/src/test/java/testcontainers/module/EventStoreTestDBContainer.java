@@ -58,12 +58,12 @@ public class EventStoreTestDBContainer extends GenericContainer<EventStoreTestDB
         waitingFor(Wait.forHealthcheck());
     }
 
-    public Client getClient() {
+    public EventStoreDBClient getClient() {
         final String address = getContainerIpAddress();
         final int port = getMappedPort(DB_HTTP_PORT);
-        final ClientSettings settings = ConnectionString.parseOrThrow(String.format("esdb://%s:%d?tls=false", address, port));
+        final EventStoreDBClientSettings settings = ConnectionString.parseOrThrow(String.format("esdb://%s:%d?tls=false", address, port));
 
-        return Client.create(settings);
+        return EventStoreDBClient.create(settings);
     }
 
     public Streams getStreamsAPI() {

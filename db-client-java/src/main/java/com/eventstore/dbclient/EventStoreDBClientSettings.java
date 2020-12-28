@@ -1,6 +1,6 @@
 package com.eventstore.dbclient;
 
-public class ClientSettings {
+public class EventStoreDBClientSettings {
     private boolean dnsDiscover;
     private int maxDiscoverAttempts;
     private int discoveryInterval;
@@ -53,7 +53,7 @@ public class ClientSettings {
     }
 
 
-    public ClientSettings(
+    public EventStoreDBClientSettings(
             boolean dnsDiscover,
             int maxDiscoverAttempts,
             int discoveryInterval,

@@ -46,8 +46,8 @@ class AccountCreated {
 }
 ```
 ```java
-import com.eventstore.dbclient.Client;
-import com.eventstore.dbclient.ClientSettings;
+import com.eventstore.dbclient.EventStoreDBClient;
+import com.eventstore.dbclient.EventStoreDBClientSettings;
 import com.eventstore.dbclient.ConnectionString;
 import com.eventstore.dbclient.GrpcClient;
 import com.eventstore.dbclient.EventData;

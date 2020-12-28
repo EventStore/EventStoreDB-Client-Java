@@ -12,7 +12,7 @@ public class ConnectionString {
     private int position = 0;
     private int nextPosition = 0;
     private String connectionString;
-    private final ConnectionSettingsBuilder settings = ClientSettings.builder();
+    private final ConnectionSettingsBuilder settings = EventStoreDBClientSettings.builder();
     private final List<String> notCurrentlySupported = Arrays.asList(
             "maxDiscoverAttempts",
             "discoveryInterval",
@@ -33,11 +33,11 @@ public class ConnectionString {
         }
     };
 
-    public static ClientSettings parse(String connectionString) throws ParseError {
+    public static EventStoreDBClientSettings parse(String connectionString) throws ParseError {
         return new ConnectionString().parseConnectionString(connectionString);
     }
 
-    public static ClientSettings parseOrThrow(String connectionString) {
+    public static EventStoreDBClientSettings parseOrThrow(String connectionString) {
         try {
             return ConnectionString.parse(connectionString);
         } catch (ParseError e) {
@@ -49,12 +49,12 @@ public class ConnectionString {
         return this.connectionString.substring(this.position);
     }
 
-    private ClientSettings parseConnectionString(String connectionString) throws ParseError {
+    private EventStoreDBClientSettings parseConnectionString(String connectionString) throws ParseError {
         this.connectionString = connectionString.trim().replaceAll("/+$", "");
         return this.parseProtocol();
     }
 
-    private ClientSettings parseProtocol() throws ParseError {
+    private EventStoreDBClientSettings parseProtocol() throws ParseError {
         this.position = nextPosition;
         String expected = "esdb:// or esdb+discover://";
         String pattern = "^(?<protocol>[^:]+)://";
@@ -80,7 +80,7 @@ public class ConnectionString {
         throw new ParseError(this.connectionString, this.position, this.nextPosition, expected);
     }
 
-    private ClientSettings parseCredentials() throws ParseError {
+    private EventStoreDBClientSettings parseCredentials() throws ParseError {
         this.position = nextPosition;
         String expected = "<URL encoded username>:<Url encoded password>";
         String pattern = "^(?:(?<credentials>[^:]+:[^@]+)@)";
@@ -110,7 +110,7 @@ public class ConnectionString {
         throw new ParseError(this.connectionString, this.position, this.nextPosition, expected);
     }
 
-    private ClientSettings parseHosts(boolean mustMatch) throws ParseError {
+    private EventStoreDBClientSettings parseHosts(boolean mustMatch) throws ParseError {
         this.position = nextPosition;
         String expected = "<URL encoded username>:<Url encoded password>";
         String pattern = "^(?:(?<host>[^$+!?*'(),;\\[\\]{}|\"%~#<>=&/]+)[,/]?)";
@@ -156,7 +156,7 @@ public class ConnectionString {
         return this.parseSearchParams(true);
     }
 
-    private ClientSettings parseSearchParams(boolean first) throws ParseError {
+    private EventStoreDBClientSettings parseSearchParams(boolean first) throws ParseError {
         this.position = nextPosition;
         if (this.position == this.connectionString.length()) {
             return this.settings.buildConnectionSettings();
