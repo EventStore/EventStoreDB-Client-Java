@@ -19,8 +19,7 @@ public class ReadStreamTests {
                 .fromStart()
                 .notResolveLinks();
 
-        ReadResult result = streams.readStream("dataset20M-1800", options)
-                .execute(10)
+        ReadResult result = streams.readStream("dataset20M-1800", 10, options)
                 .get();
 
         verifyAgainstTestData(result.getEvents(), "dataset20M-1800-e0-e10");
@@ -35,8 +34,7 @@ public class ReadStreamTests {
                 .fromEnd()
                 .notResolveLinks();
 
-        ReadResult result = streams.readStream("dataset20M-1800", options)
-                .execute(10)
+        ReadResult result = streams.readStream("dataset20M-1800", 10, options)
                 .get();
 
         verifyAgainstTestData(result.getEvents(), "dataset20M-1800-e1999-e1990");

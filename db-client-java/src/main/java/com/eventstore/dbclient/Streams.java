@@ -35,32 +35,48 @@ public class Streams {
         return new AppendToStream(this.client, streamName, events, options).execute();
     }
 
-    public ReadStream readStream(String streamName) {
-        return this.readStream(streamName, ReadStreamOptions.get());
+    public CompletableFuture<ReadResult> readStream(String streamName) {
+        return this.readStream(streamName, Long.MAX_VALUE, ReadStreamOptions.get());
     }
 
-    public ReadStream readStream(String streamName, ReadStreamOptions options) {
+    public CompletableFuture<ReadResult> readStream(String streamName, long maxCount) {
+        return this.readStream(streamName, maxCount, ReadStreamOptions.get());
+    }
+
+    public CompletableFuture<ReadResult> readStream(String streamName, ReadStreamOptions options) {
+        return this.readStream(streamName, Long.MAX_VALUE, ReadStreamOptions.get());
+    }
+
+    public CompletableFuture<ReadResult> readStream(String streamName, long maxCount, ReadStreamOptions options) {
         if (options == null)
             options = ReadStreamOptions.get();
 
         if (!options.hasUserCredentials())
             options.authenticated(this.credentials);
 
-        return new ReadStream(this.client, streamName, options);
+        return new ReadStream(this.client, streamName, maxCount, options).execute();
     }
 
-    public ReadAll readAll() {
-        return new ReadAll(this.client, ReadAllOptions.get());
+    public CompletableFuture<ReadResult> readAll() {
+        return this.readAll(Long.MAX_VALUE, ReadAllOptions.get());
     }
 
-    public ReadAll readAll(ReadAllOptions options) {
+    public CompletableFuture<ReadResult> readAll(long maxCount) {
+        return this.readAll(maxCount, ReadAllOptions.get());
+    }
+
+    public CompletableFuture<ReadResult> readAll(ReadAllOptions options) {
+        return this.readAll(Long.MAX_VALUE, options);
+    }
+
+    public CompletableFuture<ReadResult> readAll(long maxCount, ReadAllOptions options) {
         if (options == null)
             options = ReadAllOptions.get();
 
         if (!options.hasUserCredentials())
             options.authenticated(this.credentials);
 
-        return new ReadAll(this.client, options);
+        return new ReadAll(this.client, maxCount, options).execute();
     }
 
     public SubscribeToStream subscribeToStream(String streamName, SubscriptionListener listener) {

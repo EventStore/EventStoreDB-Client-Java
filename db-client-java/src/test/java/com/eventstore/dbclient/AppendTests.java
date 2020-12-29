@@ -71,8 +71,7 @@ public class AppendTests {
                 .backward();
 
         // Ensure appended event is readable
-        ReadResult readResult = streams.readStream(streamName, readStreamOptions)
-                .execute(1)
+        ReadResult readResult = streams.readStream(streamName, 1, readStreamOptions)
                 .get();
 
         List<ResolvedEvent> readEvents = readResult.getEvents();

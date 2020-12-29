@@ -20,8 +20,7 @@ public class ReadAllTests {
                 .fromStart()
                 .notResolveLinks();
 
-        ReadResult result = streams.readAll(options)
-                .execute(10)
+        ReadResult result = streams.readAll(10, options)
                 .get();
 
         verifyAgainstTestData(result.getEvents(), "all-e0-e10");
@@ -36,8 +35,7 @@ public class ReadAllTests {
                 .fromPosition(new Position(1788, 1788))
                 .notResolveLinks();
 
-        ReadResult result = streams.readAll(options)
-                .execute(10)
+        ReadResult result = streams.readAll(10, options)
                 .get();
 
         verifyAgainstTestData(result.getEvents(), "all-c1788-p1788");
@@ -52,8 +50,7 @@ public class ReadAllTests {
                 .fromEnd()
                 .notResolveLinks();
 
-        ReadResult result = streams.readAll(options)
-                .execute(10)
+        ReadResult result = streams.readAll(10, options)
                 .get();
 
         verifyAgainstTestData(result.getEvents(), "all-back-e0-e10");
@@ -68,8 +65,7 @@ public class ReadAllTests {
                 .fromPosition(new Position(3386, 3386))
                 .notResolveLinks();
 
-        ReadResult result = streams.readAll(options)
-                .execute(10)
+        ReadResult result = streams.readAll(10, options)
                 .get();
 
         verifyAgainstTestData(result.getEvents(), "all-back-c3386-p3386");

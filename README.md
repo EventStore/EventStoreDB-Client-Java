@@ -72,11 +72,15 @@ public class Main {
                 .appendStream("accounts", event)
                 .get();
 
-        ResolvedEvent resolvedEvent = client.streams()
-                .readStream("accounts")
+        ReadStreamOptions readStreamOptions = ReadStreamOptions.get()
                 .fromStart()
-                .execute(1)
+                .notResolveLinks();
+
+        ReadResult readResult = client.streams()
+                .readStream("accounts", 1, readStreamOptions)
                 .get()
+
+        ResolvedEvent resolvedEvent = readResult
                 .getEvents()
                 .get(0);
 
