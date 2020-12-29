@@ -56,8 +56,8 @@ import com.eventstore.dbclient.ReadResult;
 
 public class Main {
     public static void main(String args[]) {
-        ClientSettings setts = ConnectionString.parseOrThrow("esdb://localhost:2113");
-        Client client = Client.create(setts);                        
+        EventStoreDbClientSettings setts = ConnectionString.parseOrThrow("esdb://localhost:2113");
+        EventStoreDbClient client = EventStoreDbClient.create(setts);                        
 
         AccountCreated createdEvent = new AccountCreated();
 
@@ -69,9 +69,7 @@ public class Main {
                 .build();
 
         WriteResult writeResult = client.streams()
-                .appendStream("accounts")
-                .addEvent(event)
-                .execute()
+                .appendStream("accounts", event)
                 .get();
 
         ResolvedEvent resolvedEvent = client.streams()

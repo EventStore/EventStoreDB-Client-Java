@@ -10,7 +10,6 @@ import io.grpc.stub.MetadataUtils;
 import io.grpc.stub.StreamObserver;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -21,30 +20,14 @@ public class AppendToStream {
     private List<EventData> events;
     private AppendToStreamOptions options;
 
-    public AppendToStream(GrpcClient client, String streamName, AppendToStreamOptions options) {
+    public AppendToStream(GrpcClient client, String streamName, Iterator<EventData> events, AppendToStreamOptions options) {
         this.client = client;
         this.streamName = streamName;
         this.events = new ArrayList<>();
-        this.options = options;
-    }
-
-    public AppendToStream addEvent(EventData event) {
-        this.events.add(event);
-
-        return this;
-    }
-
-    public AppendToStream addEvents(EventData... events) {
-        this.addEvents(Arrays.stream(events).iterator());
-        return this;
-    }
-
-    public AppendToStream addEvents(Iterator<EventData> events) {
         while (events.hasNext()) {
             this.events.add(events.next());
         }
-
-        return this;
+        this.options = options;
     }
 
     public CompletableFuture<WriteResult> execute() {

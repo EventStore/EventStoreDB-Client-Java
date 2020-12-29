@@ -61,9 +61,7 @@ public class AppendTests {
         AppendToStreamOptions options = AppendToStreamOptions.get()
                 .expectedRevision(ExpectedRevision.NO_STREAM);
 
-        WriteResult appendResult = streams.appendToStream(streamName, options)
-                .addEvent(event)
-                .execute()
+        WriteResult appendResult = streams.appendToStream(streamName, options, event)
                 .get();
 
         assertEquals(new StreamRevision(0), appendResult.getNextExpectedRevision());

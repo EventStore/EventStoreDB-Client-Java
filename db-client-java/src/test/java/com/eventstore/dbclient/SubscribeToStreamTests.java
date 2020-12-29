@@ -152,9 +152,7 @@ public class SubscribeToStreamTests {
         AppendToStreamOptions options = AppendToStreamOptions.get()
                 .expectedRevision(ExpectedRevision.expectedRevision(5999));
 
-        WriteResult writeResult = streams.appendToStream(testStreamName, options)
-                .addEvent(event)
-                .execute()
+        WriteResult writeResult = streams.appendToStream(testStreamName, options, event)
                 .get();
 
         assertEquals(new StreamRevision(6000), writeResult.getNextExpectedRevision());
