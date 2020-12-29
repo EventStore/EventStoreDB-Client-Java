@@ -113,8 +113,11 @@ publishing {
         maven {
             url = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
             credentials {
-                username = ossrhUsername
-                password = ossrhPassword
+                def publishLogin = project.hasProperty("ossrhUsername") ? project.getProperties().get("ossrhUsername") : ""
+                def publishPassword = project.hasProperty("ossrhPassword") ? project.getProperties().get("ossrhPassword") : ""
+
+                username = publishLogin
+                password = publishPassword
             }
         }
     }
@@ -124,6 +127,12 @@ signing {
     useGpgCmd()
     sign configurations.archives
     sign publishing.publications.mavenJava
+}
+
+tasks.withType(Sign) {
+    onlyIf {
+        gradle.taskGraph.hasTask(":db-client-java:publish")
+    }
 }
 
 sourceCompatibility = JavaVersion.VERSION_1_8
