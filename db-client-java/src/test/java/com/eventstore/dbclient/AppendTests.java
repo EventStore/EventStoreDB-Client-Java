@@ -58,8 +58,10 @@ public class AppendTests {
                 .eventId(UUID.fromString(eventId))
                 .build();
 
-        WriteResult appendResult = streams.appendStream(streamName)
-                .expectedRevision(ExpectedRevision.NO_STREAM)
+        AppendToStreamOptions options = AppendToStreamOptions.get()
+                .expectedRevision(ExpectedRevision.NO_STREAM);
+
+        WriteResult appendResult = streams.appendToStream(streamName, options)
                 .addEvent(event)
                 .execute()
                 .get();

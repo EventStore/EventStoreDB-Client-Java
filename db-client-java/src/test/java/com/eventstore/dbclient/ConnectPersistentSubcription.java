@@ -49,7 +49,7 @@ public class ConnectPersistentSubcription {
                 .get();
 
         EventDataBuilder builder = EventData.builderAsJson("foobar", new ConnectPersistentSubcription.Foo());
-        AppendToStream appendCommand = streams.appendStream(streamName);
+        AppendToStream appendCommand = streams.appendToStream(streamName);
 
         for (int i = 0; i < 3; ++i) {
             appendCommand.addEvent(builder.build());
@@ -86,7 +86,7 @@ public class ConnectPersistentSubcription {
             }
         }).execute(32).get();
 
-        AppendToStream appendCommand2 = streams.appendStream(streamName);
+        AppendToStream appendCommand2 = streams.appendToStream(streamName);
         for (int i = 0; i < 3; ++i) {
             appendCommand2.addEvent(builder.build());
         }

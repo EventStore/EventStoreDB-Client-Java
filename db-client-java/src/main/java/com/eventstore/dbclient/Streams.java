@@ -9,8 +9,18 @@ public class Streams {
         this.credentials = credentials;
     }
 
-    public AppendToStream appendStream(String streamName) {
-        return new AppendToStream(this.client, streamName, this.credentials);
+    public AppendToStream appendToStream(String streamName) {
+        return this.appendToStream(streamName, null);
+    }
+
+    public AppendToStream appendToStream(String streamName, AppendToStreamOptions options) {
+        if(options == null)
+            options = AppendToStreamOptions.get();
+
+        if(!options.hasUserCredentials())
+            options.authenticated(this.credentials);
+
+        return new AppendToStream(this.client, streamName, options);
     }
 
     public ReadStream readStream(String streamName) {

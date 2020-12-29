@@ -56,31 +56,6 @@ public class EventStoreDBClient {
         return new Streams(this.client, this.credentials);
     }
 
-
-    public AppendToStream appendStream(String streamName) {
-        return streams().appendStream(streamName);
-    }
-
-    public ReadStream readStream(String streamName) {
-        return streams().readStream(streamName);
-    }
-
-    public ReadAll readAll() {
-        return streams().readAll();
-    }
-
-    public SubscribeToStream subscribeToStream(String streamName, SubscriptionListener listener) {
-        return streams().subscribeToStream(streamName, listener);
-    }
-
-    public SubscribeToAll subscribeToAll(SubscriptionListener listener) {
-        return streams().subscribeToAll(listener);
-    }
-
-    public DeleteStream deleteStream(String streamName) {
-        return streams().deleteStream(streamName);
-    }
-
     public PersistentSubscriptions persistentSubscriptions() {
         return new PersistentSubscriptions(this.client, this.credentials);
     }

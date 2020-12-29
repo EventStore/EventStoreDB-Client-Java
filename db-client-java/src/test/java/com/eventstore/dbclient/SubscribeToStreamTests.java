@@ -149,9 +149,11 @@ public class SubscribeToStreamTests {
                 .metadataAsBytes(eventMetaData)
                 .build();
 
-        WriteResult writeResult = streams.appendStream(testStreamName)
+        AppendToStreamOptions options = AppendToStreamOptions.get()
+                .expectedRevision(ExpectedRevision.expectedRevision(5999));
+
+        WriteResult writeResult = streams.appendToStream(testStreamName, options)
                 .addEvent(event)
-                .expectedRevision(ExpectedRevision.expectedRevision(5999))
                 .execute()
                 .get();
 

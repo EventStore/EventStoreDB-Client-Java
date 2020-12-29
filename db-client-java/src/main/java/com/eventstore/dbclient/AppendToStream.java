@@ -18,53 +18,14 @@ import java.util.concurrent.CompletableFuture;
 public class AppendToStream {
     private GrpcClient client;
     private String streamName;
-    private ExpectedRevision expectedRevision;
     private List<EventData> events;
-    private Timeouts timeouts;
-    private ConnectionMetadata metadata;
+    private AppendToStreamOptions options;
 
-    public AppendToStream(GrpcClient client, String streamName, UserCredentials credentials) {
+    public AppendToStream(GrpcClient client, String streamName, AppendToStreamOptions options) {
         this.client = client;
         this.streamName = streamName;
-        this.expectedRevision = ExpectedRevision.ANY;
         this.events = new ArrayList<>();
-        this.timeouts = Timeouts.DEFAULT;
-        this.metadata = new ConnectionMetadata();
-
-        if (credentials != null) {
-            this.metadata.authenticated(credentials);
-        }
-    }
-
-    public AppendToStream authenticated(UserCredentials credentials) {
-        this.metadata.authenticated(credentials);
-        return this;
-    }
-
-    public AppendToStream expectedRevision(ExpectedRevision revision) {
-        this.expectedRevision = revision;
-        return this;
-    }
-
-    public AppendToStream timeouts(Timeouts timeouts) {
-        this.timeouts = timeouts;
-        return this;
-    }
-
-    public AppendToStream requiresLeader() {
-        return requiresLeader(true);
-    }
-
-    public AppendToStream notRequireLeader() {
-        return requiresLeader(false);
-    }
-
-    public AppendToStream requiresLeader(boolean value) {
-        if (value) {
-            this.metadata.requiresLeader();
-        }
-
-        return this;
+        this.options = options;
     }
 
     public AppendToStream addEvent(EventData event) {
@@ -88,9 +49,9 @@ public class AppendToStream {
 
     public CompletableFuture<WriteResult> execute() {
         return this.client.run(channel -> {
-            Metadata headers = this.metadata.build();
+            Metadata headers = this.options.getMetadata();
             CompletableFuture<WriteResult> result = new CompletableFuture<>();
-            StreamsOuterClass.AppendReq.Options.Builder options = this.expectedRevision.applyOnWire(StreamsOuterClass.AppendReq.Options.newBuilder()
+            StreamsOuterClass.AppendReq.Options.Builder options = this.options.getExpectedRevision().applyOnWire(StreamsOuterClass.AppendReq.Options.newBuilder()
                     .setStreamIdentifier(Shared.StreamIdentifier.newBuilder()
                             .setStreamName(ByteString.copyFromUtf8(streamName))
                             .build()));
