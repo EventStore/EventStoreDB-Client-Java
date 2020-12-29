@@ -15,10 +15,10 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class AppendToStream {
-    private GrpcClient client;
-    private String streamName;
-    private List<EventData> events;
-    private AppendToStreamOptions options;
+    private final GrpcClient client;
+    private final String streamName;
+    private final List<EventData> events;
+    private final AppendToStreamOptions options;
 
     public AppendToStream(GrpcClient client, String streamName, Iterator<EventData> events, AppendToStreamOptions options) {
         this.client = client;

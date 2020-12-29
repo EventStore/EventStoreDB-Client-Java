@@ -58,18 +58,20 @@ public class AppendTests {
                 .eventId(UUID.fromString(eventId))
                 .build();
 
-        AppendToStreamOptions options = AppendToStreamOptions.get()
+        AppendToStreamOptions appendOptions = AppendToStreamOptions.get()
                 .expectedRevision(ExpectedRevision.NO_STREAM);
 
-        WriteResult appendResult = streams.appendToStream(streamName, options, event)
+        WriteResult appendResult = streams.appendToStream(streamName, appendOptions, event)
                 .get();
 
         assertEquals(new StreamRevision(0), appendResult.getNextExpectedRevision());
 
-        // Ensure appended event is readable
-        ReadResult readResult = streams.readStream(streamName)
+        ReadStreamOptions readStreamOptions = ReadStreamOptions.get()
                 .fromEnd()
-                .backward()
+                .backward();
+
+        // Ensure appended event is readable
+        ReadResult readResult = streams.readStream(streamName, readStreamOptions)
                 .execute(1)
                 .get();
 

@@ -3,30 +3,33 @@ package com.eventstore.dbclient;
 import io.grpc.Metadata;
 
 public class AppendToStreamOptions {
-    private ExpectedRevision expectedRevision;
     private Timeouts timeouts;
-    private ConnectionMetadata metadata;
+    private final ConnectionMetadata metadata;
+
+    private ExpectedRevision expectedRevision;
 
     private AppendToStreamOptions() {
-        this.expectedRevision = ExpectedRevision.ANY;
         this.timeouts = Timeouts.DEFAULT;
         this.metadata = new ConnectionMetadata();
+
+        this.expectedRevision = ExpectedRevision.ANY;
     }
 
-    public static AppendToStreamOptions get(){
+    public static AppendToStreamOptions get() {
         return new AppendToStreamOptions();
     }
 
-    public Metadata getMetadata(){
-        return this.metadata.build();
-    }
-
-    public ExpectedRevision getExpectedRevision(){
-        return this.expectedRevision;
-    }
-
-    public Timeouts getTimeouts(){
+    public Timeouts getTimeouts() {
         return this.timeouts;
+    }
+
+    public AppendToStreamOptions timeouts(Timeouts timeouts) {
+        this.timeouts = timeouts;
+        return this;
+    }
+
+    public Metadata getMetadata() {
+        return this.metadata.build();
     }
 
     public AppendToStreamOptions authenticated(UserCredentials credentials) {
@@ -38,13 +41,12 @@ public class AppendToStreamOptions {
         return this.metadata.hasUserCredentials();
     }
 
-    public AppendToStreamOptions expectedRevision(ExpectedRevision revision) {
-        this.expectedRevision = revision;
-        return this;
+    public ExpectedRevision getExpectedRevision() {
+        return this.expectedRevision;
     }
 
-    public AppendToStreamOptions timeouts(Timeouts timeouts) {
-        this.timeouts = timeouts;
+    public AppendToStreamOptions expectedRevision(ExpectedRevision revision) {
+        this.expectedRevision = revision;
         return this;
     }
 

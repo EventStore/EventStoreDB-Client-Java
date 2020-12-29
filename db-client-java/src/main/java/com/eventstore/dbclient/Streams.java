@@ -18,7 +18,7 @@ public class Streams {
     }
 
     public CompletableFuture<WriteResult> appendToStream(String streamName, Iterator<EventData> events) {
-        return this.appendToStream(streamName, null, events);
+        return this.appendToStream(streamName, AppendToStreamOptions.get(), events);
     }
 
     public CompletableFuture<WriteResult> appendToStream(String streamName, AppendToStreamOptions options, EventData... events) {
@@ -36,11 +36,31 @@ public class Streams {
     }
 
     public ReadStream readStream(String streamName) {
-        return new ReadStream(this.client, streamName, this.credentials);
+        return this.readStream(streamName, ReadStreamOptions.get());
+    }
+
+    public ReadStream readStream(String streamName, ReadStreamOptions options) {
+        if (options == null)
+            options = ReadStreamOptions.get();
+
+        if (!options.hasUserCredentials())
+            options.authenticated(this.credentials);
+
+        return new ReadStream(this.client, streamName, options);
     }
 
     public ReadAll readAll() {
-        return new ReadAll(this.client, this.credentials);
+        return new ReadAll(this.client, ReadAllOptions.get());
+    }
+
+    public ReadAll readAll(ReadAllOptions options) {
+        if (options == null)
+            options = ReadAllOptions.get();
+
+        if (!options.hasUserCredentials())
+            options.authenticated(this.credentials);
+
+        return new ReadAll(this.client, options);
     }
 
     public SubscribeToStream subscribeToStream(String streamName, SubscriptionListener listener) {
