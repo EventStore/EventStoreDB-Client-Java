@@ -80,11 +80,31 @@ public class Streams {
     }
 
     public SubscribeToStream subscribeToStream(String streamName, SubscriptionListener listener) {
-        return new SubscribeToStream(this.client, streamName, listener, this.credentials);
+        return this.subscribeToStream(streamName, listener, SubscribeToStreamOptions.get());
+    }
+
+    public SubscribeToStream subscribeToStream(String streamName, SubscriptionListener listener, SubscribeToStreamOptions options) {
+        if (options == null)
+            options = SubscribeToStreamOptions.get();
+
+        if (!options.hasUserCredentials())
+            options.authenticated(this.credentials);
+
+        return new SubscribeToStream(this.client, streamName, listener, options);
     }
 
     public SubscribeToAll subscribeToAll(SubscriptionListener listener) {
-        return new SubscribeToAll(this.client, listener, this.credentials);
+        return this.subscribeToAll(listener, SubscribeToAllOptions.get());
+    }
+
+    public SubscribeToAll subscribeToAll(SubscriptionListener listener, SubscribeToAllOptions options) {
+        if (options == null)
+            options = SubscribeToAllOptions.get();
+
+        if (!options.hasUserCredentials())
+            options.authenticated(this.credentials);
+
+        return new SubscribeToAll(this.client, listener, options);
     }
 
     public DeleteStream deleteStream(String streamName) {

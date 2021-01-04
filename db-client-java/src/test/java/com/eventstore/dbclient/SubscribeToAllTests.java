@@ -37,8 +37,10 @@ public class SubscribeToAllTests {
             }
         };
 
-        Subscription result = streams.subscribeToAll(listener)
-                .fromStart()
+        SubscribeToAllOptions options = SubscribeToAllOptions.get()
+                .fromStart();
+
+        Subscription result = streams.subscribeToAll(listener, options)
                 .execute()
                 .get();
 
@@ -88,10 +90,12 @@ public class SubscribeToAllTests {
                 .withEventTypePrefix("eventType-194")
                 .build();
 
-        Subscription result = server.getClient().streams()
-                .subscribeToAll(listener)
+        SubscribeToAllOptions options = SubscribeToAllOptions.get()
                 .fromStart()
-                .filter(filter)
+                .filter(filter);
+
+        Subscription result = server.getClient().streams()
+                .subscribeToAll(listener, options)
                 .execute()
                 .get();
 

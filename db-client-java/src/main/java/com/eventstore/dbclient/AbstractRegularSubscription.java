@@ -13,19 +13,18 @@ import io.grpc.stub.MetadataUtils;
 import javax.validation.constraints.NotNull;
 import java.util.concurrent.CompletableFuture;
 
-public abstract class AbstractRegularSubscription{
+public abstract class AbstractRegularSubscription {
     protected static final StreamsOuterClass.ReadReq.Options.Builder defaultReadOptions;
     protected static final StreamsOuterClass.ReadReq.Options.Builder defaultSubscribeOptions;
 
-    protected ConnectionMetadata metadata;
-    protected Timeouts timeouts;
-    protected boolean resolveLinks;
+    protected Metadata metadata;
     protected SubscriptionListener listener;
     protected Checkpointer checkpointer = null;
-    private GrpcClient client;
+    private final GrpcClient client;
 
-    protected AbstractRegularSubscription(GrpcClient client) {
+    protected AbstractRegularSubscription(GrpcClient client, Metadata metadata) {
         this.client = client;
+        this.metadata = metadata;
     }
 
     static {
@@ -45,8 +44,7 @@ public abstract class AbstractRegularSubscription{
                     .setOptions(createOptions())
                     .build();
 
-            Metadata headers = this.metadata.build();
-            StreamsGrpc.StreamsStub client = MetadataUtils.attachHeaders(StreamsGrpc.newStub(channel), headers);
+            StreamsGrpc.StreamsStub client = MetadataUtils.attachHeaders(StreamsGrpc.newStub(channel), this.metadata);
 
             CompletableFuture<Subscription> future = new CompletableFuture<>();
             ClientResponseObserver<StreamsOuterClass.ReadReq, StreamsOuterClass.ReadResp> observer = new ClientResponseObserver<StreamsOuterClass.ReadReq, StreamsOuterClass.ReadResp>() {
