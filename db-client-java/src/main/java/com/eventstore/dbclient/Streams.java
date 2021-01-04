@@ -79,35 +79,45 @@ public class Streams {
         return new ReadAll(this.client, maxCount, options).execute();
     }
 
-    public SubscribeToStream subscribeToStream(String streamName, SubscriptionListener listener) {
+    public CompletableFuture<Subscription> subscribeToStream(String streamName, SubscriptionListener listener) {
         return this.subscribeToStream(streamName, listener, SubscribeToStreamOptions.get());
     }
 
-    public SubscribeToStream subscribeToStream(String streamName, SubscriptionListener listener, SubscribeToStreamOptions options) {
+    public CompletableFuture<Subscription> subscribeToStream(String streamName, SubscriptionListener listener, SubscribeToStreamOptions options) {
         if (options == null)
             options = SubscribeToStreamOptions.get();
 
         if (!options.hasUserCredentials())
             options.authenticated(this.credentials);
 
-        return new SubscribeToStream(this.client, streamName, listener, options);
+        return new SubscribeToStream(this.client, streamName, listener, options).execute();
     }
 
-    public SubscribeToAll subscribeToAll(SubscriptionListener listener) {
+    public CompletableFuture<Subscription> subscribeToAll(SubscriptionListener listener) {
         return this.subscribeToAll(listener, SubscribeToAllOptions.get());
     }
 
-    public SubscribeToAll subscribeToAll(SubscriptionListener listener, SubscribeToAllOptions options) {
+    public CompletableFuture<Subscription> subscribeToAll(SubscriptionListener listener, SubscribeToAllOptions options) {
         if (options == null)
             options = SubscribeToAllOptions.get();
 
         if (!options.hasUserCredentials())
             options.authenticated(this.credentials);
 
-        return new SubscribeToAll(this.client, listener, options);
+        return new SubscribeToAll(this.client, listener, options).execute();
     }
 
-    public DeleteStream deleteStream(String streamName) {
-        return new DeleteStream(this.client, streamName, this.credentials);
+    public CompletableFuture<DeleteResult> deleteStream(String streamName) {
+        return this.deleteStream(streamName, DeleteStreamOptions.get());
+    }
+
+    public CompletableFuture<DeleteResult> deleteStream(String streamName, DeleteStreamOptions options) {
+        if (options == null)
+            options = DeleteStreamOptions.get();
+
+        if (!options.hasUserCredentials())
+            options.authenticated(this.credentials);
+
+        return new DeleteStream(this.client, streamName, options).execute();
     }
 }

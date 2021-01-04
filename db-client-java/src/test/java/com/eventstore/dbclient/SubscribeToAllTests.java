@@ -41,7 +41,6 @@ public class SubscribeToAllTests {
                 .fromStart();
 
         Subscription result = streams.subscribeToAll(listener, options)
-                .execute()
                 .get();
 
         receivedEvents.await();
@@ -96,7 +95,6 @@ public class SubscribeToAllTests {
 
         Subscription result = server.getClient().streams()
                 .subscribeToAll(listener, options)
-                .execute()
                 .get();
 
         assertNotNull(result.getSubscriptionId());

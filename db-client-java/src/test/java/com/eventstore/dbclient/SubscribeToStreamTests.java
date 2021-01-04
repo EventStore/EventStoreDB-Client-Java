@@ -39,7 +39,6 @@ public class SubscribeToStreamTests {
         };
 
         Subscription result = streams.subscribeToStream("dataset20M-0", listener)
-                .execute()
                 .get();
 
         receivedEvents.await();
@@ -78,7 +77,6 @@ public class SubscribeToStreamTests {
         CountingListener listener = new CountingListener();
 
         Subscription result = streams.subscribeToStream("dataset20M-0", listener)
-                .execute()
                 .get();
 
         receivedEvents.await();
@@ -140,7 +138,6 @@ public class SubscribeToStreamTests {
         CountingListener listener = new CountingListener();
 
         Subscription subscription = streams.subscribeToStream(testStreamName, listener)
-                .execute()
                 .get();
 
         receivedEvents.await();
