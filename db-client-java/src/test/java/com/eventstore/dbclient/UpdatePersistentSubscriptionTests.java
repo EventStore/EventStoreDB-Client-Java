@@ -21,8 +21,10 @@ public class UpdatePersistentSubscriptionTests {
                 .checkpointAfterInMs(5_000)
                 .build();
 
-        persistent.update("aStream", "aGroupUpd")
-            .settings(updatedSettings)
+        UpdatePersistentSubscriptionOptions options = UpdatePersistentSubscriptionOptions.get()
+                .settings(updatedSettings);
+
+        persistent.update("aStream", "aGroupUpd", options)
             .execute()
             .get();
     }}

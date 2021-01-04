@@ -20,7 +20,7 @@ public class ConnectPersistentSubscription {
     private final String stream;
     private final String group;
     private final PersistentSubscriptionListener listener;
-    private ConnectionMetadata metadata;
+    private final ConnectPersistentSubscriptionOptions options;
 
     static {
         defaultReadOptions = Persistent.ReadReq.Options.newBuilder()
@@ -28,26 +28,17 @@ public class ConnectPersistentSubscription {
                         .setStructured(Shared.Empty.getDefaultInstance()));
     }
 
-    public ConnectPersistentSubscription(GrpcClient connection, String stream, String group, UserCredentials credentials, PersistentSubscriptionListener listener) {
+    public ConnectPersistentSubscription(GrpcClient connection, String stream, String group, PersistentSubscriptionListener listener, ConnectPersistentSubscriptionOptions options) {
         this.connection = connection;
         this.stream = stream;
         this.group = group;
-        this.metadata = new ConnectionMetadata();
         this.listener = listener;
-
-        if (credentials != null) {
-            this.metadata.authenticated(credentials);
-        }
-    }
-
-    public ConnectPersistentSubscription authenticated(UserCredentials credentials) {
-        this.metadata.authenticated(credentials);
-        return this;
+        this.options = options;
     }
 
     public CompletableFuture execute(int bufferSize) {
         return this.connection.run(channel -> {
-            Metadata headers = this.metadata.build();
+            Metadata headers = this.options.getMetadata();
             PersistentSubscriptionsGrpc.PersistentSubscriptionsStub client = MetadataUtils.attachHeaders(PersistentSubscriptionsGrpc.newStub(channel), headers);
 
             final CompletableFuture<PersistentSubscription> result = new CompletableFuture<>();
