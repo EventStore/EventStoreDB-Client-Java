@@ -5,18 +5,17 @@ import org.junit.Rule;
 import org.junit.Test;
 import testcontainers.module.EventStoreTestDBContainer;
 
-import java.util.ArrayList;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public class ConnectPersistentSubcription {
+public class SubscribePersistentSubcription {
     class Foo {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            com.eventstore.dbclient.ConnectPersistentSubcription.Foo foo1 = (com.eventstore.dbclient.ConnectPersistentSubcription.Foo) o;
+            SubscribePersistentSubcription.Foo foo1 = (SubscribePersistentSubcription.Foo) o;
             return foo == foo1.foo;
         }
 
@@ -40,24 +39,25 @@ public class ConnectPersistentSubcription {
     public final EventStoreTestDBContainer server = new EventStoreTestDBContainer(false);
 
     @Test
-    public void testConnectPersistentSub() throws Throwable {
+    public void testSubscribePersistentSub() throws Throwable {
         PersistentSubscriptions persistent = server.getPersistentSubscriptionsAPI();
         Streams streams = server.getStreamsAPI();
         String streamName = "aStream-" + UUID.randomUUID().toString();
 
         persistent.create(streamName, "aGroup")
-                .execute()
                 .get();
 
-        EventDataBuilder builder = EventData.builderAsJson("foobar", new ConnectPersistentSubcription.Foo());
+        EventDataBuilder builder = EventData.builderAsJson("foobar", new SubscribePersistentSubcription.Foo());
 
         streams.appendToStream(streamName, builder.build(), builder.build(), builder.build())
                 .get();
 
         final CompletableFuture<Integer> result = new CompletableFuture<>();
 
+        SubscribePersistentSubscriptionOptions connectOptions = SubscribePersistentSubscriptionOptions.get()
+                .setBufferSize(32);
 
-        persistent.connect(streamName, "aGroup", new PersistentSubscriptionListener() {
+        persistent.subscribe(streamName, "aGroup", connectOptions, new PersistentSubscriptionListener() {
             private int count = 0;
 
             @Override
@@ -81,7 +81,7 @@ public class ConnectPersistentSubcription {
             public void onCancelled(PersistentSubscription subscription) {
                 result.complete(count);
             }
-        }).execute(32).get();
+        }).get();
 
         streams.appendToStream(streamName, builder.build(), builder.build(), builder.build())
                 .get();

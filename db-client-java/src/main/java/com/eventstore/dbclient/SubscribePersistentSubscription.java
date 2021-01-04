@@ -14,13 +14,13 @@ import io.grpc.stub.StreamObserver;
 
 import java.util.concurrent.CompletableFuture;
 
-public class ConnectPersistentSubscription {
+public class SubscribePersistentSubscription {
     private static final Persistent.ReadReq.Options.Builder defaultReadOptions;
     private final GrpcClient connection;
     private final String stream;
     private final String group;
     private final PersistentSubscriptionListener listener;
-    private final ConnectPersistentSubscriptionOptions options;
+    private final SubscribePersistentSubscriptionOptions options;
 
     static {
         defaultReadOptions = Persistent.ReadReq.Options.newBuilder()
@@ -28,7 +28,7 @@ public class ConnectPersistentSubscription {
                         .setStructured(Shared.Empty.getDefaultInstance()));
     }
 
-    public ConnectPersistentSubscription(GrpcClient connection, String stream, String group, PersistentSubscriptionListener listener, ConnectPersistentSubscriptionOptions options) {
+    public SubscribePersistentSubscription(GrpcClient connection, String stream, String group, SubscribePersistentSubscriptionOptions options, PersistentSubscriptionListener listener) {
         this.connection = connection;
         this.stream = stream;
         this.group = group;
@@ -36,7 +36,7 @@ public class ConnectPersistentSubscription {
         this.options = options;
     }
 
-    public CompletableFuture execute(int bufferSize) {
+    public CompletableFuture execute() {
         return this.connection.run(channel -> {
             Metadata headers = this.options.getMetadata();
             PersistentSubscriptionsGrpc.PersistentSubscriptionsStub client = MetadataUtils.attachHeaders(PersistentSubscriptionsGrpc.newStub(channel), headers);
@@ -47,6 +47,8 @@ public class ConnectPersistentSubscription {
                     Shared.StreamIdentifier.newBuilder()
                             .setStreamName(ByteString.copyFromUtf8(stream))
                             .build();
+
+            int bufferSize = this.options.getBufferSize();
 
             Persistent.ReadReq.Options options = defaultReadOptions.clone()
                     .setBufferSize(bufferSize)

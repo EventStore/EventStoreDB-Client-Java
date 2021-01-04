@@ -14,7 +14,6 @@ public class UpdatePersistentSubscriptionTests {
         PersistentSubscriptions persistent = server.getPersistentSubscriptionsAPI();
 
         persistent.create("aStream", "aGroupUpd")
-                .execute()
                 .get();
 
         PersistentSubscriptionSettings updatedSettings = PersistentSubscriptionSettings.builder()
@@ -25,7 +24,6 @@ public class UpdatePersistentSubscriptionTests {
                 .settings(updatedSettings);
 
         persistent.update("aStream", "aGroupUpd", options)
-            .execute()
             .get();
     }}
 }

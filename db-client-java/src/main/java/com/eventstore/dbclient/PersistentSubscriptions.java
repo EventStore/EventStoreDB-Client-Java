@@ -1,5 +1,7 @@
 package com.eventstore.dbclient;
 
+import java.util.concurrent.CompletableFuture;
+
 public class PersistentSubscriptions {
     private final GrpcClient client;
     private final UserCredentials credentials;
@@ -9,49 +11,49 @@ public class PersistentSubscriptions {
         this.credentials = credentials;
     }
 
-    public CreatePersistentSubscription create(String stream, String group) {
+    public CompletableFuture create(String stream, String group) {
         return this.create(stream, group, CreatePersistentSubscriptionOptions.get());
     }
 
-    public CreatePersistentSubscription create(String stream, String group, PersistentSubscriptionSettings settings) {
+    public CompletableFuture create(String stream, String group, PersistentSubscriptionSettings settings) {
         CreatePersistentSubscriptionOptions options = CreatePersistentSubscriptionOptions.get()
                 .settings(settings);
 
         return this.create(stream, group, options);
     }
 
-    public CreatePersistentSubscription create(String stream, String group, CreatePersistentSubscriptionOptions options) {
-        return new CreatePersistentSubscription(this.client, stream, group, options);
+    public CompletableFuture create(String stream, String group, CreatePersistentSubscriptionOptions options) {
+        return new CreatePersistentSubscription(this.client, stream, group, options).execute();
     }
 
-    public UpdatePersistentSubscription update(String stream, String group) {
+    public CompletableFuture update(String stream, String group) {
         return this.update(stream, group, UpdatePersistentSubscriptionOptions.get());
     }
 
-    public UpdatePersistentSubscription update(String stream, String group, PersistentSubscriptionSettings settings) {
+    public CompletableFuture update(String stream, String group, PersistentSubscriptionSettings settings) {
         UpdatePersistentSubscriptionOptions options = UpdatePersistentSubscriptionOptions.get()
                 .settings(settings);
 
         return this.update(stream, group, options);
     }
 
-    public UpdatePersistentSubscription update(String stream, String group, UpdatePersistentSubscriptionOptions options) {
-        return new UpdatePersistentSubscription(this.client, stream, group, options);
+    public CompletableFuture update(String stream, String group, UpdatePersistentSubscriptionOptions options) {
+        return new UpdatePersistentSubscription(this.client, stream, group, options).execute();
     }
 
-    public DeletePersistentSubscription delete(String stream, String group) {
+    public CompletableFuture delete(String stream, String group) {
         return this.delete(stream, group, DeletePersistentSubscriptionOptions.get());
     }
 
-    public DeletePersistentSubscription delete(String stream, String group, DeletePersistentSubscriptionOptions options) {
-        return new DeletePersistentSubscription(this.client, stream, group, options);
+    public CompletableFuture delete(String stream, String group, DeletePersistentSubscriptionOptions options) {
+        return new DeletePersistentSubscription(this.client, stream, group, options).execute();
     }
 
-    public ConnectPersistentSubscription connect(String stream, String group, PersistentSubscriptionListener listener) {
-        return this.connect(stream, group, listener, ConnectPersistentSubscriptionOptions.get());
+    public CompletableFuture subscribe(String stream, String group, PersistentSubscriptionListener listener) {
+        return this.subscribe(stream, group, SubscribePersistentSubscriptionOptions.get(), listener);
     }
 
-    public ConnectPersistentSubscription connect(String stream, String group, PersistentSubscriptionListener listener, ConnectPersistentSubscriptionOptions options) {
-        return new ConnectPersistentSubscription(this.client, stream, group, listener, options);
+    public CompletableFuture subscribe(String stream, String group, SubscribePersistentSubscriptionOptions options, PersistentSubscriptionListener listener) {
+        return new SubscribePersistentSubscription(this.client, stream, group, options, listener).execute();
     }
 }

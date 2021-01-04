@@ -13,11 +13,9 @@ public class DeletePersistentSubscriptionTests {
         PersistentSubscriptions persistent = server.getPersistentSubscriptionsAPI();
 
         persistent.create("aStream", "aGroupUpd")
-                .execute()
                 .get();
 
         persistent.delete("aStream", "aGroupUpd")
-                .execute()
                 .get();
     }}
 }

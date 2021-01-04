@@ -14,7 +14,6 @@ public class CreatePersistentSubscriptionTests {
         PersistentSubscriptions persistent = server.getPersistentSubscriptionsAPI();
 
         persistent.create("aStream", "aGroup")
-                .execute()
                 .get();
     }}
 }
