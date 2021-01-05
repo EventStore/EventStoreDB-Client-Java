@@ -82,7 +82,6 @@ public class ProjectionManagementTests {
 
         server.getProjectionManagementAPI()
                 .createContinuous(PROJECTION_NAME, projectionWithUnknownKeynames, false)
-                .execute()
                 .get();
     }
 
@@ -90,7 +89,6 @@ public class ProjectionManagementTests {
 
         return server.getProjectionManagementAPI()
                 .getResult(PROJECTION_NAME, CountResult.class)
-                .execute()
                 .get();
     }
 
@@ -98,7 +96,6 @@ public class ProjectionManagementTests {
 
         return server.getProjectionManagementAPI()
                 .<Map<String, Item>>getResult(PROJECTION_NAME, factory -> factory.constructMapType(HashMap.class, String.class, Item.class))
-                .execute()
                 .get();
     }
 
