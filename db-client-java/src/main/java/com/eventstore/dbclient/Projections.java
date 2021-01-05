@@ -17,9 +17,32 @@ public class Projections {
         this.credentials = credentials;
     }
 
-    public CompletableFuture createContinuous(final String projectionName, final String query, final boolean trackEmittedStreams) {
+    public CompletableFuture createContinuous(final String projectionName, final String query) {
+        return this.createContinuous(projectionName, query, CreateContinuousProjectionOptions.get());
+    }
 
-        return CreateProjection.forContinuous(this.client, this.credentials, projectionName, query, trackEmittedStreams).execute();
+    public CompletableFuture createContinuous(final String projectionName, final String query, CreateContinuousProjectionOptions options) {
+        if (options == null)
+            options = CreateContinuousProjectionOptions.get();
+
+        if (!options.hasUserCredentials())
+            options.authenticated(this.credentials);
+
+        return CreateProjection.forContinuous(this.client, projectionName, query, options).execute();
+    }
+
+    public CompletableFuture createOneTime(final String projectionName, final String query) {
+        return this.createOneTime(projectionName, query, CreateOneTimeProjectionOptions.get());
+    }
+
+    public CompletableFuture createOneTime(final String projectionName, final String query, CreateOneTimeProjectionOptions options) {
+        if (options == null)
+            options = CreateOneTimeProjectionOptions.get();
+
+        if (!options.hasUserCredentials())
+            options.authenticated(this.credentials);
+
+        return CreateProjection.forOneTime(this.client, projectionName, query, options).execute();
     }
 
     public <TResult> CompletableFuture<TResult>  getResult(final String projectionName, Class<TResult> type) {

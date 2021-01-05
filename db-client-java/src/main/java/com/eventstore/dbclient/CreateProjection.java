@@ -15,34 +15,31 @@ public class CreateProjection {
     private final String projectionName;
     private final String query;
     private final boolean trackEmittedStreams;
-    private final ConnectionMetadata metadata;
+    private final Metadata metadata;
 
-    private CreateProjection(final GrpcClient client, final UserCredentials credentials, final boolean continuous,
+    private CreateProjection(final GrpcClient client, final Metadata metadata, final boolean continuous,
                             final String projectionName, final String query, final boolean trackEmittedStreams) {
 
         this.client = client;
+        this.metadata = metadata;
         this.continuous = continuous;
         this.projectionName = projectionName;
         this.query = query;
         this.trackEmittedStreams = trackEmittedStreams;
-
-        this.metadata = new ConnectionMetadata();
-
-        if (credentials != null) {
-            this.metadata.authenticated(credentials);
-        }
     }
 
-    static CreateProjection forContinuous(final GrpcClient client, final UserCredentials credentials,
+    static CreateProjection forContinuous(final GrpcClient client,
                                                  final String projectionName, final String query,
-                                                 final boolean trackEmittedStreams) {
+                                                 final CreateContinuousProjectionOptions options) {
 
-        return new CreateProjection(client, credentials, true, projectionName, query, trackEmittedStreams);
+        return new CreateProjection(client, options.getMetadata(), true, projectionName, query, options.getTrackEmittedStreams());
     }
 
-    public CreateProjection authenticated(UserCredentials credentials) {
-        this.metadata.authenticated(credentials);
-        return this;
+    static CreateProjection forOneTime(final GrpcClient client,
+                                          final String projectionName, final String query,
+                                          CreateOneTimeProjectionOptions options) {
+
+        return new CreateProjection(client, options.getMetadata(), false, projectionName, query, false);
     }
 
     public CompletableFuture execute() {
@@ -59,7 +56,7 @@ public class CreateProjection {
                     .setOptions(optionsBuilder)
                     .build();
 
-            Metadata headers = this.metadata.build();
+            Metadata headers = this.metadata;
 
             ProjectionsGrpc.ProjectionsStub client = MetadataUtils.attachHeaders(ProjectionsGrpc.newStub(channel), headers);
 

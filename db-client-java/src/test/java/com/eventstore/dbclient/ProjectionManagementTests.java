@@ -81,7 +81,7 @@ public class ProjectionManagementTests {
             final String projectionWithUnknownKeynames) throws InterruptedException, ExecutionException {
 
         server.getProjectionManagementAPI()
-                .createContinuous(PROJECTION_NAME, projectionWithUnknownKeynames, false)
+                .createContinuous(PROJECTION_NAME, projectionWithUnknownKeynames)
                 .get();
     }
 
