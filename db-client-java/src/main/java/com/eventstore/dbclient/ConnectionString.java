@@ -2,8 +2,7 @@ package com.eventstore.dbclient;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,6 +20,18 @@ public class ConnectionString {
             "throwOnAppendFailure",
             "defaultCredentials"
     );
+    private HashMap<String,String> LowerToKey = new HashMap<String,String>(){
+        {
+            put("dnsdiscover", "dnsDiscover");
+            put("maxdiscoverattempts", "maxDiscoverAttempts");
+            put("discoveryinterval", "discoveryInterval");
+            put("gossiptimeout", "gossipTimeout");
+            put("nodepreference", "nodePreference");
+            put("tls", "tls");
+            put("tlsverifycert", "tlsVerifyCert");
+            put("throwonappendfailure", "throwOnAppendFailure");
+        }
+    };
 
     public static ClientSettings parse(String connectionString) throws ParseError {
         return new ConnectionString().parseConnectionString(connectionString);
@@ -162,7 +173,8 @@ public class ConnectionString {
 
         this.nextPosition += m.end();
 
-        String key = m.group("key");
+        String rawKey = m.group("key");
+        String key = this.LowerToKey.getOrDefault(rawKey.toLowerCase(Locale.ROOT), rawKey);
         String value = m.group("value");
         int keyPosition = this.position + ("&" + key + "=").length();
 
