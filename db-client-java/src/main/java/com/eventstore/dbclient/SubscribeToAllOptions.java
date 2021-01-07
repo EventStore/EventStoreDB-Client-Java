@@ -36,6 +36,9 @@ public class SubscribeToAllOptions {
     }
 
     public SubscribeToAllOptions authenticated(UserCredentials credentials) {
+        if(credentials == null)
+            return this;
+
         this.metadata.authenticated(credentials);
         return this;
     }

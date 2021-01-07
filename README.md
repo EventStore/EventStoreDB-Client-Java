@@ -13,6 +13,23 @@ EventStore Ltd publishes GA (general availability) versions to [Maven Central].
 The SDK is built using [`Gradle`][gradle]. Integration tests run against a server using Docker, with the [EventStoreDB gRPC
 Client Test Container][container].
 
+### Run tests
+
+Tests are written using [TestContainers](https://www.testcontainers.org/) and require [Docker](https://www.docker.com/) to be installed.
+To access the github packages docker images, you need to authenticate docker with a gitub personal access token. It should be [generated](https://github.com/settings/tokens/new). Select at least following scopes:
+- `repo`
+- `read:packages`
+- `write:packages`
+
+Then login to github docker registry with:
+```shell script
+$ docker login https://docker.pkg.github.com -u YOUR_GITHUB_USERNAME
+```
+
+and providing your personal access token as a password. 
+
+Check full instructions in the ["Authenticating to GitHub packages"](https://docs.github.com/en/free-pro-team@latest/packages/guides/configuring-docker-for-use-with-github-packages#authenticating-to-github-packages) guide.
+
 ## EventStoreDB Server Compatibility
 
 This client is compatible with version `20.6.1` upwards.
@@ -99,8 +116,7 @@ This client currently supports creating and getting the result of a continuous p
 Create a projection:
 ```java
 client.projections()
-    .createContinuous(PROJECTION_NAME, PROJECTION_JS, false)
-    .execute()
+    .createContinuous(PROJECTION_NAME, PROJECTION_JS)
     .get();
 ```
 
@@ -124,7 +140,6 @@ Get the result:
 ```java
 CountResult result = client.projections()
     .getResult(PROJECTION_NAME, CountResult.class)
-    .execute()
     .get();
 ```
 
