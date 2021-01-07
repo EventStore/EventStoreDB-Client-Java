@@ -1,45 +1,16 @@
 package com.eventstore.dbclient;
 
-import io.grpc.Metadata;
-
-public class DeleteStreamOptions {
-    private Timeouts timeouts;
-    private final ConnectionMetadata metadata;
-
+public class DeleteStreamOptions extends OptionsBase<DeleteStreamOptions> {
     private ExpectedRevision expectedRevision;
     private boolean softDelete;
 
     private DeleteStreamOptions() {
-        this.timeouts = Timeouts.DEFAULT;
-        this.metadata = new ConnectionMetadata();
-
         this.expectedRevision = ExpectedRevision.ANY;
         this.softDelete = true;
     }
 
     public static DeleteStreamOptions get() {
         return new DeleteStreamOptions();
-    }
-
-    public Timeouts getTimeouts() {
-        return this.timeouts;
-    }
-
-    public DeleteStreamOptions timeouts(Timeouts timeouts) {
-        this.timeouts = timeouts;
-        return this;
-    }
-
-    public Metadata getMetadata() {
-        return this.metadata.build();
-    }
-
-    public DeleteStreamOptions authenticated(UserCredentials credentials) {
-        if(credentials == null)
-            return this;
-
-        this.metadata.authenticated(credentials);
-        return this;
     }
 
     public DeleteStreamOptions requiresLeader() {
@@ -56,10 +27,6 @@ public class DeleteStreamOptions {
         }
 
         return this;
-    }
-
-    public boolean hasUserCredentials() {
-        return this.metadata.hasUserCredentials();
     }
 
     public boolean getSoftDelete() {

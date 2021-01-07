@@ -1,34 +1,14 @@
 package com.eventstore.dbclient;
 
-import io.grpc.Metadata;
-
-public class SubscribePersistentSubscriptionOptions {
-    private final ConnectionMetadata metadata;
+public class SubscribePersistentSubscriptionOptions extends OptionsBase<SubscribePersistentSubscriptionOptions> {
     private int bufferSize;
 
     private SubscribePersistentSubscriptionOptions() {
-        this.metadata = new ConnectionMetadata();
         this.bufferSize = 10;
     }
 
     public static SubscribePersistentSubscriptionOptions get() {
         return new SubscribePersistentSubscriptionOptions();
-    }
-
-    public Metadata getMetadata() {
-        return this.metadata.build();
-    }
-
-    public SubscribePersistentSubscriptionOptions authenticated(UserCredentials credentials) {
-        if(credentials == null)
-            return this;
-
-        this.metadata.authenticated(credentials);
-        return this;
-    }
-
-    public boolean hasUserCredentials() {
-        return this.metadata.hasUserCredentials();
     }
 
     public int getBufferSize() {

@@ -1,50 +1,17 @@
 package com.eventstore.dbclient;
 
-import io.grpc.Metadata;
-
-public class SubscribeToAllOptions {
-    private Timeouts timeouts;
-    private final ConnectionMetadata metadata;
-
+public class SubscribeToAllOptions extends OptionsBase<SubscribeToAllOptions> {
     private boolean resolveLinks;
     private Position position;
     protected SubscriptionFilter filter;
 
     private SubscribeToAllOptions() {
-        this.timeouts = Timeouts.DEFAULT;
-        this.metadata = new ConnectionMetadata();
-
         this.resolveLinks = false;
         this.position = Position.START;
     }
 
     public static SubscribeToAllOptions get() {
         return new SubscribeToAllOptions();
-    }
-
-    public Timeouts getTimeouts() {
-        return this.timeouts;
-    }
-
-    public SubscribeToAllOptions timeouts(Timeouts timeouts) {
-        this.timeouts = timeouts;
-        return this;
-    }
-
-    public Metadata getMetadata() {
-        return this.metadata.build();
-    }
-
-    public SubscribeToAllOptions authenticated(UserCredentials credentials) {
-        if(credentials == null)
-            return this;
-
-        this.metadata.authenticated(credentials);
-        return this;
-    }
-
-    public boolean hasUserCredentials() {
-        return this.metadata.hasUserCredentials();
     }
 
     public boolean getResolveLinks() {

@@ -1,19 +1,11 @@
 package com.eventstore.dbclient;
 
-import io.grpc.Metadata;
-
-public class ReadAllOptions {
-    private Timeouts timeouts;
-    private final ConnectionMetadata metadata;
-
+public class ReadAllOptions extends OptionsBase<ReadAllOptions> {
     private Position position;
     private boolean resolveLinks;
     private Direction direction;
 
     private ReadAllOptions() {
-        this.timeouts = Timeouts.DEFAULT;
-        this.metadata = new ConnectionMetadata();
-
         this.resolveLinks = false;
         this.position = Position.START;
         this.direction = Direction.Forward;
@@ -21,31 +13,6 @@ public class ReadAllOptions {
 
     public static ReadAllOptions get() {
         return new ReadAllOptions();
-    }
-
-    public Timeouts getTimeouts() {
-        return this.timeouts;
-    }
-
-    public ReadAllOptions timeouts(Timeouts timeouts) {
-        this.timeouts = timeouts;
-        return this;
-    }
-
-    public Metadata getMetadata() {
-        return this.metadata.build();
-    }
-
-    public ReadAllOptions authenticated(UserCredentials credentials) {
-        if(credentials == null)
-            return this;
-
-        this.metadata.authenticated(credentials);
-        return this;
-    }
-
-    public boolean hasUserCredentials() {
-        return this.metadata.hasUserCredentials();
     }
 
     public Direction getDirection() {
