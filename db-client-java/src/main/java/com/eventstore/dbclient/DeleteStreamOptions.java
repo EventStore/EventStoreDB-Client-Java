@@ -1,11 +1,9 @@
 package com.eventstore.dbclient;
 
-public class DeleteStreamOptions extends OptionsBase<DeleteStreamOptions> {
-    private ExpectedRevision expectedRevision;
+public class DeleteStreamOptions extends OptionsWithExpectedRevisionBase<DeleteStreamOptions> {
     private boolean softDelete;
 
     private DeleteStreamOptions() {
-        this.expectedRevision = ExpectedRevision.ANY;
         this.softDelete = true;
     }
 
@@ -24,15 +22,6 @@ public class DeleteStreamOptions extends OptionsBase<DeleteStreamOptions> {
 
     public DeleteStreamOptions hardDelete() {
         this.softDelete = false;
-        return this;
-    }
-
-    public ExpectedRevision getExpectedRevision() {
-        return this.expectedRevision;
-    }
-
-    public DeleteStreamOptions expectedRevision(ExpectedRevision revision) {
-        this.expectedRevision = revision;
         return this;
     }
 }
