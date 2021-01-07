@@ -18,7 +18,7 @@ public class ReadAllTests {
         ReadAllOptions options = ReadAllOptions.get()
                 .forward()
                 .fromStart()
-                .notResolveLinks();
+                .notResolveLinkTos();
 
         ReadResult result = streams.readAll(10, options)
                 .get();
@@ -33,7 +33,7 @@ public class ReadAllTests {
         ReadAllOptions options = ReadAllOptions.get()
                 .forward()
                 .fromPosition(new Position(1788, 1788))
-                .notResolveLinks();
+                .notResolveLinkTos();
 
         ReadResult result = streams.readAll(10, options)
                 .get();
@@ -48,7 +48,7 @@ public class ReadAllTests {
         ReadAllOptions options = ReadAllOptions.get()
                 .backward()
                 .fromEnd()
-                .notResolveLinks();
+                .notResolveLinkTos();
 
         ReadResult result = streams.readAll(10, options)
                 .get();
@@ -63,7 +63,7 @@ public class ReadAllTests {
         ReadAllOptions options = ReadAllOptions.get()
                 .backward()
                 .fromPosition(new Position(3386, 3386))
-                .notResolveLinks();
+                .notResolveLinkTos();
 
         ReadResult result = streams.readAll(10, options)
                 .get();

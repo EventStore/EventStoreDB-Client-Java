@@ -1,12 +1,12 @@
 package com.eventstore.dbclient;
 
 public class SubscribeToAllOptions extends OptionsBase<SubscribeToAllOptions> {
-    private boolean resolveLinks;
+    private boolean resolveLinkTos;
     private Position position;
     protected SubscriptionFilter filter;
 
     private SubscribeToAllOptions() {
-        this.resolveLinks = false;
+        this.resolveLinkTos = false;
         this.position = Position.START;
     }
 
@@ -14,21 +14,21 @@ public class SubscribeToAllOptions extends OptionsBase<SubscribeToAllOptions> {
         return new SubscribeToAllOptions();
     }
 
-    public boolean getResolveLinks() {
-        return resolveLinks;
+    public boolean shouldResolveLinkTos() {
+        return this.resolveLinkTos;
     }
 
-    public SubscribeToAllOptions resolveLinks() {
-        return this.resolveLinks(true);
-    }
-
-    public SubscribeToAllOptions notResolveLinks() {
-        return this.resolveLinks(false);
-    }
-
-    public SubscribeToAllOptions resolveLinks(boolean value) {
-        this.resolveLinks = value;
+    public SubscribeToAllOptions resolveLinkTos(boolean value) {
+        this.resolveLinkTos = value;
         return this;
+    }
+
+    public SubscribeToAllOptions resolveLinkTos() {
+        return this.resolveLinkTos(true);
+    }
+
+    public SubscribeToAllOptions notResolveLinkTos() {
+        return this.resolveLinkTos(false);
     }
 
     public Position getPosition() {

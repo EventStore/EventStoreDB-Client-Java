@@ -20,7 +20,7 @@ public class SubscribeToStream extends AbstractRegularSubscription {
     @Override
     protected StreamsOuterClass.ReadReq.Options.Builder createOptions() {
         return defaultSubscribeOptions.clone()
-                .setResolveLinks(this.options.getResolveLinks())
+                .setResolveLinks(this.options.shouldResolveLinkTos())
                 .setNoFilter(Shared.Empty.getDefaultInstance())
                 .setStream(GrpcUtils.toStreamOptions(this.streamName, this.options.getStartingRevision()));
     }

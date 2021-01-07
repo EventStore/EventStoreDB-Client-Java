@@ -19,20 +19,4 @@ public class AppendToStreamOptions extends OptionsBase<AppendToStreamOptions> {
         this.expectedRevision = revision;
         return this;
     }
-
-    public AppendToStreamOptions requiresLeader() {
-        return requiresLeader(true);
-    }
-
-    public AppendToStreamOptions notRequireLeader() {
-        return requiresLeader(false);
-    }
-
-    public AppendToStreamOptions requiresLeader(boolean value) {
-        if (value) {
-            this.metadata.requiresLeader();
-        }
-
-        return this;
-    }
 }

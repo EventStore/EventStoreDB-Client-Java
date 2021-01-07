@@ -27,7 +27,7 @@ public class DeleteStream {
             Metadata headers = this.options.getMetadata();
             StreamsGrpc.StreamsStub client = MetadataUtils.attachHeaders(StreamsGrpc.newStub(channel), headers);
 
-            if (this.options.getSoftDelete()) {
+            if (this.options.isSoftDelete()) {
                 StreamsOuterClass.DeleteReq req = StreamsOuterClass.DeleteReq.newBuilder()
                         .setOptions(this.options.getExpectedRevision().applyOnWire(StreamsOuterClass.DeleteReq.Options.newBuilder()
                                 .setStreamIdentifier(Shared.StreamIdentifier.newBuilder()

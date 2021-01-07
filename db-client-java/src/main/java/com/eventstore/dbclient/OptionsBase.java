@@ -34,4 +34,20 @@ class OptionsBase<T> {
         this.metadata.authenticated(credentials);
         return (T)this;
     }
+
+    public T requiresLeader() {
+        return requiresLeader(true);
+    }
+
+    public T notRequireLeader() {
+        return requiresLeader(false);
+    }
+
+    public T requiresLeader(boolean value) {
+        if (value) {
+            this.metadata.requiresLeader();
+        }
+
+        return (T)this;
+    }
 }

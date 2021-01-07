@@ -17,7 +17,7 @@ public class SubscribeToAll extends AbstractRegularSubscription {
     protected StreamsOuterClass.ReadReq.Options.Builder createOptions() {
         StreamsOuterClass.ReadReq.Options.Builder options =
                 defaultSubscribeOptions.clone()
-                        .setResolveLinks(this.options.getResolveLinks())
+                        .setResolveLinks(this.options.shouldResolveLinkTos())
                         .setAll(StreamsOuterClass.ReadReq.Options.AllOptions.newBuilder()
                                 .setPosition(StreamsOuterClass.ReadReq.Options.Position.newBuilder()
                                         .setCommitPosition(this.options.getPosition().getCommitUnsigned())

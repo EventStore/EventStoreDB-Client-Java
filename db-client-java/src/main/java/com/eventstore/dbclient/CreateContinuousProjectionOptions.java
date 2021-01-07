@@ -11,7 +11,7 @@ public class CreateContinuousProjectionOptions extends OptionsBase<CreateContinu
         return new CreateContinuousProjectionOptions();
     }
 
-    public boolean getTrackEmittedStreams() {
+    public boolean isTrackingEmittedStreams() {
         return trackEmittedStreams;
     }
 

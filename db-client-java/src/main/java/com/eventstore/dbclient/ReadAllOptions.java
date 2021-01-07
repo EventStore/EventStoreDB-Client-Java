@@ -2,11 +2,11 @@ package com.eventstore.dbclient;
 
 public class ReadAllOptions extends OptionsBase<ReadAllOptions> {
     private Position position;
-    private boolean resolveLinks;
+    private boolean resolveLinkTos;
     private Direction direction;
 
     private ReadAllOptions() {
-        this.resolveLinks = false;
+        this.resolveLinkTos = false;
         this.position = Position.START;
         this.direction = Direction.Forward;
     }
@@ -29,37 +29,21 @@ public class ReadAllOptions extends OptionsBase<ReadAllOptions> {
         return this;
     }
 
-    public ReadAllOptions requiresLeader() {
-        return requiresLeader(true);
+    public boolean shouldResolveLinkTos() {
+        return this.resolveLinkTos;
     }
 
-    public ReadAllOptions notRequireLeader() {
-        return requiresLeader(false);
-    }
-
-    public ReadAllOptions requiresLeader(boolean value) {
-        if (value) {
-            this.metadata.requiresLeader();
-        }
-
+    public ReadAllOptions resolveLinkTos(boolean value) {
+        this.resolveLinkTos = value;
         return this;
     }
 
-    public boolean getResolveLinks() {
-        return this.resolveLinks;
+    public ReadAllOptions resolveLinkTos() {
+        return this.resolveLinkTos(true);
     }
 
-    public ReadAllOptions resolveLinks(boolean value) {
-        this.resolveLinks = value;
-        return this;
-    }
-
-    public ReadAllOptions resolveLinks() {
-        return this.resolveLinks(true);
-    }
-
-    public ReadAllOptions notResolveLinks() {
-        return this.resolveLinks(false);
+    public ReadAllOptions notResolveLinkTos() {
+        return this.resolveLinkTos(false);
     }
 
     public Position getPosition() {

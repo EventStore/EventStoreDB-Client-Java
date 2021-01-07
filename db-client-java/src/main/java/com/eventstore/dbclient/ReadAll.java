@@ -21,7 +21,7 @@ public class ReadAll extends AbstractRead {
                         .setPosition(StreamsOuterClass.ReadReq.Options.Position.newBuilder()
                                 .setCommitPosition(this.options.getPosition().getCommitUnsigned())
                                 .setPreparePosition(this.options.getPosition().getPrepareUnsigned())))
-                .setResolveLinks(this.options.getResolveLinks())
+                .setResolveLinks(this.options.shouldResolveLinkTos())
                 .setCount(this.maxCount)
                 .setNoFilter(Shared.Empty.getDefaultInstance())
                 .setReadDirection(this.options.getDirection() == Direction.Forward ?

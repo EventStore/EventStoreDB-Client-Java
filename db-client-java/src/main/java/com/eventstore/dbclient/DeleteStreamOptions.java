@@ -13,23 +13,7 @@ public class DeleteStreamOptions extends OptionsBase<DeleteStreamOptions> {
         return new DeleteStreamOptions();
     }
 
-    public DeleteStreamOptions requiresLeader() {
-        return requiresLeader(true);
-    }
-
-    public DeleteStreamOptions notRequireLeader() {
-        return requiresLeader(false);
-    }
-
-    public DeleteStreamOptions requiresLeader(boolean value) {
-        if (value) {
-            this.metadata.requiresLeader();
-        }
-
-        return this;
-    }
-
-    public boolean getSoftDelete() {
+    public boolean isSoftDelete() {
         return this.softDelete;
     }
 

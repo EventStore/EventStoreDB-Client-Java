@@ -32,7 +32,7 @@ public class CreateProjection {
                                                  final String projectionName, final String query,
                                                  final CreateContinuousProjectionOptions options) {
 
-        return new CreateProjection(client, options.getMetadata(), true, projectionName, query, options.getTrackEmittedStreams());
+        return new CreateProjection(client, options.getMetadata(), true, projectionName, query, options.isTrackingEmittedStreams());
     }
 
     static CreateProjection forOneTime(final GrpcClient client,

@@ -17,7 +17,7 @@ public class ReadStreamTests {
         ReadStreamOptions options = ReadStreamOptions.get()
                 .forward()
                 .fromStart()
-                .notResolveLinks();
+                .notResolveLinkTos();
 
         ReadResult result = streams.readStream("dataset20M-1800", 10, options)
                 .get();
@@ -32,7 +32,7 @@ public class ReadStreamTests {
         ReadStreamOptions options = ReadStreamOptions.get()
                 .backward()
                 .fromEnd()
-                .notResolveLinks();
+                .notResolveLinkTos();
 
         ReadResult result = streams.readStream("dataset20M-1800", 10, options)
                 .get();

@@ -2,10 +2,10 @@ package com.eventstore.dbclient;
 
 public class SubscribeToStreamOptions extends OptionsBase<SubscribeToStreamOptions> {
     private StreamRevision startRevision;
-    private boolean resolveLinks;
+    private boolean resolveLinkTos;
 
     private SubscribeToStreamOptions() {
-        this.resolveLinks = false;
+        this.resolveLinkTos = false;
         this.startRevision = StreamRevision.START;
     }
 
@@ -13,21 +13,21 @@ public class SubscribeToStreamOptions extends OptionsBase<SubscribeToStreamOptio
         return new SubscribeToStreamOptions();
     }
 
-    public boolean getResolveLinks() {
-        return this.resolveLinks;
+    public boolean shouldResolveLinkTos() {
+        return this.resolveLinkTos;
     }
 
-    public SubscribeToStreamOptions resolveLinks() {
-        return this.resolveLinks(true);
-    }
-
-    public SubscribeToStreamOptions notResolveLinks() {
-        return this.resolveLinks(false);
-    }
-
-    public SubscribeToStreamOptions resolveLinks(boolean value) {
-        this.resolveLinks = value;
+    public SubscribeToStreamOptions resolveLinkTos(boolean value) {
+        this.resolveLinkTos = value;
         return this;
+    }
+
+    public SubscribeToStreamOptions resolveLinkTos() {
+        return this.resolveLinkTos(true);
+    }
+
+    public SubscribeToStreamOptions notResolveLinkTos() {
+        return this.resolveLinkTos(false);
     }
 
     public StreamRevision getStartingRevision() {

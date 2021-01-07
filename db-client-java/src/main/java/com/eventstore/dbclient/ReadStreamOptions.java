@@ -2,12 +2,12 @@ package com.eventstore.dbclient;
 
 public class ReadStreamOptions extends OptionsBase<ReadStreamOptions> {
     private StreamRevision startRevision;
-    private boolean resolveLinks;
+    private boolean resolveLinkTos;
     private Direction direction;
 
     private ReadStreamOptions() {
         this.startRevision = StreamRevision.START;
-        this.resolveLinks = false;
+        this.resolveLinkTos = false;
         this.direction = Direction.Forward;
     }
 
@@ -28,37 +28,21 @@ public class ReadStreamOptions extends OptionsBase<ReadStreamOptions> {
         return this;
     }
 
-    public ReadStreamOptions requiresLeader() {
-        return requiresLeader(true);
+    public boolean shouldResolveLinkTos() {
+        return this.resolveLinkTos;
     }
 
-    public ReadStreamOptions notRequireLeader() {
-        return requiresLeader(false);
-    }
-
-    public ReadStreamOptions requiresLeader(boolean value) {
-        if (value) {
-            this.metadata.requiresLeader();
-        }
-
+    public ReadStreamOptions resolveLinkTos(boolean value) {
+        this.resolveLinkTos = value;
         return this;
     }
 
-    public boolean getResolveLinks() {
-        return this.resolveLinks;
+    public ReadStreamOptions resolveLinkTos() {
+        return this.resolveLinkTos(true);
     }
 
-    public ReadStreamOptions resolveLinks(boolean value) {
-        this.resolveLinks = value;
-        return this;
-    }
-
-    public ReadStreamOptions resolveLinks() {
-        return this.resolveLinks(true);
-    }
-
-    public ReadStreamOptions notResolveLinks() {
-        return this.resolveLinks(false);
+    public ReadStreamOptions notResolveLinkTos() {
+        return this.resolveLinkTos(false);
     }
 
     public StreamRevision getStartingRevision() {
