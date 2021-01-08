@@ -1,9 +1,6 @@
 package com.eventstore.dbclient;
 
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import testcontainers.module.EventStoreTestDBContainer;
 
 import java.io.BufferedReader;
@@ -26,9 +23,10 @@ public class ProjectionManagementTests {
 
     private static final int EXPECTED_EVENT_COUNT = 2000;
 
-
     private static String COUNT_EVENTS_PROJECTION;
     private static String UNKNOWN_KEYNAMES_PROJECTION;
+
+    private EventStoreDBProjectionManagementClient eventStoreDBClient;
 
     @BeforeClass
     public static void loadProjectionJs() throws IOException {
@@ -39,10 +37,27 @@ public class ProjectionManagementTests {
 
     private static String loadResourceAsString(String fileName) throws IOException {
 
-        try(BufferedReader reader = new BufferedReader(new InputStreamReader(ProjectionManagementTests.class.getClassLoader()
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(ProjectionManagementTests.class.getClassLoader()
                 .getResourceAsStream(fileName)))) {
 
             return reader.lines().collect(Collectors.joining("\n"));
+        }
+    }
+
+    @Before
+    public void init() {
+        eventStoreDBClient = server.getProjectionManagementClient();
+    }
+
+    @After
+    public void teardown() throws InterruptedException {
+        if (eventStoreDBClient == null) {
+            return;
+        }
+        try {
+            eventStoreDBClient.shutdown();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
@@ -80,21 +95,21 @@ public class ProjectionManagementTests {
     private void createProjection(
             final String projectionWithUnknownKeynames) throws InterruptedException, ExecutionException {
 
-        server.getProjectionManagementAPI()
+        eventStoreDBClient
                 .createContinuous(PROJECTION_NAME, projectionWithUnknownKeynames)
                 .get();
     }
 
     private CountResult getResultOfCountingProjection() throws InterruptedException, ExecutionException {
 
-        return server.getProjectionManagementAPI()
+        return server.getProjectionManagementClient()
                 .getResult(PROJECTION_NAME, CountResult.class)
                 .get();
     }
 
     private Map<String, Item> getResultOfUnknownKeyNamesProjection() throws ExecutionException, InterruptedException {
 
-        return server.getProjectionManagementAPI()
+        return server.getProjectionManagementClient()
                 .<Map<String, Item>>getResult(PROJECTION_NAME, factory -> factory.constructMapType(HashMap.class, String.class, Item.class))
                 .get();
     }
