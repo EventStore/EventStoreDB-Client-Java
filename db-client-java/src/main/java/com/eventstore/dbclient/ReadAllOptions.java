@@ -15,7 +15,6 @@ public class ReadAllOptions extends OptionsWithPositionAndResolveLinkTosBase<Rea
         return this.direction;
     }
 
-
     public ReadAllOptions direction(Direction direction) {
         this.direction = direction;
         return this;

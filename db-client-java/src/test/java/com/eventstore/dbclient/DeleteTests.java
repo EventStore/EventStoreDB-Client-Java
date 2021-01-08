@@ -25,7 +25,6 @@ public class DeleteTests {
                 .softDelete()
                 .expectedRevision(ExpectedRevision.expectedRevision(1999));
 
-
         DeleteResult result = client.deleteStream("dataset20M-1800", options)
                 .get();
 

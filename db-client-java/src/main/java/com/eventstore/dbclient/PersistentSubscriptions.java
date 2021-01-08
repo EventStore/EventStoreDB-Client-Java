@@ -1,7 +1,5 @@
 package com.eventstore.dbclient;
 
-import java.util.concurrent.CompletableFuture;
-
 public class PersistentSubscriptions {
     private final GrpcClient client;
     private final UserCredentials credentials;
@@ -10,6 +8,4 @@ public class PersistentSubscriptions {
         this.client = client;
         this.credentials = credentials;
     }
-
-
 }

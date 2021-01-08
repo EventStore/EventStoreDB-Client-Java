@@ -39,7 +39,7 @@ public class ParseInvalidConnectionStringTests {
 
     @Test(expected = ParseError.class)
     public void test() throws ParseError {
-        EventStoreDBClientSettings parsedSettings = ConnectionString.parse(connectionString);
+        EventStoreDBClientSettings parsedSettings = EventStoreDBConnectionString.parse(connectionString);
     }
 
 }

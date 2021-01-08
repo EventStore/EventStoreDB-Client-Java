@@ -79,7 +79,7 @@ public class EventStoreTestDBContainer extends GenericContainer<EventStoreTestDB
     private EventStoreDBClientSettings getEventStoreDBClientSettings() {
         final String address = getContainerIpAddress();
         final int port = getMappedPort(DB_HTTP_PORT);
-        final EventStoreDBClientSettings settings = ConnectionString.parseOrThrow(String.format("esdb://%s:%d?tls=false", address, port));
+        final EventStoreDBClientSettings settings = EventStoreDBConnectionString.parseOrThrow(String.format("esdb://%s:%d?tls=false", address, port));
         return settings;
     }
 

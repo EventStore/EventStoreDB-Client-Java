@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 
 import static java.lang.Integer.parseInt;
 
-public class ConnectionString {
+public class EventStoreDBConnectionString {
     private int position = 0;
     private int nextPosition = 0;
     private String connectionString;
@@ -34,12 +34,12 @@ public class ConnectionString {
     };
 
     public static EventStoreDBClientSettings parse(String connectionString) throws ParseError {
-        return new ConnectionString().parseConnectionString(connectionString);
+        return new EventStoreDBConnectionString().parseConnectionString(connectionString);
     }
 
     public static EventStoreDBClientSettings parseOrThrow(String connectionString) {
         try {
-            return ConnectionString.parse(connectionString);
+            return EventStoreDBConnectionString.parse(connectionString);
         } catch (ParseError e) {
             throw new RuntimeException(e);
         }

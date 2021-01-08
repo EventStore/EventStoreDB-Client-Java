@@ -65,7 +65,7 @@ class AccountCreated {
 ```java
 import com.eventstore.dbclient.EventStoreDBClient;
 import com.eventstore.dbclient.EventStoreDBClientSettings;
-import com.eventstore.dbclient.ConnectionString;
+import com.eventstore.dbclient.EventStoreDBConnectionString;
 import com.eventstore.dbclient.GrpcClient;
 import com.eventstore.dbclient.EventData;
 import com.eventstore.dbclient.WriteResult;
@@ -73,7 +73,7 @@ import com.eventstore.dbclient.ReadResult;
 
 public class Main {
     public static void main(String args[]) {
-        EventStoreDbClientSettings setts = ConnectionString.parseOrThrow("esdb://localhost:2113");
+        EventStoreDbClientSettings setts = EventStoreDBConnectionString.parseOrThrow("esdb://localhost:2113");
         EventStoreDbClient client = EventStoreDbClient.create(setts);                        
 
         AccountCreated createdEvent = new AccountCreated();
@@ -85,7 +85,7 @@ public class Main {
                 .builderAsJson("account-created", createdEvent)
                 .build();
 
-        WriteResult writeResult = client.streams()
+        WriteResult writeResult = client
                 .appendStream("accounts", event)
                 .get();
 
@@ -93,7 +93,7 @@ public class Main {
                 .fromStart()
                 .notResolveLinks();
 
-        ReadResult readResult = client.streams()
+        ReadResult readResult = client
                 .readStream("accounts", 1, readStreamOptions)
                 .get()
 
@@ -115,7 +115,10 @@ This client currently supports creating and getting the result of a continuous p
 
 Create a projection:
 ```java
-client.projections()
+EventStoreDbClientSettings setts = EventStoreDBConnectionString.parseOrThrow("esdb://localhost:2113");
+EventStoreDBProjectionManagementClient client = EventStoreDBProjectionManagementClient.create(setts);
+
+client
     .createContinuous(PROJECTION_NAME, PROJECTION_JS)
     .get();
 ```
@@ -138,7 +141,7 @@ public class CountResult {
 
 Get the result:
 ```java
-CountResult result = client.projections()
+CountResult result = client
     .getResult(PROJECTION_NAME, CountResult.class)
     .get();
 ```

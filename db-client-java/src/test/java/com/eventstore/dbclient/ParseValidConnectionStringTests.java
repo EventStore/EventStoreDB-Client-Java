@@ -122,7 +122,7 @@ public class ParseValidConnectionStringTests {
     public void test() throws ParseError, JsonProcessingException {
 
         EventStoreDBClientSettings expectedSettings = this.parseJson(jsonSettings);
-        EventStoreDBClientSettings parsedSettings = ConnectionString.parse(connectionString);
+        EventStoreDBClientSettings parsedSettings = EventStoreDBConnectionString.parse(connectionString);
 
         this.assertEquals(expectedSettings, parsedSettings);
     }

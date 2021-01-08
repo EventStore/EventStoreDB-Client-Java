@@ -7,5 +7,4 @@ public class SubscribeToStreamOptions extends OptionsWithStartRevisionAndResolve
     public static SubscribeToStreamOptions get() {
         return new SubscribeToStreamOptions();
     }
-
 }
