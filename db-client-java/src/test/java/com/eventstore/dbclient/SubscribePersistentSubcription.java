@@ -41,7 +41,7 @@ public class SubscribePersistentSubcription {
     @Test
     public void testSubscribePersistentSub() throws Throwable {
         PersistentSubscriptions persistent = server.getPersistentSubscriptionsAPI();
-        Streams streams = server.getStreamsAPI();
+        EventStoreDBClient client = server.getClient();
         String streamName = "aStream-" + UUID.randomUUID().toString();
 
         persistent.create(streamName, "aGroup")
@@ -49,7 +49,7 @@ public class SubscribePersistentSubcription {
 
         EventDataBuilder builder = EventData.builderAsJson("foobar", new SubscribePersistentSubcription.Foo());
 
-        streams.appendToStream(streamName, builder.build(), builder.build(), builder.build())
+        client.appendToStream(streamName, builder.build(), builder.build(), builder.build())
                 .get();
 
         final CompletableFuture<Integer> result = new CompletableFuture<>();
@@ -83,7 +83,7 @@ public class SubscribePersistentSubcription {
             }
         }).get();
 
-        streams.appendToStream(streamName, builder.build(), builder.build(), builder.build())
+        client.appendToStream(streamName, builder.build(), builder.build(), builder.build())
                 .get();
 
         Assert.assertEquals(6, result.get().intValue());

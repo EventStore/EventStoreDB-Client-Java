@@ -46,7 +46,7 @@ public class AppendTests {
 
     @Test
     public void testAppendSingleEventNoStream() throws Throwable {
-        Streams streams = server.getStreamsAPI();
+        EventStoreDBClient client = server.getClient();
 
         final String streamName = "testIntegrationAppendSingleEventNoStream";
         final String eventType = "TestEvent";
@@ -61,7 +61,7 @@ public class AppendTests {
         AppendToStreamOptions appendOptions = AppendToStreamOptions.get()
                 .expectedRevision(ExpectedRevision.NO_STREAM);
 
-        WriteResult appendResult = streams.appendToStream(streamName, appendOptions, event)
+        WriteResult appendResult = client.appendToStream(streamName, appendOptions, event)
                 .get();
 
         assertEquals(new StreamRevision(0), appendResult.getNextExpectedRevision());
@@ -71,7 +71,7 @@ public class AppendTests {
                 .backward();
 
         // Ensure appended event is readable
-        ReadResult readResult = streams.readStream(streamName, 1, readStreamOptions)
+        ReadResult readResult = client.readStream(streamName, 1, readStreamOptions)
                 .get();
 
         List<ResolvedEvent> readEvents = readResult.getEvents();

@@ -12,14 +12,14 @@ public class ReadStreamTests {
 
     @Test
     public void testReadStreamForward10EventsFromPositionStart() throws Throwable {
-        Streams streams = server.getStreamsAPI();
+        EventStoreDBClient client = server.getClient();
 
         ReadStreamOptions options = ReadStreamOptions.get()
                 .forward()
                 .fromStart()
                 .notResolveLinkTos();
 
-        ReadResult result = streams.readStream("dataset20M-1800", 10, options)
+        ReadResult result = client.readStream("dataset20M-1800", 10, options)
                 .get();
 
         verifyAgainstTestData(result.getEvents(), "dataset20M-1800-e0-e10");
@@ -27,14 +27,14 @@ public class ReadStreamTests {
 
     @Test
     public void testReadStreamBackward10EventsFromPositionEnd() throws Throwable {
-        Streams streams = server.getStreamsAPI();
+        EventStoreDBClient client = server.getClient();
 
         ReadStreamOptions options = ReadStreamOptions.get()
                 .backward()
                 .fromEnd()
                 .notResolveLinkTos();
 
-        ReadResult result = streams.readStream("dataset20M-1800", 10, options)
+        ReadResult result = client.readStream("dataset20M-1800", 10, options)
                 .get();
 
         verifyAgainstTestData(result.getEvents(), "dataset20M-1800-e1999-e1990");
