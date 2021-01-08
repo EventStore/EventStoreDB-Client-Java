@@ -1,15 +1,13 @@
 package com.eventstore.dbclient;
 
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.Test;
-import testcontainers.module.EventStoreTestDBContainer;
 
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public class SubscribePersistentSubcription {
+public class SubscribePersistentSubcription extends PersistenSubscriptionTestsBase {
     class Foo {
         @Override
         public boolean equals(Object o) {
@@ -35,21 +33,17 @@ public class SubscribePersistentSubcription {
         }
     }
 
-    @Rule
-    public final EventStoreTestDBContainer server = new EventStoreTestDBContainer(false);
-
     @Test
     public void testSubscribePersistentSub() throws Throwable {
-        PersistentSubscriptions persistent = server.getPersistentSubscriptionsAPI();
-        EventStoreDBClient client = server.getClient();
+        EventStoreDBClient streamsClient = server.getClient();
         String streamName = "aStream-" + UUID.randomUUID().toString();
 
-        persistent.create(streamName, "aGroup")
+        client.create(streamName, "aGroup")
                 .get();
 
         EventDataBuilder builder = EventData.builderAsJson("foobar", new SubscribePersistentSubcription.Foo());
 
-        client.appendToStream(streamName, builder.build(), builder.build(), builder.build())
+        streamsClient.appendToStream(streamName, builder.build(), builder.build(), builder.build())
                 .get();
 
         final CompletableFuture<Integer> result = new CompletableFuture<>();
@@ -57,7 +51,7 @@ public class SubscribePersistentSubcription {
         SubscribePersistentSubscriptionOptions connectOptions = SubscribePersistentSubscriptionOptions.get()
                 .setBufferSize(32);
 
-        persistent.subscribe(streamName, "aGroup", connectOptions, new PersistentSubscriptionListener() {
+        client.subscribe(streamName, "aGroup", connectOptions, new PersistentSubscriptionListener() {
             private int count = 0;
 
             @Override
@@ -83,7 +77,7 @@ public class SubscribePersistentSubcription {
             }
         }).get();
 
-        client.appendToStream(streamName, builder.build(), builder.build(), builder.build())
+        streamsClient.appendToStream(streamName, builder.build(), builder.build(), builder.build())
                 .get();
 
         Assert.assertEquals(6, result.get().intValue());

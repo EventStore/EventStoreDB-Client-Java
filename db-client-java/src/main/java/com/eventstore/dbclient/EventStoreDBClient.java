@@ -120,8 +120,4 @@ public class EventStoreDBClient extends EventStoreDBClientBase {
 
         return new DeleteStream(this.client, streamName, options).execute();
     }
-
-    public PersistentSubscriptions persistentSubscriptions() {
-        return new PersistentSubscriptions(this.client, this.credentials);
-    }
 }

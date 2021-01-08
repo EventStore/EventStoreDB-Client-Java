@@ -64,8 +64,10 @@ public class EventStoreTestDBContainer extends GenericContainer<EventStoreTestDB
         return EventStoreDBClient.create(settings);
     }
 
-    public PersistentSubscriptions getPersistentSubscriptionsAPI() {
-        return getClient().persistentSubscriptions();
+    public EventStoreDBPersistentSubscriptionsClient getPersistentSubscriptionsClient() {
+        final EventStoreDBClientSettings settings = getEventStoreDBClientSettings();
+
+        return EventStoreDBPersistentSubscriptionsClient.create(settings);
     }
 
     public EventStoreDBProjectionManagementClient getProjectionManagementClient() {
