@@ -4,7 +4,7 @@ public class ReadAllOptions extends OptionsWithPositionAndResolveLinkTosBase<Rea
     private Direction direction;
 
     private ReadAllOptions() {
-        this.direction = Direction.Forward;
+        this.direction = Direction.Forwards;
     }
 
     public static ReadAllOptions get() {
@@ -20,11 +20,11 @@ public class ReadAllOptions extends OptionsWithPositionAndResolveLinkTosBase<Rea
         return this;
     }
 
-    public ReadAllOptions forward() {
-        return direction(Direction.Forward);
+    public ReadAllOptions forwards() {
+        return direction(Direction.Forwards);
     }
 
-    public ReadAllOptions backward() {
-        return direction(Direction.Backward);
+    public ReadAllOptions backwards() {
+        return direction(Direction.Backwards);
     }
 }

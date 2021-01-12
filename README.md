@@ -86,7 +86,7 @@ public class Main {
                 .build();
 
         WriteResult writeResult = client
-                .appendStream("accounts", event)
+                .appendToStream("accounts", event)
                 .get();
 
         ReadStreamOptions readStreamOptions = ReadStreamOptions.get()
@@ -95,7 +95,7 @@ public class Main {
 
         ReadResult readResult = client
                 .readStream("accounts", 1, readStreamOptions)
-                .get()
+                .get();
 
         ResolvedEvent resolvedEvent = readResult
                 .getEvents()

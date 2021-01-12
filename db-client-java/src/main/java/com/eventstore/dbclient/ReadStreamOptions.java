@@ -4,7 +4,7 @@ public class ReadStreamOptions extends OptionsWithStartRevisionAndResolveLinkTos
     private Direction direction;
 
     private ReadStreamOptions() {
-        this.direction = Direction.Forward;
+        this.direction = Direction.Forwards;
     }
 
     public static ReadStreamOptions get() {
@@ -15,13 +15,13 @@ public class ReadStreamOptions extends OptionsWithStartRevisionAndResolveLinkTos
         return this.direction;
     }
 
-    public ReadStreamOptions forward() {
-        this.direction = Direction.Forward;
+    public ReadStreamOptions forwards() {
+        this.direction = Direction.Forwards;
         return this;
     }
 
-    public ReadStreamOptions backward() {
-        this.direction = Direction.Backward;
+    public ReadStreamOptions backwards() {
+        this.direction = Direction.Backwards;
         return this;
     }
 }

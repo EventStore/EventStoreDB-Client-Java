@@ -16,7 +16,7 @@ public class ReadAllTests {
         EventStoreDBClient client = server.getClient();
 
         ReadAllOptions options = ReadAllOptions.get()
-                .forward()
+                .forwards()
                 .fromStart()
                 .notResolveLinkTos();
 
@@ -31,7 +31,7 @@ public class ReadAllTests {
         EventStoreDBClient client = server.getClient();
 
         ReadAllOptions options = ReadAllOptions.get()
-                .forward()
+                .forwards()
                 .fromPosition(new Position(1788, 1788))
                 .notResolveLinkTos();
 
@@ -46,7 +46,7 @@ public class ReadAllTests {
         EventStoreDBClient client = server.getClient();
 
         ReadAllOptions options = ReadAllOptions.get()
-                .backward()
+                .backwards()
                 .fromEnd()
                 .notResolveLinkTos();
 
@@ -61,7 +61,7 @@ public class ReadAllTests {
         EventStoreDBClient client = server.getClient();
 
         ReadAllOptions options = ReadAllOptions.get()
-                .backward()
+                .backwards()
                 .fromPosition(new Position(3386, 3386))
                 .notResolveLinkTos();
 

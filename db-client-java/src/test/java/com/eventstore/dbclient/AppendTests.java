@@ -68,7 +68,7 @@ public class AppendTests {
 
         ReadStreamOptions readStreamOptions = ReadStreamOptions.get()
                 .fromEnd()
-                .backward();
+                .backwards();
 
         // Ensure appended event is readable
         ReadResult readResult = client.readStream(streamName, 1, readStreamOptions)

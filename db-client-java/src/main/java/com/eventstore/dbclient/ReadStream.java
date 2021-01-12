@@ -27,7 +27,7 @@ public class ReadStream extends AbstractRead {
                 .setResolveLinks(this.options.shouldResolveLinkTos())
                 .setCount(this.maxCount)
                 .setNoFilter(Shared.Empty.getDefaultInstance())
-                .setReadDirection(this.options.getDirection() == Direction.Forward ?
+                .setReadDirection(this.options.getDirection() == Direction.Forwards ?
                         StreamsOuterClass.ReadReq.Options.ReadDirection.Forwards :
                         StreamsOuterClass.ReadReq.Options.ReadDirection.Backwards);
     }

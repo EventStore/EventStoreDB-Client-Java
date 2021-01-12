@@ -7,17 +7,17 @@ import java.util.UUID;
 
 public class EventDataBuilder {
     private static final JsonMapper mapper = new JsonMapper();
-    private byte[] payload;
+    private byte[] eventData;
     private byte[] metadata;
     private String eventType;
     private boolean isJson;
     private UUID id;
 
-    public static <A> EventDataBuilder json(String eventType, A payload) {
+    public static <A> EventDataBuilder json(String eventType, A eventData) {
         EventDataBuilder self = new EventDataBuilder();
 
         try {
-            self.payload = mapper.writeValueAsBytes(payload);
+            self.eventData = mapper.writeValueAsBytes(eventData);
             self.isJson = true;
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
@@ -28,10 +28,10 @@ public class EventDataBuilder {
         return self;
     }
 
-    public static EventDataBuilder binary(String eventType, byte[] payload) {
+    public static EventDataBuilder binary(String eventType, byte[] eventData) {
         EventDataBuilder self = new EventDataBuilder();
 
-        self.payload = payload;
+        self.eventData = eventData;
         self.eventType = eventType;
         self.isJson = false;
 
@@ -61,6 +61,6 @@ public class EventDataBuilder {
     public EventData build() {
         UUID eventId = this.id == null ? UUID.randomUUID() : this.id;
         String contentType = this.isJson ? "application/json" : "application/octet-stream";
-        return new EventData(eventId, this.eventType, contentType, this.payload, this.metadata);
+        return new EventData(eventId, this.eventType, contentType, this.eventData, this.metadata);
     }
 }

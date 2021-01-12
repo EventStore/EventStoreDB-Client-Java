@@ -15,7 +15,7 @@ public class ReadStreamTests {
         EventStoreDBClient client = server.getClient();
 
         ReadStreamOptions options = ReadStreamOptions.get()
-                .forward()
+                .forwards()
                 .fromStart()
                 .notResolveLinkTos();
 
@@ -30,7 +30,7 @@ public class ReadStreamTests {
         EventStoreDBClient client = server.getClient();
 
         ReadStreamOptions options = ReadStreamOptions.get()
-                .backward()
+                .backwards()
                 .fromEnd()
                 .notResolveLinkTos();
 
