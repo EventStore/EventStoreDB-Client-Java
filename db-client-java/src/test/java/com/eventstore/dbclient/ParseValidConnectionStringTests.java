@@ -95,7 +95,7 @@ public class ParseValidConnectionStringTests {
         });
     }
 
-    public void assertEquals(ClientSettings settings, ClientSettings other) {
+    public void assertEquals(EventStoreDBClientSettings settings, EventStoreDBClientSettings other) {
         Assert.assertEquals(settings.isDnsDiscover(), other.isDnsDiscover());
         Assert.assertEquals(settings.getMaxDiscoverAttempts(), other.getMaxDiscoverAttempts());
         Assert.assertEquals(settings.getDiscoveryInterval(), other.getDiscoveryInterval());
@@ -121,14 +121,14 @@ public class ParseValidConnectionStringTests {
     @Test
     public void test() throws ParseError, JsonProcessingException {
 
-        ClientSettings expectedSettings = this.parseJson(jsonSettings);
-        ClientSettings parsedSettings = ConnectionString.parse(connectionString);
+        EventStoreDBClientSettings expectedSettings = this.parseJson(jsonSettings);
+        EventStoreDBClientSettings parsedSettings = EventStoreDBConnectionString.parse(connectionString);
 
         this.assertEquals(expectedSettings, parsedSettings);
     }
 
-    private ClientSettings parseJson(String input) throws JsonProcessingException {
-        ConnectionSettingsBuilder builder = ClientSettings.builder();
+    private EventStoreDBClientSettings parseJson(String input) throws JsonProcessingException {
+        ConnectionSettingsBuilder builder = EventStoreDBClientSettings.builder();
         JsonNode tree = mapper.readTree(input);
 
         builder

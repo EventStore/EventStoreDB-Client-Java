@@ -6,11 +6,11 @@ import io.grpc.netty.shaded.io.netty.handler.ssl.util.InsecureTrustManagerFactor
 
 import javax.net.ssl.SSLException;
 
-public class Client {
-    final private GrpcClient client;
-    final private UserCredentials credentials;
+public class EventStoreDBClientBase {
+    final protected GrpcClient client;
+    final protected UserCredentials credentials;
 
-    private Client(ClientSettings settings) {
+    protected EventStoreDBClientBase(EventStoreDBClientSettings settings) {
         ConnectionBuilder builder = new ConnectionBuilder();
         if (settings.getDefaultCredentials() != null) {
             this.credentials = settings.getDefaultCredentials().toUserCredentials();
@@ -48,23 +48,7 @@ public class Client {
         this.client = builder.createSingleNodeConnection(settings.getHosts()[0]);
     }
 
-    public static Client create(ClientSettings settings) {
-        return new Client(settings);
-    }
-
-    public Streams streams() {
-        return new Streams(this.client, this.credentials);
-    }
-
-    public PersistentSubscriptions persistentSubscriptions() {
-        return new PersistentSubscriptions(this.client, this.credentials);
-    }
-
     public void shutdown() throws InterruptedException {
         this.client.shutdown();
-    }
-
-    public Projections projections() {
-        return new Projections(this.client, this.credentials);
     }
 }

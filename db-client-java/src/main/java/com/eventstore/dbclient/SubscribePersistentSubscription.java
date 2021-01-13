@@ -14,13 +14,13 @@ import io.grpc.stub.StreamObserver;
 
 import java.util.concurrent.CompletableFuture;
 
-public class ConnectPersistentSubscription {
+public class SubscribePersistentSubscription {
     private static final Persistent.ReadReq.Options.Builder defaultReadOptions;
     private final GrpcClient connection;
     private final String stream;
     private final String group;
     private final PersistentSubscriptionListener listener;
-    private ConnectionMetadata metadata;
+    private final SubscribePersistentSubscriptionOptions options;
 
     static {
         defaultReadOptions = Persistent.ReadReq.Options.newBuilder()
@@ -28,26 +28,17 @@ public class ConnectPersistentSubscription {
                         .setStructured(Shared.Empty.getDefaultInstance()));
     }
 
-    public ConnectPersistentSubscription(GrpcClient connection, String stream, String group, UserCredentials credentials, PersistentSubscriptionListener listener) {
+    public SubscribePersistentSubscription(GrpcClient connection, String stream, String group, SubscribePersistentSubscriptionOptions options, PersistentSubscriptionListener listener) {
         this.connection = connection;
         this.stream = stream;
         this.group = group;
-        this.metadata = new ConnectionMetadata();
         this.listener = listener;
-
-        if (credentials != null) {
-            this.metadata.authenticated(credentials);
-        }
+        this.options = options;
     }
 
-    public ConnectPersistentSubscription authenticated(UserCredentials credentials) {
-        this.metadata.authenticated(credentials);
-        return this;
-    }
-
-    public CompletableFuture execute(int bufferSize) {
+    public CompletableFuture execute() {
         return this.connection.run(channel -> {
-            Metadata headers = this.metadata.build();
+            Metadata headers = this.options.getMetadata();
             PersistentSubscriptionsGrpc.PersistentSubscriptionsStub client = MetadataUtils.attachHeaders(PersistentSubscriptionsGrpc.newStub(channel), headers);
 
             final CompletableFuture<PersistentSubscription> result = new CompletableFuture<>();
@@ -56,6 +47,8 @@ public class ConnectPersistentSubscription {
                     Shared.StreamIdentifier.newBuilder()
                             .setStreamName(ByteString.copyFromUtf8(stream))
                             .build();
+
+            int bufferSize = this.options.getBufferSize();
 
             Persistent.ReadReq.Options options = defaultReadOptions.clone()
                     .setBufferSize(bufferSize)

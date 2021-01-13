@@ -14,6 +14,10 @@ public class ConnectionMetadata {
         return this;
     }
 
+    public boolean hasUserCredentials() {
+        return this.metadata.containsKey(Metadata.Key.of("authorization", Metadata.ASCII_STRING_MARSHALLER));
+    }
+
     public ConnectionMetadata requiresLeader() {
         this.metadata.put(Metadata.Key.of("requires-leader", Metadata.ASCII_STRING_MARSHALLER), String.valueOf(true));
         return this;

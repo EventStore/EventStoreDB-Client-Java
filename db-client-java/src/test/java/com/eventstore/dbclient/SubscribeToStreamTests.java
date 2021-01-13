@@ -16,7 +16,7 @@ public class SubscribeToStreamTests {
 
     @Test
     public void testStreamSubscriptionDeliversAllowsCancellationDuringStream() throws InterruptedException, ExecutionException {
-        Streams streams = server.getStreamsAPI();
+        EventStoreDBClient client = server.getClient();
 
         final CountDownLatch receivedEvents = new CountDownLatch(1000);
         final CountDownLatch cancellation = new CountDownLatch(1);
@@ -38,8 +38,7 @@ public class SubscribeToStreamTests {
             }
         };
 
-        Subscription result = streams.subscribeToStream("dataset20M-0", listener)
-                .execute()
+        Subscription result = client.subscribeToStream("dataset20M-0", listener)
                 .get();
 
         receivedEvents.await();
@@ -49,7 +48,7 @@ public class SubscribeToStreamTests {
 
     @Test
     public void testStreamSubscriptionDeliversAllEventsInStream() throws InterruptedException, ExecutionException {
-        Streams streams = server.getStreamsAPI();
+        EventStoreDBClient client = server.getClient();
 
         final CountDownLatch receivedEvents = new CountDownLatch(6000);
         final CountDownLatch cancellation = new CountDownLatch(1);
@@ -76,8 +75,8 @@ public class SubscribeToStreamTests {
         }
 
         CountingListener listener = new CountingListener();
-        Subscription result = streams.subscribeToStream("dataset20M-0", listener)
-                .execute()
+
+        Subscription result = client.subscribeToStream("dataset20M-0", listener)
                 .get();
 
         receivedEvents.await();
@@ -87,7 +86,7 @@ public class SubscribeToStreamTests {
 
     @Test
     public void testStreamSubscriptionDeliversAllEventsInStreamAndListensForNewEvents() throws Throwable {
-        Streams streams = server.getStreamsAPI();
+        EventStoreDBClient client = server.getClient();
 
         final CountDownLatch receivedEvents = new CountDownLatch(6000);
         final CountDownLatch appendedEvents = new CountDownLatch(1);
@@ -137,8 +136,8 @@ public class SubscribeToStreamTests {
 
         // Listen to everything already in the stream
         CountingListener listener = new CountingListener();
-        Subscription subscription = streams.subscribeToStream(testStreamName, listener)
-                .execute()
+
+        Subscription subscription = client.subscribeToStream(testStreamName, listener)
                 .get();
 
         receivedEvents.await();
@@ -149,10 +148,10 @@ public class SubscribeToStreamTests {
                 .metadataAsBytes(eventMetaData)
                 .build();
 
-        WriteResult writeResult = streams.appendStream(testStreamName)
-                .addEvent(event)
-                .expectedRevision(ExpectedRevision.expectedRevision(5999))
-                .execute()
+        AppendToStreamOptions options = AppendToStreamOptions.get()
+                .expectedRevision(ExpectedRevision.expectedRevision(5999));
+
+        WriteResult writeResult = client.appendToStream(testStreamName, options, event)
                 .get();
 
         assertEquals(new StreamRevision(6000), writeResult.getNextExpectedRevision());

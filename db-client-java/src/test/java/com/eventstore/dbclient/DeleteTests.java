@@ -19,11 +19,13 @@ public class DeleteTests {
     * TODO - Update the test as described in the comment below.
     * */
     public void testCanDeleteStream() throws Throwable {
-        Streams streams = server.getStreamsAPI();
-        DeleteResult result = streams.deleteStream("dataset20M-1800")
+        EventStoreDBClient client = server.getClient();
+
+        DeleteStreamOptions options = DeleteStreamOptions.get()
                 .softDelete()
-                .expectedRevision(ExpectedRevision.expectedRevision(1999))
-                .execute()
+                .expectedRevision(ExpectedRevision.expectedRevision(1999));
+
+        DeleteResult result = client.deleteStream("dataset20M-1800", options)
                 .get();
 
         // The ideal actual test here would be that the stream does not exist, but since this

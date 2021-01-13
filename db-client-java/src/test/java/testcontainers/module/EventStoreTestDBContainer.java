@@ -58,24 +58,29 @@ public class EventStoreTestDBContainer extends GenericContainer<EventStoreTestDB
         waitingFor(Wait.forHealthcheck());
     }
 
-    public Client getClient() {
+    public EventStoreDBClient getClient() {
+        final EventStoreDBClientSettings settings = getEventStoreDBClientSettings();
+
+        return EventStoreDBClient.create(settings);
+    }
+
+    public EventStoreDBPersistentSubscriptionsClient getPersistentSubscriptionsClient() {
+        final EventStoreDBClientSettings settings = getEventStoreDBClientSettings();
+
+        return EventStoreDBPersistentSubscriptionsClient.create(settings);
+    }
+
+    public EventStoreDBProjectionManagementClient getProjectionManagementClient() {
+        final EventStoreDBClientSettings settings = getEventStoreDBClientSettings();
+
+        return EventStoreDBProjectionManagementClient.create(settings);
+    }
+
+    private EventStoreDBClientSettings getEventStoreDBClientSettings() {
         final String address = getContainerIpAddress();
         final int port = getMappedPort(DB_HTTP_PORT);
-        final ClientSettings settings = ConnectionString.parseOrThrow(String.format("esdb://%s:%d?tls=false", address, port));
-
-        return Client.create(settings);
+        final EventStoreDBClientSettings settings = EventStoreDBConnectionString.parseOrThrow(String.format("esdb://%s:%d?tls=false", address, port));
+        return settings;
     }
 
-    public Streams getStreamsAPI() {
-        return getClient().streams();
-    }
-
-    public PersistentSubscriptions getPersistentSubscriptionsAPI() {
-        return getClient().persistentSubscriptions();
-    }
-
-    public Projections getProjectionManagementAPI() {
-
-        return getClient().projections();
-    }
 }

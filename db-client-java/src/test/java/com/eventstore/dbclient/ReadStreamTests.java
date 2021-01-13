@@ -2,7 +2,6 @@ package com.eventstore.dbclient;
 
 import org.junit.Rule;
 import org.junit.Test;
-import testcontainers.module.EventStoreStreamsClient;
 import testcontainers.module.EventStoreTestDBContainer;
 
 import java.util.List;
@@ -13,25 +12,29 @@ public class ReadStreamTests {
 
     @Test
     public void testReadStreamForward10EventsFromPositionStart() throws Throwable {
-        Streams streams = server.getStreamsAPI();
-         ReadResult result = streams.readStream("dataset20M-1800")
-                 .forward()
-                 .fromStart()
-                 .notResolveLinks()
-                 .execute(10)
-                 .get();
+        EventStoreDBClient client = server.getClient();
+
+        ReadStreamOptions options = ReadStreamOptions.get()
+                .forwards()
+                .fromStart()
+                .notResolveLinkTos();
+
+        ReadResult result = client.readStream("dataset20M-1800", 10, options)
+                .get();
 
         verifyAgainstTestData(result.getEvents(), "dataset20M-1800-e0-e10");
     }
 
     @Test
     public void testReadStreamBackward10EventsFromPositionEnd() throws Throwable {
-        Streams streams = server.getStreamsAPI();
-        ReadResult result = streams.readStream("dataset20M-1800")
-                .backward()
+        EventStoreDBClient client = server.getClient();
+
+        ReadStreamOptions options = ReadStreamOptions.get()
+                .backwards()
                 .fromEnd()
-                .notResolveLinks()
-                .execute(10)
+                .notResolveLinkTos();
+
+        ReadResult result = client.readStream("dataset20M-1800", 10, options)
                 .get();
 
         verifyAgainstTestData(result.getEvents(), "dataset20M-1800-e1999-e1990");

@@ -7,9 +7,9 @@ public enum Direction {
     /**
      * Read in the forward direction.
      */
-    Forward,
+    Forwards,
     /**
      * Read in the backward direction.
      */
-    Backward
+    Backwards
 }

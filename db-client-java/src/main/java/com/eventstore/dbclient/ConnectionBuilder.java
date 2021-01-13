@@ -60,7 +60,7 @@ public class ConnectionBuilder {
         return new EventStoreDBClusterClient(null, endpoint, nodePreference, _timeouts, _sslContext);
     }
 
-    public GrpcClient createConnectionFromConnectionSettings(ClientSettings clientSettings) {
+    public GrpcClient createConnectionFromConnectionSettings(EventStoreDBClientSettings clientSettings) {
 
         ConnectionBuilder builder = new ConnectionBuilder();
 

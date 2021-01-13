@@ -11,11 +11,11 @@ import static org.junit.Assert.*;
 
 public class SubscribeToAllTests {
     @Rule
-    public final EventStoreTestDBContainer server = new EventStoreTestDBContainer(false);
+    public final EventStoreTestDBContainer client = new EventStoreTestDBContainer(false);
 
     @Test
     public void testAllSubscriptionDeliversAllowsCancellationDuringStream() throws InterruptedException, ExecutionException {
-        Streams streams = server.getStreamsAPI();
+        EventStoreDBClient streams = client.getClient();
 
         final CountDownLatch receivedEvents = new CountDownLatch(1000);
         final CountDownLatch cancellation = new CountDownLatch(1);
@@ -37,9 +37,10 @@ public class SubscribeToAllTests {
             }
         };
 
-        Subscription result = streams.subscribeToAll(listener)
-                .fromStart()
-                .execute()
+        SubscribeToAllOptions options = SubscribeToAllOptions.get()
+                .fromStart();
+
+        Subscription result = streams.subscribeToAll(listener, options)
                 .get();
 
         receivedEvents.await();
@@ -88,11 +89,12 @@ public class SubscribeToAllTests {
                 .withEventTypePrefix("eventType-194")
                 .build();
 
-        Subscription result = server.getClient().streams()
-                .subscribeToAll(listener)
+        SubscribeToAllOptions options = SubscribeToAllOptions.get()
                 .fromStart()
-                .filter(filter)
-                .execute()
+                .filter(filter);
+
+        Subscription result = client.getClient()
+                .subscribeToAll(listener, options)
                 .get();
 
         assertNotNull(result.getSubscriptionId());

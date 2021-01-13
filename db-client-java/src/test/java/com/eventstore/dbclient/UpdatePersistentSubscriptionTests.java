@@ -1,29 +1,22 @@
 package com.eventstore.dbclient;
 
-import org.junit.Rule;
 import org.junit.Test;
-import testcontainers.module.EventStoreStreamsClient;
-import testcontainers.module.EventStoreTestDBContainer;
 
-public class UpdatePersistentSubscriptionTests {
-    @Rule
-    public final EventStoreTestDBContainer server = new EventStoreTestDBContainer(false);
-
+public class UpdatePersistentSubscriptionTests extends PersistenSubscriptionTestsBase {
     @Test
-    public void testUpdatePersistentSub() throws Throwable { {
-        PersistentSubscriptions persistent = server.getPersistentSubscriptionsAPI();
+    public void testUpdatePersistentSub() throws Throwable {
 
-        persistent.create("aStream", "aGroupUpd")
-                .execute()
+        client.create("aStream", "aGroupUpd")
                 .get();
 
         PersistentSubscriptionSettings updatedSettings = PersistentSubscriptionSettings.builder()
                 .checkpointAfterInMs(5_000)
                 .build();
 
-        persistent.update("aStream", "aGroupUpd")
-            .settings(updatedSettings)
-            .execute()
+        UpdatePersistentSubscriptionOptions options = UpdatePersistentSubscriptionOptions.get()
+                .settings(updatedSettings);
+
+        client.update("aStream", "aGroupUpd", options)
             .get();
-    }}
+    }
 }

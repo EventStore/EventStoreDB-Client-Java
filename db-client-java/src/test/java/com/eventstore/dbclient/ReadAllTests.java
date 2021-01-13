@@ -2,7 +2,6 @@ package com.eventstore.dbclient;
 
 import org.junit.Rule;
 import org.junit.Test;
-import testcontainers.module.EventStoreStreamsClient;
 import testcontainers.module.EventStoreTestDBContainer;
 
 import java.util.List;
@@ -14,24 +13,29 @@ public class ReadAllTests {
 
     @Test
     public void testReadAllEventsForwardFromZeroPosition() throws ExecutionException, InterruptedException {
-        Streams streams = server.getStreamsAPI();
-        ReadResult result = streams.readAll()
-                .forward()
+        EventStoreDBClient client = server.getClient();
+
+        ReadAllOptions options = ReadAllOptions.get()
+                .forwards()
                 .fromStart()
-                .notResolveLinks()
-                .execute(10)
+                .notResolveLinkTos();
+
+        ReadResult result = client.readAll(10, options)
                 .get();
+
         verifyAgainstTestData(result.getEvents(), "all-e0-e10");
     }
 
     @Test
     public void testReadAllEventsForwardFromNonZeroPosition() throws ExecutionException, InterruptedException {
-        Streams streams = server.getStreamsAPI();
-        ReadResult result = streams.readAll()
-                .forward()
+        EventStoreDBClient client = server.getClient();
+
+        ReadAllOptions options = ReadAllOptions.get()
+                .forwards()
                 .fromPosition(new Position(1788, 1788))
-                .notResolveLinks()
-                .execute(10)
+                .notResolveLinkTos();
+
+        ReadResult result = client.readAll(10, options)
                 .get();
 
         verifyAgainstTestData(result.getEvents(), "all-c1788-p1788");
@@ -39,12 +43,14 @@ public class ReadAllTests {
 
     @Test
     public void testReadAllEventsBackwardsFromZeroPosition() throws ExecutionException, InterruptedException {
-        Streams streams = server.getStreamsAPI();
-        ReadResult result = streams.readAll()
-                .backward()
+        EventStoreDBClient client = server.getClient();
+
+        ReadAllOptions options = ReadAllOptions.get()
+                .backwards()
                 .fromEnd()
-                .notResolveLinks()
-                .execute(10)
+                .notResolveLinkTos();
+
+        ReadResult result = client.readAll(10, options)
                 .get();
 
         verifyAgainstTestData(result.getEvents(), "all-back-e0-e10");
@@ -52,12 +58,14 @@ public class ReadAllTests {
 
     @Test
     public void testReadAllEventsBackwardsFromNonZeroPosition() throws ExecutionException, InterruptedException {
-        Streams streams = server.getStreamsAPI();
-        ReadResult result = streams.readAll()
-                .backward()
+        EventStoreDBClient client = server.getClient();
+
+        ReadAllOptions options = ReadAllOptions.get()
+                .backwards()
                 .fromPosition(new Position(3386, 3386))
-                .notResolveLinks()
-                .execute(10)
+                .notResolveLinkTos();
+
+        ReadResult result = client.readAll(10, options)
                 .get();
 
         verifyAgainstTestData(result.getEvents(), "all-back-c3386-p3386");

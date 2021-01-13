@@ -14,42 +14,27 @@ public class UpdatePersistentSubscription {
     private final GrpcClient connection;
     private final String stream;
     private final String group;
-    private PersistentSubscriptionSettings settings;
-    private ConnectionMetadata metadata;
+    private final UpdatePersistentSubscriptionOptions options;
 
-    public UpdatePersistentSubscription(GrpcClient connection, String stream, String group, UserCredentials credentials) {
+    public UpdatePersistentSubscription(GrpcClient connection, String stream, String group, UpdatePersistentSubscriptionOptions options) {
         this.connection = connection;
         this.stream = stream;
         this.group = group;
-        this.settings = PersistentSubscriptionSettings.builder().build();
-        this.metadata = new ConnectionMetadata();
 
-        if (credentials != null) {
-            this.metadata.authenticated(credentials);
-        }
-    }
-
-    public UpdatePersistentSubscription authenticated(UserCredentials credentials) {
-        this.metadata.authenticated(credentials);
-        return this;
-    }
-
-    public UpdatePersistentSubscription settings(PersistentSubscriptionSettings settings) {
-        this.settings = settings;
-
-        return this;
+        this.options = options;
     }
 
     public CompletableFuture execute() {
         return this.connection.run(channel -> {
             CompletableFuture result = new CompletableFuture();
-            Metadata headers = this.metadata.build();
+            Metadata headers = this.options.getMetadata();
             PersistentSubscriptionsGrpc.PersistentSubscriptionsStub client = MetadataUtils.attachHeaders(PersistentSubscriptionsGrpc.newStub(channel), headers);
 
             Persistent.UpdateReq.Options.Builder builder = Persistent.UpdateReq.Options.newBuilder();
             Persistent.UpdateReq.Settings.Builder settingsBuilder = Persistent.UpdateReq.Settings.newBuilder();
             Shared.StreamIdentifier.Builder streamIdentifierBuilder = Shared.StreamIdentifier.newBuilder();
 
+            PersistentSubscriptionSettings settings = options.getSettings();
             settingsBuilder.setRevision(settings.getRevision())
                     .setResolveLinks(settings.isResolveLinks())
                     .setReadBatchSize(settings.getReadBatchSize())

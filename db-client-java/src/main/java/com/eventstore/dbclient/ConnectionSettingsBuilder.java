@@ -12,11 +12,11 @@ public class ConnectionSettingsBuilder {
     private boolean _tls = true;
     private boolean _tlsVerifyCert = true;
     private boolean _throwOnAppendFailure = true;
-    private ClientSettings.Credentials _defaultCredentials;
+    private EventStoreDBClientSettings.Credentials _defaultCredentials;
     private LinkedList<Endpoint> _hosts = new LinkedList<>();
 
-    public ClientSettings buildConnectionSettings() {
-        return new ClientSettings(_dnsDiscover,
+    public EventStoreDBClientSettings buildConnectionSettings() {
+        return new EventStoreDBClientSettings(_dnsDiscover,
                 _maxDiscoverAttempts,
                 _discoveryInterval,
                 _gossipTimeout,
@@ -70,7 +70,7 @@ public class ConnectionSettingsBuilder {
     }
 
     public ConnectionSettingsBuilder defaultCredentials(String username, String password) {
-        this._defaultCredentials = new ClientSettings.Credentials(username, password);
+        this._defaultCredentials = new EventStoreDBClientSettings.Credentials(username, password);
         return this;
     }
 

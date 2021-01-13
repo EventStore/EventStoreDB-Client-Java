@@ -14,28 +14,19 @@ public class DeletePersistentSubscription {
     private final GrpcClient client;
     private final String stream;
     private final String group;
-    private ConnectionMetadata metadata;
+    private final DeletePersistentSubscriptionOptions options;
 
-    public DeletePersistentSubscription(GrpcClient client, String stream, String group, UserCredentials credentials) {
+    public DeletePersistentSubscription(GrpcClient client, String stream, String group, DeletePersistentSubscriptionOptions options) {
         this.client = client;
         this.stream = stream;
         this.group = group;
-        this.metadata = new ConnectionMetadata();
-
-        if (credentials != null) {
-            this.metadata.authenticated(credentials);
-        }
-    }
-
-    public DeletePersistentSubscription authenticated(UserCredentials credentials) {
-        this.metadata.authenticated(credentials);
-        return this;
+        this.options = options;
     }
 
     public CompletableFuture execute() {
         return this.client.run(channel -> {
             CompletableFuture result = new CompletableFuture();
-            Metadata headers = this.metadata.build();
+            Metadata headers = this.options.getMetadata();
             PersistentSubscriptionsGrpc.PersistentSubscriptionsStub client = MetadataUtils.attachHeaders(PersistentSubscriptionsGrpc.newStub(channel), headers);
 
             Shared.StreamIdentifier streamIdentifier =

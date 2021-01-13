@@ -14,11 +14,12 @@ import java.util.concurrent.CompletableFuture;
 public abstract class AbstractRead {
     protected static final StreamsOuterClass.ReadReq.Options.Builder defaultReadOptions;
 
-    private GrpcClient client;
-    protected ConnectionMetadata metadata;
+    private final GrpcClient client;
+    protected final Metadata metadata;
 
-    protected AbstractRead(GrpcClient client) {
+    protected AbstractRead(GrpcClient client, Metadata metadata) {
         this.client = client;
+        this.metadata = metadata;
     }
 
     static {
@@ -27,19 +28,15 @@ public abstract class AbstractRead {
                         .setStructured(Shared.Empty.getDefaultInstance()));
     }
 
-    public abstract StreamsOuterClass.ReadReq.Options.Builder createOptions(long count);
+    public abstract StreamsOuterClass.ReadReq.Options.Builder createOptions();
 
-    public CompletableFuture<ReadResult> readThrough() {
-        return this.execute(Long.MAX_VALUE);
-    }
-
-    public CompletableFuture<ReadResult> execute(long count) {
+    public CompletableFuture<ReadResult> execute() {
         return this.client.run(channel -> {
             StreamsOuterClass.ReadReq request = StreamsOuterClass.ReadReq.newBuilder()
-                    .setOptions(createOptions(count))
+                    .setOptions(createOptions())
                     .build();
 
-            Metadata headers = this.metadata.build();
+            Metadata headers = this.metadata;
             StreamsGrpc.StreamsStub client = MetadataUtils.attachHeaders(StreamsGrpc.newStub(channel), headers);
 
             CompletableFuture<ReadResult> future = new CompletableFuture<>();

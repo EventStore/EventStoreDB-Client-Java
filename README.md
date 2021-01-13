@@ -13,6 +13,23 @@ EventStore Ltd publishes GA (general availability) versions to [Maven Central].
 The SDK is built using [`Gradle`][gradle]. Integration tests run against a server using Docker, with the [EventStoreDB gRPC
 Client Test Container][container].
 
+### Run tests
+
+Tests are written using [TestContainers](https://www.testcontainers.org/) and require [Docker](https://www.docker.com/) to be installed.
+To access the github packages docker images, you need to authenticate docker with a gitub personal access token. It should be [generated](https://github.com/settings/tokens/new). Select at least following scopes:
+- `repo`
+- `read:packages`
+- `write:packages`
+
+Then login to github docker registry with:
+```shell script
+$ docker login https://docker.pkg.github.com -u YOUR_GITHUB_USERNAME
+```
+
+and providing your personal access token as a password. 
+
+Check full instructions in the ["Authenticating to GitHub packages"](https://docs.github.com/en/free-pro-team@latest/packages/guides/configuring-docker-for-use-with-github-packages#authenticating-to-github-packages) guide.
+
 ## EventStoreDB Server Compatibility
 
 This client is compatible with version `20.6.1` upwards.
@@ -46,9 +63,9 @@ class AccountCreated {
 }
 ```
 ```java
-import com.eventstore.dbclient.Client;
-import com.eventstore.dbclient.ClientSettings;
-import com.eventstore.dbclient.ConnectionString;
+import com.eventstore.dbclient.EventStoreDBClient;
+import com.eventstore.dbclient.EventStoreDBClientSettings;
+import com.eventstore.dbclient.EventStoreDBConnectionString;
 import com.eventstore.dbclient.GrpcClient;
 import com.eventstore.dbclient.EventData;
 import com.eventstore.dbclient.WriteResult;
@@ -56,8 +73,8 @@ import com.eventstore.dbclient.ReadResult;
 
 public class Main {
     public static void main(String args[]) {
-        ClientSettings setts = ConnectionString.parseOrThrow("esdb://localhost:2113");
-        Client client = Client.create(setts);                        
+        EventStoreDbClientSettings setts = EventStoreDBConnectionString.parseOrThrow("esdb://localhost:2113");
+        EventStoreDbClient client = EventStoreDbClient.create(setts);                        
 
         AccountCreated createdEvent = new AccountCreated();
 
@@ -68,17 +85,19 @@ public class Main {
                 .builderAsJson("account-created", createdEvent)
                 .build();
 
-        WriteResult writeResult = client.streams()
-                .appendStream("accounts")
-                .addEvent(event)
-                .execute()
+        WriteResult writeResult = client
+                .appendToStream("accounts", event)
                 .get();
 
-        ResolvedEvent resolvedEvent = client.streams()
-                .readStream("accounts")
+        ReadStreamOptions readStreamOptions = ReadStreamOptions.get()
                 .fromStart()
-                .execute(1)
-                .get()
+                .notResolveLinks();
+
+        ReadResult readResult = client
+                .readStream("accounts", 1, readStreamOptions)
+                .get();
+
+        ResolvedEvent resolvedEvent = readResult
                 .getEvents()
                 .get(0);
 
@@ -96,9 +115,11 @@ This client currently supports creating and getting the result of a continuous p
 
 Create a projection:
 ```java
-client.projections()
-    .createContinuous(PROJECTION_NAME, PROJECTION_JS, false)
-    .execute()
+EventStoreDbClientSettings setts = EventStoreDBConnectionString.parseOrThrow("esdb://localhost:2113");
+EventStoreDBProjectionManagementClient client = EventStoreDBProjectionManagementClient.create(setts);
+
+client
+    .createContinuous(PROJECTION_NAME, PROJECTION_JS)
     .get();
 ```
 
@@ -120,9 +141,8 @@ public class CountResult {
 
 Get the result:
 ```java
-CountResult result = client.projections()
+CountResult result = client
     .getResult(PROJECTION_NAME, CountResult.class)
-    .execute()
     .get();
 ```
 

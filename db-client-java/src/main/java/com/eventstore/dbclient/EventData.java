@@ -37,12 +37,12 @@ public final class EventData {
         return userMetadata;
     }
 
-    public static <A> EventDataBuilder builderAsJson(String eventType, A payload) {
-        return EventDataBuilder.json(eventType, payload);
+    public static <A> EventDataBuilder builderAsJson(String eventType, A eventData) {
+        return EventDataBuilder.json(eventType, eventData);
     }
 
-    public static EventDataBuilder builderAsBinary(String eventType, byte[] payload) {
-        return EventDataBuilder.binary(eventType, payload);
+    public static EventDataBuilder builderAsBinary(String eventType, byte[] eventData) {
+        return EventDataBuilder.binary(eventType, eventData);
     }
 }
 
