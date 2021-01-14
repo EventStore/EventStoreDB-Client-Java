@@ -15,4 +15,14 @@ class OptionsWithExpectedRevisionBase<T> extends OptionsBase<T> {
         this.expectedRevision = revision;
         return (T) this;
     }
+
+    public T expectedRevision(StreamRevision revision) {
+        this.expectedRevision = ExpectedRevision.expectedRevision(revision.getValueUnsigned());
+        return (T) this;
+    }
+
+    public T expectedRevision(long revision) {
+        this.expectedRevision = ExpectedRevision.expectedRevision(revision);
+        return (T) this;
+    }
 }

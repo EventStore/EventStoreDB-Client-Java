@@ -38,10 +38,18 @@ public final class EventData {
     }
 
     public static <A> EventDataBuilder builderAsJson(String eventType, A eventData) {
-        return EventDataBuilder.json(eventType, eventData);
+        return builderAsJson(null, eventType, eventData);
+    }
+
+    public static <A> EventDataBuilder builderAsJson(UUID eventId, String eventType, A eventData) {
+        return EventDataBuilder.json(eventId, eventType, eventData);
     }
 
     public static EventDataBuilder builderAsBinary(String eventType, byte[] eventData) {
+        return builderAsBinary(null, eventType, eventData);
+    }
+
+    public static EventDataBuilder builderAsBinary(UUID id, String eventType, byte[] eventData) {
         return EventDataBuilder.binary(eventType, eventData);
     }
 }

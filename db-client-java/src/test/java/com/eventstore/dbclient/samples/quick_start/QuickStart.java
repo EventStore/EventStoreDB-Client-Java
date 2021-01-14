@@ -16,7 +16,7 @@ public class QuickStart {
 
         // region createEvent
         TestEvent event = new TestEvent();
-        event.setEntityId(UUID.randomUUID().toString());
+        event.setId(UUID.randomUUID().toString());
         event.setImportantData("I wrote my first event!");
 
         EventData eventData = EventData
