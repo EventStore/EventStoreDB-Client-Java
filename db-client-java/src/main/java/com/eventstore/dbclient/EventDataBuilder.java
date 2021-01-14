@@ -14,6 +14,10 @@ public class EventDataBuilder {
     private UUID id;
 
     public static <A> EventDataBuilder json(String eventType, A eventData) {
+        return json(null, eventType, eventData);
+    }
+
+    public static <A> EventDataBuilder json(UUID id, String eventType, A eventData) {
         EventDataBuilder self = new EventDataBuilder();
 
         try {
@@ -29,6 +33,10 @@ public class EventDataBuilder {
     }
 
     public static EventDataBuilder binary(String eventType, byte[] eventData) {
+        return binary(null, eventType, eventData);
+    }
+
+    public static EventDataBuilder binary(UUID id, String eventType, byte[] eventData) {
         EventDataBuilder self = new EventDataBuilder();
 
         self.eventData = eventData;
