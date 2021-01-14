@@ -124,7 +124,7 @@ public class SubscribingToStream {
         // endregion subscribe-to-all-subscription-dropped
     }
 
-    private static void SubscribeToFiltered(EventStoreDBClient client) {
+    private static void subscribeToFiltered(EventStoreDBClient client) {
         SubscriptionListener listener = new SubscriptionListener() {
             @Override
             public void onEvent(Subscription subscription, ResolvedEvent event) {
@@ -154,7 +154,7 @@ public class SubscribingToStream {
         // endregion stream-regex-filtered-subscription
     }
 
-    private static void OverridingUserCredentials(EventStoreDBClient client) {
+    private static void overridingUserCredentials(EventStoreDBClient client) {
         SubscriptionListener listener = new SubscriptionListener() {
             @Override
             public void onEvent(Subscription subscription, ResolvedEvent event) {
