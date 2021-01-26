@@ -44,7 +44,7 @@ public class EventStoreDBClient extends EventStoreDBClientBase {
     }
 
     public CompletableFuture<ReadResult> readStream(String streamName, ReadStreamOptions options) {
-        return this.readStream(streamName, Long.MAX_VALUE, ReadStreamOptions.get());
+        return this.readStream(streamName, Long.MAX_VALUE, options);
     }
 
     public CompletableFuture<ReadResult> readStream(String streamName, long maxCount, ReadStreamOptions options) {
