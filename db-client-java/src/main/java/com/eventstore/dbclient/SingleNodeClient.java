@@ -5,6 +5,7 @@ import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 public class SingleNodeClient implements GrpcClient {
@@ -13,12 +14,16 @@ public class SingleNodeClient implements GrpcClient {
     private final ManagedChannel channel;
     private final SslContext context;
     private final Timeouts timeouts;
+    private final long keepAliveTimeoutInMs;
+    private final long keepAliveIntervalInMs;
 
-    public SingleNodeClient(String host, int port, Timeouts timeouts, SslContext context) {
+    public SingleNodeClient(String host, int port, Timeouts timeouts, SslContext context, long keepAliveTimeoutInMs, long keepAliveIntervalInMs) {
         this.host = host;
         this.port = port;
         this.context = context;
         this.timeouts = timeouts;
+        this.keepAliveTimeoutInMs = keepAliveTimeoutInMs;
+        this.keepAliveIntervalInMs = keepAliveIntervalInMs;
         this.channel = createChannel();
     }
 
@@ -31,6 +36,16 @@ public class SingleNodeClient implements GrpcClient {
         } else {
             builder.sslContext(context);
         }
+
+        if (keepAliveTimeoutInMs == -1)
+            builder.keepAliveTimeout(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+        else
+            builder.keepAliveTimeout(keepAliveTimeoutInMs, TimeUnit.MILLISECONDS);
+
+        if (keepAliveIntervalInMs == -1)
+            builder.keepAliveTime(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+        else
+            builder.keepAliveTime(keepAliveIntervalInMs, TimeUnit.MILLISECONDS);
 
         return builder.build();
     }

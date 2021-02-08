@@ -91,7 +91,11 @@ public class ParseValidConnectionStringTests {
                 {
                         "esdb://host?MaxDiscoverAttempts=200&discoveryinterval=1000&GOSSIPTIMEOUT=1&nOdEpReFeReNcE=leader&TLS=false&TlsVerifyCert=false&THROWOnAppendFailure=false",
                         "{\"dnsDiscover\":false,\"maxDiscoverAttempts\":200,\"discoveryInterval\":1000,\"gossipTimeout\":1,\"nodePreference\":\"leader\",\"tls\":false,\"tlsVerifyCert\":false,\"throwOnAppendFailure\":false,\"hosts\":[{\"address\":\"host\",\"port\":2113}]}"
-                }
+                },
+                {
+                        "esdb://localhost?keepAliveTimeout=20&keepAliveInterval=10",
+                        "{\"dnsDiscover\":false,\"maxDiscoverAttempts\":3,\"discoveryInterval\":500,\"gossipTimeout\":3000,\"nodePreference\":\"random\",\"tls\":true,\"tlsVerifyCert\":true,\"throwOnAppendFailure\":true,\"hosts\":[{\"address\":\"localhost\",\"port\":2113}], \"keepAliveTimeout\": \"20\", \"keepAliveInterval\": \"10\"}"
+                },
         });
     }
 
@@ -104,6 +108,8 @@ public class ParseValidConnectionStringTests {
         Assert.assertEquals(settings.isTls(), other.isTls());
         Assert.assertEquals(settings.isTlsVerifyCert(), other.isTlsVerifyCert());
         Assert.assertEquals(settings.isThrowOnAppendFailure(), other.isThrowOnAppendFailure());
+        Assert.assertEquals(settings.getKeepAliveTimeout(), other.getKeepAliveTimeout());
+        Assert.assertEquals(settings.getKeepAliveInterval(), other.getKeepAliveInterval());
 
         Assert.assertEquals(settings.getHosts().length, other.getHosts().length);
         IntStream.range(0, settings.getHosts().length).forEach((i) -> {
@@ -141,6 +147,14 @@ public class ParseValidConnectionStringTests {
                 .tlsVerifyCert(tree.get("tlsVerifyCert").asBoolean())
                 .throwOnAppendFailure(tree.get("throwOnAppendFailure").asBoolean());
 
+        JsonNode keepAliveTimeoutNode = tree.get("keepAliveTimeout");
+        JsonNode keepAliveIntervalNode = tree.get("keepAliveInterval");
+
+        if (keepAliveTimeoutNode != null)
+            builder.keepAliveTimeout(Long.parseLong(keepAliveTimeoutNode.asText()));
+
+        if (keepAliveIntervalNode != null)
+            builder.keepAliveInterval(Long.parseLong(keepAliveIntervalNode.asText()));
 
         tree.get("hosts").elements().forEachRemaining((host) -> {
             builder.addHost(new Endpoint(host.get("address").asText(), host.get("port").asInt()));

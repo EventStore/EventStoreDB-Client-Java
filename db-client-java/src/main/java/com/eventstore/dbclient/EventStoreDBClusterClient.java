@@ -40,8 +40,10 @@ public class EventStoreDBClusterClient implements GrpcClient {
     private final SslContext sslContext;
     private final Timeouts timeouts;
     private LinkedBlockingQueue<Msg> messages;
+    private final long keepAliveTimeoutInMs;
+    private final long keepAliveIntervalInMs;
 
-    public EventStoreDBClusterClient(List<InetSocketAddress> seedNodes, Endpoint domainEndpoint, NodePreference nodePreference, Timeouts timeouts, SslContext sslContext) {
+    public EventStoreDBClusterClient(List<InetSocketAddress> seedNodes, Endpoint domainEndpoint, NodePreference nodePreference, Timeouts timeouts, SslContext sslContext, long keepAliveTimeoutInMs, long keepAliveIntervalInMs) {
         this.seedNodes = seedNodes;
         this.nodePreference = nodePreference;
         this.sslContext = sslContext;
@@ -49,6 +51,8 @@ public class EventStoreDBClusterClient implements GrpcClient {
         this.domainEndpoint = domainEndpoint;
         this.currentChannelId = UUID.randomUUID();
         this.messages = new LinkedBlockingQueue<>();
+        this.keepAliveTimeoutInMs = keepAliveTimeoutInMs;
+        this.keepAliveIntervalInMs = keepAliveIntervalInMs;
 
         try {
             this.messages.put(new CreateChannel(this.currentChannelId));
@@ -67,6 +71,16 @@ public class EventStoreDBClusterClient implements GrpcClient {
         } else {
             builder.sslContext(this.sslContext);
         }
+
+        if (keepAliveTimeoutInMs <= 0)
+            builder.keepAliveTimeout(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+        else
+            builder.keepAliveTimeout(keepAliveTimeoutInMs, TimeUnit.MILLISECONDS);
+
+        if (keepAliveIntervalInMs <= 0)
+            builder.keepAliveTime(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+        else
+            builder.keepAliveTime(keepAliveIntervalInMs, TimeUnit.MILLISECONDS);
 
         return builder.build();
     }

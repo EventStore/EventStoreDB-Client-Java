@@ -7,6 +7,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.lang.Integer.parseInt;
+import static java.lang.Long.parseLong;
 
 public class EventStoreDBConnectionString {
     private int position = 0;
@@ -30,6 +31,8 @@ public class EventStoreDBConnectionString {
             put("tls", "tls");
             put("tlsverifycert", "tlsVerifyCert");
             put("throwonappendfailure", "throwOnAppendFailure");
+            put("keepalivetimeout", "keepAliveTimeout");
+            put("keepaliveinterval", "keepAliveInterval");
         }
     };
 
@@ -263,8 +266,77 @@ public class EventStoreDBConnectionString {
                 this.settings.throwOnAppendFailure(value.equals("true"));
                 break;
             }
+            case "keepAliveTimeout": {
+                try {
+                    long parsedValue = parseLong(value);
+                    if (parsedValue >= 0 && parsedValue < Consts.DEFAULT_KEEP_ALIVE_TIMEOUT_IN_MS) {
+                        // FIXME - Use a proper log library.
+                        System.out.println("Specified keepAliveTimeout of " + parsedValue + " is less than recommended " + Consts.DEFAULT_KEEP_ALIVE_TIMEOUT_IN_MS);
+                    }
+
+                    if (parsedValue < -1) {
+                        // FIXME - Use a proper log library.
+                        System.out.println("Invalid keepAliveTimeout of " + parsedValue + ". Please provide a positive integer, or -1 to disable");
+
+                        throw new ParseError(
+                                this.connectionString,
+                                keyPosition,
+                                this.nextPosition,
+                                "positive integer"
+                        );
+                    }
+
+                    if (parsedValue == -1)
+                        parsedValue = Long.MAX_VALUE;
+
+                    this.settings.keepAliveTimeout(parsedValue);
+                } catch (NumberFormatException e) {
+                    throw new ParseError(
+                            this.connectionString,
+                            keyPosition,
+                            this.nextPosition,
+                            "integer"
+                    );
+                }
+                break;
+            }
+            case "keepAliveInterval": {
+                try {
+                    long parsedValue = parseLong(value);
+                    if (parsedValue >= 0 && parsedValue < Consts.DEFAULT_KEEP_ALIVE_INTERVAL_IN_MS) {
+                        // FIXME - Use a proper log library.
+                        System.out.println("Specified keepAliveInterval of " + parsedValue + " is less than recommended " + Consts.DEFAULT_KEEP_ALIVE_INTERVAL_IN_MS);
+                    }
+
+                    if (parsedValue < -1) {
+                        // FIXME - Use a proper log library.
+                        System.out.println("Invalid keepAliveInterval of " + parsedValue + ". Please provide a positive integer, or -1 to disable");
+
+                        throw new ParseError(
+                                this.connectionString,
+                                keyPosition,
+                                this.nextPosition,
+                                "positive integer"
+                        );
+                    }
+
+                    if (parsedValue == -1)
+                        parsedValue = Long.MAX_VALUE;
+
+                    this.settings.keepAliveInterval(parsedValue);
+                } catch (NumberFormatException e) {
+                    throw new ParseError(
+                            this.connectionString,
+                            keyPosition,
+                            this.nextPosition,
+                            "integer"
+                    );
+                }
+                break;
+            }
             default: {
                 String warning = "unknown option " + key + ", setting will be ignored.";
+                // FIXME - Use a proper logging library.
                 System.out.println(warning);
             }
         }

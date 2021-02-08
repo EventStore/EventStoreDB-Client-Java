@@ -30,6 +30,10 @@ public class ParseInvalidConnectionStringTests {
                 {"esdb://localhost?tlsVerifyCert=false&nodePreference=any"},
                 {"esdb://localhost?tlsVerifyCert=if you feel like it"},
                 {"esdb://localhost?throwOnAppendFailure=sometimes"},
+                {"esdb://localhost?keepAliveInterval=-3"},
+                {"esdb://localhost?keepAliveInterval=sdfksjsfl"},
+                {"esdb://localhost?keepAliveTimeout=sdfksjsfl"},
+                {"esdb://localhost?keepAliveTimeout=-3"},
         });
     }
 
