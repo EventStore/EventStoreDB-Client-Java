@@ -14,6 +14,8 @@ public class ConnectionSettingsBuilder {
     private boolean _throwOnAppendFailure = true;
     private EventStoreDBClientSettings.Credentials _defaultCredentials;
     private LinkedList<Endpoint> _hosts = new LinkedList<>();
+    private long _keepAliveTimeout = Consts.DEFAULT_KEEP_ALIVE_TIMEOUT_IN_MS;
+    private long _keepAliveInterval = Consts.DEFAULT_KEEP_ALIVE_INTERVAL_IN_MS;
 
     public EventStoreDBClientSettings buildConnectionSettings() {
         return new EventStoreDBClientSettings(_dnsDiscover,
@@ -25,8 +27,9 @@ public class ConnectionSettingsBuilder {
                 _tlsVerifyCert,
                 _throwOnAppendFailure,
                 _defaultCredentials,
-                _hosts.toArray(new Endpoint[_hosts.size()])
-        );
+                _hosts.toArray(new Endpoint[_hosts.size()]),
+                _keepAliveTimeout,
+                _keepAliveInterval);
     }
 
     public ConnectionSettingsBuilder dnsDiscover(boolean dnsDiscover) {
@@ -76,6 +79,33 @@ public class ConnectionSettingsBuilder {
 
     public ConnectionSettingsBuilder addHost(Endpoint host) {
         this._hosts.push(host);
+        return this;
+    }
+
+    public ConnectionSettingsBuilder keepAliveTimeout(long value) {
+        if (value >= 0 && value < Consts.DEFAULT_KEEP_ALIVE_TIMEOUT_IN_MS) {
+            // FIXME - Use a proper log library.
+            System.out.println("Specified keepAliveTimeout of " + value + " is less than recommended " + Consts.DEFAULT_KEEP_ALIVE_TIMEOUT_IN_MS);
+        } else {
+            if (value == -1)
+                value = Long.MAX_VALUE;
+
+            this._keepAliveTimeout = value;
+        }
+        return this;
+    }
+
+    public ConnectionSettingsBuilder keepAliveInterval(long value) {
+        if (value >= 0 && value < Consts.DEFAULT_KEEP_ALIVE_INTERVAL_IN_MS) {
+            // FIXME - Use a proper log library.
+            System.out.println("Specified keepAliveInterval of " + value + " is less than recommended " + Consts.DEFAULT_KEEP_ALIVE_INTERVAL_IN_MS);
+        } else {
+            if (value == -1)
+                value = Long.MAX_VALUE;
+
+            this._keepAliveInterval = value;
+        }
+
         return this;
     }
 }
