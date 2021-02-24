@@ -30,6 +30,8 @@ and providing your personal access token as a password.
 
 Check full instructions in the ["Authenticating to GitHub packages"](https://docs.github.com/en/free-pro-team@latest/packages/guides/configuring-docker-for-use-with-github-packages#authenticating-to-github-packages) guide.
 
+Specific docker images can be specified via the enviroment variable `EVENTSTORE_IMAGE`.
+
 ## EventStoreDB Server Compatibility
 
 This client is compatible with version `20.6.1` upwards.
