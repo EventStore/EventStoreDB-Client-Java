@@ -5,6 +5,8 @@ import com.github.dockerjava.api.model.HealthCheck;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
+import java.util.Optional;
+
 public class EventStoreTestDBContainer extends GenericContainer<EventStoreTestDBContainer> {
     public static final String NAME;
     public static final String IMAGE;
@@ -23,16 +25,21 @@ public class EventStoreTestDBContainer extends GenericContainer<EventStoreTestDB
         DB_HTTP_PORT = 2113;
     }
 
+    private static String getImageName() {
+        return Optional.ofNullable(System.getenv("EVENTSTORE_IMAGE"))
+                .orElse(IMAGE + ":" + IMAGE_TAG);
+    }
+
     public EventStoreTestDBContainer() {
         this(true);
     }
 
     public EventStoreTestDBContainer(boolean emptyDatabase) {
-        this(IMAGE + ":" + IMAGE_TAG, emptyDatabase);
+        this(getImageName(), emptyDatabase);
     }
 
     public EventStoreTestDBContainer(boolean emptyDatabase, boolean runProjections) {
-        this(IMAGE + ":" + IMAGE_TAG, emptyDatabase, runProjections);
+        this(getImageName(), emptyDatabase, runProjections);
     }
 
     public EventStoreTestDBContainer(String image, boolean emptyDatabase) {
