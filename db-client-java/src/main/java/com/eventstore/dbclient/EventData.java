@@ -49,8 +49,8 @@ public final class EventData {
         return builderAsBinary(null, eventType, eventData);
     }
 
-    public static EventDataBuilder builderAsBinary(UUID id, String eventType, byte[] eventData) {
-        return EventDataBuilder.binary(eventType, eventData);
+    public static EventDataBuilder builderAsBinary(UUID eventId, String eventType, byte[] eventData) {
+        return EventDataBuilder.binary(eventId, eventType, eventData);
     }
 }
 
