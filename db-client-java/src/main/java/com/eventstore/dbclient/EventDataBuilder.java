@@ -34,6 +34,7 @@ public class EventDataBuilder {
         self.eventData = eventData;
         self.eventType = eventType;
         self.isJson = true;
+        self.id = id;
 
         return self;
     }
@@ -48,6 +49,7 @@ public class EventDataBuilder {
         self.eventData = eventData;
         self.eventType = eventType;
         self.isJson = false;
+        self.id = id;
 
         return self;
     }

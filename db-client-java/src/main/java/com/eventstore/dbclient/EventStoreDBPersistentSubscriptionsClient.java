@@ -23,6 +23,13 @@ public class EventStoreDBPersistentSubscriptionsClient extends EventStoreDBClien
     }
 
     public CompletableFuture create(String stream, String group, CreatePersistentSubscriptionOptions options) {
+        if (options == null)
+            options = CreatePersistentSubscriptionOptions.get();
+
+        if (!options.hasUserCredentials()) {
+            options.authenticated(this.credentials);
+        }
+
         return new CreatePersistentSubscription(this.client, stream, group, options).execute();
     }
 
@@ -38,6 +45,13 @@ public class EventStoreDBPersistentSubscriptionsClient extends EventStoreDBClien
     }
 
     public CompletableFuture update(String stream, String group, UpdatePersistentSubscriptionOptions options) {
+        if (options == null)
+            options = UpdatePersistentSubscriptionOptions.get();
+
+        if (!options.hasUserCredentials()) {
+            options.authenticated(this.credentials);
+        }
+
         return new UpdatePersistentSubscription(this.client, stream, group, options).execute();
     }
 
@@ -46,6 +60,13 @@ public class EventStoreDBPersistentSubscriptionsClient extends EventStoreDBClien
     }
 
     public CompletableFuture delete(String stream, String group, DeletePersistentSubscriptionOptions options) {
+        if (options == null)
+            options = DeletePersistentSubscriptionOptions.get();
+
+        if (!options.hasUserCredentials()) {
+            options.authenticated(this.credentials);
+        }
+
         return new DeletePersistentSubscription(this.client, stream, group, options).execute();
     }
 
@@ -54,6 +75,13 @@ public class EventStoreDBPersistentSubscriptionsClient extends EventStoreDBClien
     }
 
     public CompletableFuture subscribe(String stream, String group, SubscribePersistentSubscriptionOptions options, PersistentSubscriptionListener listener) {
+        if (options == null)
+            options = SubscribePersistentSubscriptionOptions.get();
+
+        if (!options.hasUserCredentials()) {
+            options.authenticated(this.credentials);
+        }
+
         return new SubscribePersistentSubscription(this.client, stream, group, options, listener).execute();
     }
 }
