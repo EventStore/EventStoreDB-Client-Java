@@ -8,6 +8,21 @@ compatible with Java 8 and above.
 ## Access to binaries
 EventStore Ltd publishes GA (general availability) versions to [Maven Central].
 
+### Snapshot versions
+
+Snapshot versions are pushed on Sonatype Snapshots Repository every time a pull request is merged in the main branch `trunk`.
+The snippet below shows how to use the Sonatype Snapshots Repository using the Gradle build tool.
+
+```gradle
+repositories {
+    ...
+    maven {
+        url uri('https://oss.sonatype.org/content/repositories/snapshots')
+    }
+    ...
+}
+```
+
 ## Developing
 
 The SDK is built using [`Gradle`][gradle]. Integration tests run against a server using Docker, with the [EventStoreDB gRPC
@@ -26,7 +41,7 @@ Then login to github docker registry with:
 $ docker login https://docker.pkg.github.com -u YOUR_GITHUB_USERNAME
 ```
 
-and providing your personal access token as a password. 
+and providing your personal access token as a password.
 
 Check full instructions in the ["Authenticating to GitHub packages"](https://docs.github.com/en/free-pro-team@latest/packages/guides/configuring-docker-for-use-with-github-packages#authenticating-to-github-packages) guide.
 
@@ -76,7 +91,7 @@ import com.eventstore.dbclient.ReadResult;
 public class Main {
     public static void main(String args[]) {
         EventStoreDbClientSettings setts = EventStoreDBConnectionString.parseOrThrow("esdb://localhost:2113");
-        EventStoreDbClient client = EventStoreDbClient.create(setts);                        
+        EventStoreDbClient client = EventStoreDbClient.create(setts);
 
         AccountCreated createdEvent = new AccountCreated();
 
@@ -105,7 +120,7 @@ public class Main {
 
         AccountCreated writtenEvent = resolvedEvent.getOriginalEvent()
                 .getEventDataAs(AccountCreated.class);
-    
+
         // Doing something productive...
     }
 }
