@@ -24,4 +24,4 @@ jobs:
       - name: Publish Sonatype Release repository
         uses: eskatos/gradle-command-action@v1
         with:
-          arguments: publish -PossrhUsername="${{ secrets.OSSRH_USERNAME }}" -PossrhPassword="${{ secrets.OSSRH_PASSWORD }}" -PsecretKey="${{secrets.SECRET_KEY }}" -PsecretKeyId="${{secrets.SECRET_KEY }}"
+          arguments: publish -PossrhUsername="${{ secrets.OSSRH_USERNAME }}" -PossrhPassword="${{ secrets.OSSRH_PASSWORD }}" -PsecretKey="${{secrets.SECRET_KEY }}" -PsecretKeyId="${{secrets.SECRET_KEY_ID }}"
