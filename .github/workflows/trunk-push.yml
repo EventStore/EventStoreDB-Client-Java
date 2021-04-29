@@ -39,7 +39,7 @@ jobs:
       - name: Build and Test
         uses: eskatos/gradle-command-action@v1
         with:
-          arguments: test -PossrhUsername="" -PossrhPassword=""
+          arguments: test
 
   publish:
     name: Publish Snapshot Packages
@@ -49,25 +49,17 @@ jobs:
       - name: Check Out Sources
         uses: actions/checkout@v1
 
-      - name: Install JDK ${{ matrix.java }}
+      - name: Install JDK 8
         uses: actions/setup-java@v1
         with:
-          java-version: 11
+          java-version: 8
+
       - name: Confirm Java Version
         shell: bash
         run: javac -version
 
-      - name: Cache Gradle packages
-        uses: actions/cache@v2
-        with:
-          path: ~/.gradle/caches
-          key: ubuntu-latest-11-gradle-${{ hashFiles('**/*.gradle') }}
-          restore-keys: ubuntu-latest-11-gradle
-
-      - name: Publish GitHub Packages
+      - name: Publish Sonatype Snapshots repository
         uses: eskatos/gradle-command-action@v1
         with:
-          arguments: publish -PossrhUsername="" -PossrhPassword=""
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          arguments: publish -PossrhUsername="${{ secrets.OSSRH_USERNAME }}" -PossrhPassword="${{ secrets.OSSRH_PASSWORD }}" -PsecretKey="${{secrets.SECRET_KEY }}" -PsecretKeyId="${{secrets.SECRET_KEY_ID }}"
 

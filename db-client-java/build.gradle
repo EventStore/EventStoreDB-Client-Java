@@ -15,7 +15,7 @@ plugins {
 }
 
 group = 'com.eventstore'
-version = '1.0.0'
+version = '1.1.0-SNAPSHOT'
 
 java {
     withJavadocJar()
@@ -72,6 +72,12 @@ protobuf {
     }
 }
 
+def isSnapshot = project.version.toString().endsWith("-SNAPSHOT")
+def publishLogin = project.hasProperty("ossrhUsername") ? project.getProperties().get("ossrhUsername") : ""
+def publishPassword = project.hasProperty("ossrhPassword") ? project.getProperties().get("ossrhPassword") : ""
+def secretKeyId = project.hasProperty("secretKeyId") ? project.getProperties().get("secretKeyId") : ""
+def secretKey = project.hasProperty("secretKey") ? project.getProperties().get("secretKey") : ""
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
@@ -104,18 +110,20 @@ publishing {
                         name = 'Yorick Laupa'
                         email = 'yorick.laupa@eventstore.com'
                     }
-                }    
-            }    
+                }
+            }
         }
     }
 
     repositories {
         maven {
-            url = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
-            credentials {
-                def publishLogin = project.hasProperty("ossrhUsername") ? project.getProperties().get("ossrhUsername") : ""
-                def publishPassword = project.hasProperty("ossrhPassword") ? project.getProperties().get("ossrhPassword") : ""
+            def releaseUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+            def snapshotUrl = 'https://oss.sonatype.org/content/repositories/snapshots'
+            def finalUrl = isSnapshot ? snapshotUrl : releaseUrl
 
+            name = 'Sonatype'
+            url = finalUrl
+            credentials {
                 username = publishLogin
                 password = publishPassword
             }
@@ -124,7 +132,8 @@ publishing {
 }
 
 signing {
-    useGpgCmd()
+    // useGpgCmd()
+    useInMemoryPgpKeys(secretKeyId, secretKey, "")
     sign configurations.archives
     sign publishing.publications.mavenJava
 }

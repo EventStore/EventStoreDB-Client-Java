@@ -1,0 +1,27 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "oss-v*"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Out Sources
+        uses: actions/checkout@v1
+
+      - name: Install JDK 8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 8
+
+      - name: Confirm Java Version
+        shell: bash
+        run: javac -version
+
+      - name: Publish Sonatype Release repository
+        uses: eskatos/gradle-command-action@v1
+        with:
+          arguments: publish -PossrhUsername="${{ secrets.OSSRH_USERNAME }}" -PossrhPassword="${{ secrets.OSSRH_PASSWORD }}" -PsecretKey="${{secrets.SECRET_KEY }}" -PsecretKeyId="${{secrets.SECRET_KEY_ID }}"
