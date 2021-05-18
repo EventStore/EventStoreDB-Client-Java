@@ -1,5 +1,8 @@
 package com.eventstore.dbclient;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.*;
@@ -10,6 +13,7 @@ import static java.lang.Integer.parseInt;
 import static java.lang.Long.parseLong;
 
 public class EventStoreDBConnectionString {
+    private final Logger logger = LoggerFactory.getLogger(EventStoreDBConnectionString.class);
     private int position = 0;
     private int nextPosition = 0;
     private String connectionString;
@@ -182,8 +186,7 @@ public class EventStoreDBConnectionString {
         int keyPosition = this.position + ("&" + key + "=").length();
 
         if (notCurrentlySupported.contains(key)) {
-            String warning = key + " is not currently supported by this client, and will have no effect.";
-            System.out.println(warning);
+            logger.warn("{} is not currently supported by this client, and will have no effect.", key);
         }
 
         switch (key) {
@@ -270,13 +273,11 @@ public class EventStoreDBConnectionString {
                 try {
                     long parsedValue = parseLong(value);
                     if (parsedValue >= 0 && parsedValue < Consts.DEFAULT_KEEP_ALIVE_TIMEOUT_IN_MS) {
-                        // FIXME - Use a proper log library.
-                        System.out.println("Specified keepAliveTimeout of " + parsedValue + " is less than recommended " + Consts.DEFAULT_KEEP_ALIVE_TIMEOUT_IN_MS);
+                        logger.warn("Specified keepAliveTimeout of {} is less than recommended {}", parsedValue, Consts.DEFAULT_KEEP_ALIVE_TIMEOUT_IN_MS);
                     }
 
                     if (parsedValue < -1) {
-                        // FIXME - Use a proper log library.
-                        System.out.println("Invalid keepAliveTimeout of " + parsedValue + ". Please provide a positive integer, or -1 to disable");
+                        logger.error("Invalid keepAliveTimeout of {}. Please provide a positive integer, or -1 to disable.", parsedValue);
 
                         throw new ParseError(
                                 this.connectionString,
@@ -304,13 +305,11 @@ public class EventStoreDBConnectionString {
                 try {
                     long parsedValue = parseLong(value);
                     if (parsedValue >= 0 && parsedValue < Consts.DEFAULT_KEEP_ALIVE_INTERVAL_IN_MS) {
-                        // FIXME - Use a proper log library.
-                        System.out.println("Specified keepAliveInterval of " + parsedValue + " is less than recommended " + Consts.DEFAULT_KEEP_ALIVE_INTERVAL_IN_MS);
+                        logger.warn("Specified keepAliveInterval of {} is less than recommended {}", parsedValue, Consts.DEFAULT_KEEP_ALIVE_INTERVAL_IN_MS);
                     }
 
                     if (parsedValue < -1) {
-                        // FIXME - Use a proper log library.
-                        System.out.println("Invalid keepAliveInterval of " + parsedValue + ". Please provide a positive integer, or -1 to disable");
+                        logger.error("Invalid keepAliveInterval of {}. Please provide a positive integer, or -1 to disable.", parsedValue);
 
                         throw new ParseError(
                                 this.connectionString,
@@ -335,9 +334,7 @@ public class EventStoreDBConnectionString {
                 break;
             }
             default: {
-                String warning = "unknown option " + key + ", setting will be ignored.";
-                // FIXME - Use a proper logging library.
-                System.out.println(warning);
+                logger.warn("Unknown option {}, setting will be ignored.", key);
             }
         }
 

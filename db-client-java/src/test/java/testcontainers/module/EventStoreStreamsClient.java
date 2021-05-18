@@ -2,6 +2,8 @@ package testcontainers.module;
 
 import org.junit.rules.ExternalResource;
 
+import java.util.concurrent.ExecutionException;
+
 public class EventStoreStreamsClient extends ExternalResource {
     private final EventStoreTestDBContainer server;
 
@@ -20,7 +22,7 @@ public class EventStoreStreamsClient extends ExternalResource {
 
         try {
             this.server.getClient().shutdown();
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
     }

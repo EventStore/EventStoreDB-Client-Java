@@ -5,6 +5,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import testcontainers.module.EventStoreTestDBContainer;
 
+import java.util.concurrent.ExecutionException;
+
 class PersistenSubscriptionTestsBase {
     @Rule
     public final EventStoreTestDBContainer server = new EventStoreTestDBContainer(false);
@@ -22,7 +24,7 @@ class PersistenSubscriptionTestsBase {
 
         try {
             client.shutdown();
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
     }

@@ -18,23 +18,14 @@ import java.util.function.Function;
 public class GossipClient {
     private final ManagedChannel _channel;
     private final GossipGrpc.GossipStub _stub;
-    private final Timeouts _timeouts;
 
-    public GossipClient(String host, int port, Timeouts timeouts, SslContext sslContext) {
-        this(NettyChannelBuilder.forAddress(host, port)
-                .userAgent("Event Store Client (Java) v1.0.0-SNAPSHOT")
-                .sslContext(sslContext)
-                .build(), timeouts);
-    }
-
-    public GossipClient(ManagedChannel channel, Timeouts timeouts) {
+    public GossipClient(ManagedChannel channel) {
         _channel = channel;
-        _timeouts = timeouts;
         _stub = GossipGrpc.newStub(_channel);
     }
 
     public void shutdown() throws InterruptedException {
-        _channel.shutdown().awaitTermination(_timeouts.shutdownTimeout, _timeouts.shutdownTimeoutUnit);
+        _channel.shutdown().awaitTermination(Timeouts.DEFAULT.shutdownTimeout, Timeouts.DEFAULT.shutdownTimeoutUnit);
     }
 
     public CompletableFuture<ClusterInfo> read() {

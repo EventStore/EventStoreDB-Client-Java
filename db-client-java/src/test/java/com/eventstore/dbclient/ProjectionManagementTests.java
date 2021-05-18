@@ -56,7 +56,7 @@ public class ProjectionManagementTests {
         }
         try {
             eventStoreDBClient.shutdown();
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
     }
