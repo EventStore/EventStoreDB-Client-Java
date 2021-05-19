@@ -1,6 +1,7 @@
 package com.eventstore.dbclient;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.concurrent.CompletableFuture;
 
@@ -35,6 +36,16 @@ public class EventStoreDBClient extends EventStoreDBClientBase {
         return new AppendToStream(this.client, streamName, events, options).execute();
     }
 
+    public CompletableFuture<WriteResult> setStreamMetadata(String streamName, StreamMetadata metadata) {
+        return setStreamMetadata(streamName, null, metadata);
+    }
+
+    public CompletableFuture<WriteResult> setStreamMetadata(String streamName, AppendToStreamOptions options, StreamMetadata metadata) {
+        EventData event = EventDataBuilder.json("$metadata", metadata.serialize()).build();
+
+        return appendToStream("$$" + streamName, options, event);
+     }
+
     public CompletableFuture<ReadResult> readStream(String streamName) {
         return this.readStream(streamName, Long.MAX_VALUE, ReadStreamOptions.get());
     }
@@ -55,6 +66,34 @@ public class EventStoreDBClient extends EventStoreDBClientBase {
             options.authenticated(this.credentials);
 
         return new ReadStream(this.client, streamName, maxCount, options).execute();
+    }
+
+    public CompletableFuture<StreamMetadata> getStreamMetadata(String streamName) {
+        return getStreamMetadata(streamName, null);
+    }
+
+    public CompletableFuture<StreamMetadata> getStreamMetadata(String streamName, ReadStreamOptions options) {
+
+        return readStream("$$" + streamName, options).thenCompose(result -> {
+            RecordedEvent event = result.getEvents().get(0).getOriginalEvent();
+            CompletableFuture<StreamMetadata> out = new CompletableFuture<>();
+
+            try {
+                HashMap<String, Object> source = event.getEventDataAs(HashMap.class);
+
+                out.complete(StreamMetadata.deserialize(source));
+            } catch (Throwable e) {
+                out.completeExceptionally(e);
+            }
+
+            return out;
+        }).exceptionally(e -> {
+            if (e.getCause() instanceof StreamNotFoundException) {
+                return new StreamMetadata();
+            }
+
+            throw new RuntimeException(e);
+        });
     }
 
     public CompletableFuture<ReadResult> readAll() {
