@@ -1,9 +1,13 @@
 package com.eventstore.dbclient;
 
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.LinkedList;
 
 public class ConnectionSettingsBuilder {
+    private final Logger logger = LoggerFactory.getLogger(ConnectionSettingsBuilder.class);
     private boolean _dnsDiscover = false;
     private int _maxDiscoverAttempts = 3;
     private int _discoveryInterval = 500;
@@ -84,8 +88,7 @@ public class ConnectionSettingsBuilder {
 
     public ConnectionSettingsBuilder keepAliveTimeout(long value) {
         if (value >= 0 && value < Consts.DEFAULT_KEEP_ALIVE_TIMEOUT_IN_MS) {
-            // FIXME - Use a proper log library.
-            System.out.println("Specified keepAliveTimeout of " + value + " is less than recommended " + Consts.DEFAULT_KEEP_ALIVE_TIMEOUT_IN_MS);
+            logger.warn("Specified keepAliveTimeout of {} is less than recommended {}", value, Consts.DEFAULT_KEEP_ALIVE_TIMEOUT_IN_MS);
         } else {
             if (value == -1)
                 value = Long.MAX_VALUE;
@@ -97,8 +100,7 @@ public class ConnectionSettingsBuilder {
 
     public ConnectionSettingsBuilder keepAliveInterval(long value) {
         if (value >= 0 && value < Consts.DEFAULT_KEEP_ALIVE_INTERVAL_IN_MS) {
-            // FIXME - Use a proper log library.
-            System.out.println("Specified keepAliveInterval of " + value + " is less than recommended " + Consts.DEFAULT_KEEP_ALIVE_INTERVAL_IN_MS);
+            logger.warn("Specified keepAliveInterval of {} is less than recommended {}", value, Consts.DEFAULT_KEEP_ALIVE_INTERVAL_IN_MS);
         } else {
             if (value == -1)
                 value = Long.MAX_VALUE;
