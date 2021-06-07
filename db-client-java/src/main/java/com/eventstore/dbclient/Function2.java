@@ -1,2 +1,6 @@
-package com.eventstore.dbclient;public interface Function2 {
+package com.eventstore.dbclient;
+
+@FunctionalInterface
+public interface Function2<A, B, R> {
+   R apply(A a, B b);
 }

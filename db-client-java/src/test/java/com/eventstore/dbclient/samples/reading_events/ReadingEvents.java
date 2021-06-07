@@ -14,10 +14,9 @@ public class ReadingEvents {
                 .forwards()
                 .fromStart();
 
-        ReadResult result = client.readStream("some-stream", options)
+        List<ResolvedEvent> events = client.readStream("some-stream", options, Observer.collect())
                 .get();
 
-        Iterable<ResolvedEvent> events = result.getEvents();
         // endregion read-from-stream
 
         // region iterate-stream
@@ -34,10 +33,9 @@ public class ReadingEvents {
                 .forwards()
                 .fromRevision(10);
 
-        ReadResult result = client.readStream("some-stream", 20, options)
+        List<ResolvedEvent> events = client.readStream("some-stream", 20, options, Observer.collect())
                 .get();
 
-        Iterable<ResolvedEvent> events = result.getEvents();
         // endregion read-from-stream-position
 
         // region iterate-stream
@@ -57,7 +55,7 @@ public class ReadingEvents {
                 .fromStart()
                 .authenticated(credentials);
 
-        ReadResult result = client.readStream("some-stream", options)
+        List<ResolvedEvent> result = client.readStream("some-stream", Observer.collect())
                 .get();
         // endregion overriding-user-credentials
     }
@@ -68,11 +66,10 @@ public class ReadingEvents {
                 .forwards()
                 .fromRevision(10);
 
-        Iterable<ResolvedEvent> events = null;
+        List<ResolvedEvent> events = null;
         try {
-            ReadResult result = client.readStream("some-stream", 20, options)
+            events = client.readStream("some-stream", 20, options, Observer.collect())
                     .get();
-            events = result.getEvents();
         } catch (ExecutionException e) {
             Throwable innerException = e.getCause();
 
@@ -94,10 +91,8 @@ public class ReadingEvents {
                 .backwards()
                 .fromEnd();
 
-        ReadResult result = client.readStream("some-stream", options)
+        List<ResolvedEvent> events = client.readStream("some-stream", options, Observer.collect())
                 .get();
-
-        Iterable<ResolvedEvent> events = result.getEvents();
 
         for (ResolvedEvent resolvedEvent : events) {
             RecordedEvent recordedEvent = resolvedEvent.getOriginalEvent();
@@ -112,10 +107,9 @@ public class ReadingEvents {
                 .forwards()
                 .fromStart();
 
-        ReadResult result = client.readAll(options)
+        List<ResolvedEvent> events = client.readAll(options, Observer.collect())
                 .get();
 
-        Iterable<ResolvedEvent> events = result.getEvents();
         // endregion read-from-all-stream
 
         // region read-from-all-stream-iterate
@@ -135,7 +129,7 @@ public class ReadingEvents {
                 .fromStart()
                 .authenticated(credentials);
 
-        ReadResult result = client.readAll(options)
+        List<ResolvedEvent> result = client.readAll(options, Observer.collect())
                 .get();
         // endregion read-all-overriding-user-credentials
     }
@@ -146,10 +140,8 @@ public class ReadingEvents {
                 .forwards()
                 .fromStart();
 
-        ReadResult result = client.readAll(options)
+        List<ResolvedEvent> events = client.readAll(options, Observer.collect())
                 .get();
-
-        Iterable<ResolvedEvent> events = result.getEvents();
 
         for (ResolvedEvent resolvedEvent : events) {
             RecordedEvent recordedEvent = resolvedEvent.getOriginalEvent();
@@ -167,10 +159,9 @@ public class ReadingEvents {
                 .backwards()
                 .fromEnd();
 
-        ReadResult result = client.readAll(options)
+        List<ResolvedEvent> events = client.readAll(options, Observer.collect())
                 .get();
 
-        Iterable<ResolvedEvent> events = result.getEvents();
         // endregion read-from-all-stream-backwards
 
         // region read-from-all-stream-iterate
@@ -186,10 +177,8 @@ public class ReadingEvents {
                 .forwards()
                 .fromStart();
 
-        ReadResult result = client.readAll(options)
+        List<ResolvedEvent> events = client.readAll(options, Observer.collect())
                 .get();
-
-        Iterable<ResolvedEvent> events = result.getEvents();
 
         for (ResolvedEvent resolvedEvent : events) {
             RecordedEvent recordedEvent = resolvedEvent.getOriginalEvent();
@@ -207,10 +196,9 @@ public class ReadingEvents {
                 .fromStart()
                 .resolveLinkTos();
 
-        ReadResult result = client.readAll(options)
+        List<ResolvedEvent> events = client.readAll(options, Observer.collect())
                 .get();
 
-        Iterable<ResolvedEvent> events = result.getEvents();
         // endregion read-from-all-stream-resolving-link-Tos
         for (ResolvedEvent resolvedEvent : events) {
             RecordedEvent recordedEvent = resolvedEvent.getOriginalEvent();

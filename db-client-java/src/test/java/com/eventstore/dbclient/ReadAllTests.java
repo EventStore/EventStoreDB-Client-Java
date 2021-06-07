@@ -12,16 +12,6 @@ public class ReadAllTests {
     @Rule
     public final EventStoreTestDBContainer server = new EventStoreTestDBContainer(false);
 
-    static <A> List<A> collect(Iterable<A> iterator) {
-        List<A> result = new ArrayList<>();
-
-        for (A elem: iterator) {
-            result.add(elem);
-        }
-
-        return result;
-    }
-
     @Test
     public void testReadAllEventsForwardFromZeroPosition() throws ExecutionException, InterruptedException {
         EventStoreDBClient client = server.getClient();
@@ -31,10 +21,10 @@ public class ReadAllTests {
                 .fromStart()
                 .notResolveLinkTos();
 
-        ReadResult result = client.readAll(10, options)
+        List<ResolvedEvent> events = client.readAll(10, options, Observer.collect())
                 .get();
 
-        verifyAgainstTestData(collect(result.getEvents()), "all-e0-e10");
+        verifyAgainstTestData(events, "all-e0-e10");
     }
 
     @Test
@@ -46,10 +36,10 @@ public class ReadAllTests {
                 .fromPosition(new Position(1788, 1788))
                 .notResolveLinkTos();
 
-        ReadResult result = client.readAll(10, options)
+        List<ResolvedEvent> events = client.readAll(10, options, Observer.collect())
                 .get();
 
-        verifyAgainstTestData(collect(result.getEvents()), "all-c1788-p1788");
+        verifyAgainstTestData(events, "all-c1788-p1788");
     }
 
     @Test
@@ -61,10 +51,10 @@ public class ReadAllTests {
                 .fromEnd()
                 .notResolveLinkTos();
 
-        ReadResult result = client.readAll(10, options)
+        List<ResolvedEvent> events = client.readAll(10, options, Observer.collect())
                 .get();
 
-        verifyAgainstTestData(collect(result.getEvents()), "all-back-e0-e10");
+        verifyAgainstTestData(events, "all-back-e0-e10");
     }
 
     @Test
@@ -76,10 +66,10 @@ public class ReadAllTests {
                 .fromPosition(new Position(3386, 3386))
                 .notResolveLinkTos();
 
-        ReadResult result = client.readAll(10, options)
+        List<ResolvedEvent> events = client.readAll(10, options, Observer.collect())
                 .get();
 
-        verifyAgainstTestData(collect(result.getEvents()), "all-back-c3386-p3386");
+        verifyAgainstTestData(events, "all-back-c3386-p3386");
     }
 
     private void verifyAgainstTestData(List<ResolvedEvent> actualEvents, String filenameStem) {
