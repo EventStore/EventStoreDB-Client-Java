@@ -4,12 +4,23 @@ import org.junit.Rule;
 import org.junit.Test;
 import testcontainers.module.EventStoreTestDBContainer;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class ReadAllTests {
     @Rule
     public final EventStoreTestDBContainer server = new EventStoreTestDBContainer(false);
+
+    static <A> List<A> collect(Iterable<A> iterator) {
+        List<A> result = new ArrayList<>();
+
+        for (A elem: iterator) {
+            result.add(elem);
+        }
+
+        return result;
+    }
 
     @Test
     public void testReadAllEventsForwardFromZeroPosition() throws ExecutionException, InterruptedException {
@@ -23,7 +34,7 @@ public class ReadAllTests {
         ReadResult result = client.readAll(10, options)
                 .get();
 
-        verifyAgainstTestData(result.getEvents(), "all-e0-e10");
+        verifyAgainstTestData(collect(result.getEvents()), "all-e0-e10");
     }
 
     @Test
@@ -38,7 +49,7 @@ public class ReadAllTests {
         ReadResult result = client.readAll(10, options)
                 .get();
 
-        verifyAgainstTestData(result.getEvents(), "all-c1788-p1788");
+        verifyAgainstTestData(collect(result.getEvents()), "all-c1788-p1788");
     }
 
     @Test
@@ -53,7 +64,7 @@ public class ReadAllTests {
         ReadResult result = client.readAll(10, options)
                 .get();
 
-        verifyAgainstTestData(result.getEvents(), "all-back-e0-e10");
+        verifyAgainstTestData(collect(result.getEvents()), "all-back-e0-e10");
     }
 
     @Test
@@ -68,7 +79,7 @@ public class ReadAllTests {
         ReadResult result = client.readAll(10, options)
                 .get();
 
-        verifyAgainstTestData(result.getEvents(), "all-back-c3386-p3386");
+        verifyAgainstTestData(collect(result.getEvents()), "all-back-c3386-p3386");
     }
 
     private void verifyAgainstTestData(List<ResolvedEvent> actualEvents, String filenameStem) {

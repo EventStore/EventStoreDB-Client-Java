@@ -46,7 +46,7 @@ public class QuickStart {
         ReadResult result = client.readStream("some-stream", 10, options)
                 .get();
 
-        List<ResolvedEvent> events = result.getEvents();
+        Iterable<ResolvedEvent> events = result.getEvents();
         // endregion readStream
     }
 }

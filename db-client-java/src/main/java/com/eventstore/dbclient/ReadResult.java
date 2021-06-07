@@ -1,15 +1,16 @@
 package com.eventstore.dbclient;
 
+import java.util.Iterator;
 import java.util.List;
 
 public class ReadResult {
-    private final List<ResolvedEvent> events;
+    private final Iterable<ResolvedEvent> iterable;
 
-    public ReadResult(List<ResolvedEvent> events) {
-        this.events = events;
+    public ReadResult(Iterable<ResolvedEvent> iterable) {
+        this.iterable = iterable;
     }
 
-    public List<ResolvedEvent> getEvents() {
-        return this.events;
+    public Iterable<ResolvedEvent> getEvents() {
+        return this.iterable;
     }
 }

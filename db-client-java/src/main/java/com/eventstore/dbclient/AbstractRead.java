@@ -3,6 +3,8 @@ package com.eventstore.dbclient;
 import com.eventstore.dbclient.proto.shared.Shared;
 import com.eventstore.dbclient.proto.streams.StreamsGrpc;
 import com.eventstore.dbclient.proto.streams.StreamsOuterClass;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import io.grpc.Metadata;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.MetadataUtils;
@@ -10,10 +12,13 @@ import io.grpc.stub.StreamObserver;
 
 import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.stream.Stream;
 
 public abstract class AbstractRead {
     protected static final StreamsOuterClass.ReadReq.Options.Builder defaultReadOptions;
 
+    private final Logger logger = LoggerFactory.getLogger(AbstractRead.class);
     private final GrpcClient client;
     protected final Metadata metadata;
 
@@ -42,11 +47,16 @@ public abstract class AbstractRead {
             CompletableFuture<ReadResult> future = new CompletableFuture<>();
             ArrayList<ResolvedEvent> resolvedEvents = new ArrayList<>();
 
+            LinkedBlockingQueue<ResolvedEvent> result = new LinkedBlockingQueue<>(Consts.DEFAULT_QUEUE_CAPACITY);
             client.read(request, new StreamObserver<StreamsOuterClass.ReadResp>() {
                 private boolean completed = false;
+                private boolean firstTime = true;
 
                 @Override
                 public void onNext(StreamsOuterClass.ReadResp value) {
+                    if (this.completed)
+                        return;
+
                     if (value.hasStreamNotFound()) {
                         future.completeExceptionally(new StreamNotFoundException());
                         this.completed = true;
@@ -54,7 +64,19 @@ public abstract class AbstractRead {
                     }
 
                     if (value.hasEvent()) {
-                        resolvedEvents.add(ResolvedEvent.fromWire(value.getEvent()));
+                        try {
+                            result.put(ResolvedEvent.fromWire(value.getEvent()));
+
+                            if (this.firstTime) {
+                                this.firstTime = false;
+
+                                future.complete(new ReadResult(result));
+                            }
+                        } catch (InterruptedException e) {
+                            // TODO - we might consider switching back to an observable interface considering how bad async Java story is.
+                            logger.error("Exception occurred when consuming read result. Your iterator will stop producing value.", e);
+                            this.completed = true;
+                        }
                     }
                 }
 
@@ -63,8 +85,6 @@ public abstract class AbstractRead {
                     if (this.completed) {
                         return;
                     }
-
-                    future.complete(new ReadResult(resolvedEvents));
                 }
 
                 @Override

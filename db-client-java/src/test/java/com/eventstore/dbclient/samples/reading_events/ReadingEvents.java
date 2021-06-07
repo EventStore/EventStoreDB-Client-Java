@@ -17,7 +17,7 @@ public class ReadingEvents {
         ReadResult result = client.readStream("some-stream", options)
                 .get();
 
-        List<ResolvedEvent> events = result.getEvents();
+        Iterable<ResolvedEvent> events = result.getEvents();
         // endregion read-from-stream
 
         // region iterate-stream
@@ -37,7 +37,7 @@ public class ReadingEvents {
         ReadResult result = client.readStream("some-stream", 20, options)
                 .get();
 
-        List<ResolvedEvent> events = result.getEvents();
+        Iterable<ResolvedEvent> events = result.getEvents();
         // endregion read-from-stream-position
 
         // region iterate-stream
@@ -68,7 +68,7 @@ public class ReadingEvents {
                 .forwards()
                 .fromRevision(10);
 
-        List<ResolvedEvent> events = null;
+        Iterable<ResolvedEvent> events = null;
         try {
             ReadResult result = client.readStream("some-stream", 20, options)
                     .get();
@@ -97,7 +97,7 @@ public class ReadingEvents {
         ReadResult result = client.readStream("some-stream", options)
                 .get();
 
-        List<ResolvedEvent> events = result.getEvents();
+        Iterable<ResolvedEvent> events = result.getEvents();
 
         for (ResolvedEvent resolvedEvent : events) {
             RecordedEvent recordedEvent = resolvedEvent.getOriginalEvent();
@@ -115,7 +115,7 @@ public class ReadingEvents {
         ReadResult result = client.readAll(options)
                 .get();
 
-        List<ResolvedEvent> events = result.getEvents();
+        Iterable<ResolvedEvent> events = result.getEvents();
         // endregion read-from-all-stream
 
         // region read-from-all-stream-iterate
@@ -149,7 +149,7 @@ public class ReadingEvents {
         ReadResult result = client.readAll(options)
                 .get();
 
-        List<ResolvedEvent> events = result.getEvents();
+        Iterable<ResolvedEvent> events = result.getEvents();
 
         for (ResolvedEvent resolvedEvent : events) {
             RecordedEvent recordedEvent = resolvedEvent.getOriginalEvent();
@@ -170,7 +170,7 @@ public class ReadingEvents {
         ReadResult result = client.readAll(options)
                 .get();
 
-        List<ResolvedEvent> events = result.getEvents();
+        Iterable<ResolvedEvent> events = result.getEvents();
         // endregion read-from-all-stream-backwards
 
         // region read-from-all-stream-iterate
@@ -189,7 +189,7 @@ public class ReadingEvents {
         ReadResult result = client.readAll(options)
                 .get();
 
-        List<ResolvedEvent> events = result.getEvents();
+        Iterable<ResolvedEvent> events = result.getEvents();
 
         for (ResolvedEvent resolvedEvent : events) {
             RecordedEvent recordedEvent = resolvedEvent.getOriginalEvent();
@@ -210,7 +210,7 @@ public class ReadingEvents {
         ReadResult result = client.readAll(options)
                 .get();
 
-        List<ResolvedEvent> events = result.getEvents();
+        Iterable<ResolvedEvent> events = result.getEvents();
         // endregion read-from-all-stream-resolving-link-Tos
         for (ResolvedEvent resolvedEvent : events) {
             RecordedEvent recordedEvent = resolvedEvent.getOriginalEvent();

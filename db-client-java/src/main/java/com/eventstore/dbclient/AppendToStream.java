@@ -46,7 +46,7 @@ public class AppendToStream {
 
                     StreamRevision nextExpectedRevision;
                     if (success.getCurrentRevisionOptionCase() == StreamsOuterClass.AppendResp.Success.CurrentRevisionOptionCase.NO_STREAM) {
-                        nextExpectedRevision = new StreamRevision(1); // NO_STREAM
+                        nextExpectedRevision = new StreamRevision(0); // NO_STREAM
                     } else {
                         nextExpectedRevision = new StreamRevision(success.getCurrentRevision());
                     }
