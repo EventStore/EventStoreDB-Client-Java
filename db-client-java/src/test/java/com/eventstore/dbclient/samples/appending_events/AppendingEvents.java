@@ -3,23 +3,10 @@ package com.eventstore.dbclient.samples.appending_events;
 import com.eventstore.dbclient.*;
 import com.eventstore.dbclient.samples.TestEvent;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 public class AppendingEvents {
-
-    static <A> List<A> collect(Iterator<A> iterator) {
-        List<A> result = new ArrayList<>();
-
-        while (iterator.hasNext()) {
-            result.add(iterator.next());
-        }
-
-        return result;
-    }
 
     private static void appendToStream(EventStoreDBClient client) throws ExecutionException, InterruptedException {
         // region append-to-stream

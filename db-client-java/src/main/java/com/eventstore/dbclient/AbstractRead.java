@@ -3,8 +3,6 @@ package com.eventstore.dbclient;
 import com.eventstore.dbclient.proto.shared.Shared;
 import com.eventstore.dbclient.proto.streams.StreamsGrpc;
 import com.eventstore.dbclient.proto.streams.StreamsOuterClass;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import io.grpc.Metadata;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.MetadataUtils;
@@ -15,7 +13,6 @@ import java.util.concurrent.CompletableFuture;
 public abstract class AbstractRead {
     protected static final StreamsOuterClass.ReadReq.Options.Builder defaultReadOptions;
 
-    private final Logger logger = LoggerFactory.getLogger(AbstractRead.class);
     private final GrpcClient client;
     protected final Metadata metadata;
 

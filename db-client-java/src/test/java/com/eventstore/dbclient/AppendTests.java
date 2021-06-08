@@ -5,7 +5,6 @@ import org.junit.Test;
 import testcontainers.module.EventStoreTestDBContainer;
 import testcontainers.module.EventStoreStreamsClient;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -44,16 +43,6 @@ public class AppendTests {
 
     @Rule
     public final EventStoreStreamsClient client = new EventStoreStreamsClient(server);
-
-    static <A> List<A> collect(Iterable<A> iterator) {
-        List<A> result = new ArrayList<>();
-
-        for (A elem : iterator) {
-            result.add(elem);
-        }
-
-        return result;
-    }
 
     @Test
     public void testAppendSingleEventNoStream() throws Throwable {

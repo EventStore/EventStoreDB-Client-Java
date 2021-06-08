@@ -74,20 +74,16 @@ public class EventStoreDBClient extends EventStoreDBClientBase {
 
     public CompletableFuture<StreamMetadata> getStreamMetadata(String streamName, ReadStreamOptions options) {
 
-        return readStream("$$" + streamName, options, Observer.collect()).thenCompose(events -> {
+        return readStream("$$" + streamName, options, Observer.last()).thenCompose(resolvedEvent -> {
             CompletableFuture<StreamMetadata> out = new CompletableFuture<>();
-            for (ResolvedEvent resolvedEvent : events) {
-                RecordedEvent event = resolvedEvent.getOriginalEvent();
+            RecordedEvent event = resolvedEvent.getOriginalEvent();
 
-                try {
-                    HashMap<String, Object> source = event.getEventDataAs(HashMap.class);
+            try {
+                HashMap<String, Object> source = event.getEventDataAs(HashMap.class);
 
-                    out.complete(StreamMetadata.deserialize(source));
-                } catch (Throwable e) {
-                    out.completeExceptionally(e);
-                }
-
-                break;
+                out.complete(StreamMetadata.deserialize(source));
+            } catch (Throwable e) {
+                out.completeExceptionally(e);
             }
 
             return out;

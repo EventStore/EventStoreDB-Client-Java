@@ -5,7 +5,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import testcontainers.module.EventStoreTestDBContainer;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ReadStreamTests {
