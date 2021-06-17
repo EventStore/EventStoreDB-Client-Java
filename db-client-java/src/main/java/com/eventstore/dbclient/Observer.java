@@ -1,20 +1,20 @@
 package com.eventstore.dbclient;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class Observer<A, R> {
     private final CompletableFuture<R> future = new CompletableFuture<>();
-    private final Function2<A, R, R> iteratee;
-    private R seed;
+    private final Fold<A, R> iteratee;
+    private Object seed;
     private boolean completed = false;
 
-    public Observer(R seed, Function2<A, R, R> iteratee) {
-       this.iteratee = iteratee;
-       this.seed = seed;
+    private Observer(Fold<A, R> iteratee) {
+        this.iteratee = iteratee;
+        this.seed = iteratee.getBegin();
     }
 
     public void onNext(A value) {
@@ -22,7 +22,7 @@ public class Observer<A, R> {
             return;
 
         try {
-            seed = iteratee.apply(value, seed);
+            seed = iteratee.getStep().apply(value, seed);
         } catch (Throwable t) {
             completed = true;
             onError(t);
@@ -42,7 +42,7 @@ public class Observer<A, R> {
             return;
 
         completed = true;
-        future.complete(seed);
+        future.complete(iteratee.getDone().apply(seed));
     }
 
     public CompletableFuture<R> getFuture() {
@@ -53,50 +53,35 @@ public class Observer<A, R> {
         return completed;
     }
 
-    public <B> Observer<B, R> contramap(Function<B, A> f) {
-        return new Observer<>(seed, (b, acc) -> this.iteratee.apply(f.apply(b), acc));
+    public static <A, R> Observer<A, R> fromFold(Fold<A, R> fold) {
+        return new Observer<>(fold);
     }
 
     public static <A, R> Observer<A, R> fold(R seed, Function2<A, R, R> iteratee) {
-        return new Observer(seed, iteratee);
+        return new Observer<A, R>(Fold.fold(seed, iteratee));
     }
 
     public static <A> Observer<A, Object> forEach(Consumer<A> f) {
-        return new Observer<>(null, (a, x) -> {
-            f.accept(a);
-            return x;
-        });
+        return new Observer<>(Fold.forEach(f));
     }
 
     public static <A> Observer<A, List<A>> collect() {
-        return new Observer<>(new ArrayList<>(), (a, acc) -> {
-            acc.add(a);
-            return acc;
-        });
+        return new Observer<>(Fold.collect());
     }
 
     public static <A, B> Observer<A, List<B>> collectMap(Function<A, B> f) {
-        return new Observer<>(new ArrayList<>(), (a, acc) -> {
-            acc.add(f.apply(a));
-            return acc;
-        });
+        return new Observer<>(Fold.collectMap(f));
     }
 
     public static <A> Observer<A, Long> count() {
-        return new Observer<>(Long.valueOf(0), (a, acc) -> acc + 1);
+        return new Observer<>(Fold.count());
     }
 
-    public static <A> Observer<A, A> last() {
-        return new Observer<>(null, (a, x) -> a);
+    public static <A> Observer<A, Optional<A>> last() {
+        return new Observer<>(Fold.last());
     }
 
-    public static <A> Observer<A, A> first() {
-        return new Observer<>(null, (a, x) -> {
-           if (x == null) {
-               return a;
-           } else {
-               return x;
-           }
-        });
+    public static <A> Observer<A, Optional<A>> first() {
+        return new Observer<>(Fold.first());
     }
 }
