@@ -120,7 +120,7 @@ public class Fold<A, B> {
         });
     }
 
-    public static <X, A> Fold<X, A> lift(A value) {
+    public static <X, A> Fold<X, A> value(A value) {
         return Fold.<X, A>fold(value, (ignored, v) -> v);
     }
 

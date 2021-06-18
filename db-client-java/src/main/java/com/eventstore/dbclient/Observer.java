@@ -53,35 +53,35 @@ public class Observer<A, R> {
         return completed;
     }
 
-    public static <A, R> Observer<A, R> fromFold(Fold<A, R> fold) {
+    public static <A, R> Observer<A, R> from(Fold<A, R> fold) {
         return new Observer<>(fold);
     }
 
     public static <A, R> Observer<A, R> fold(R seed, Function2<A, R, R> iteratee) {
-        return new Observer<A, R>(Fold.fold(seed, iteratee));
+        return from(Fold.fold(seed, iteratee));
     }
 
     public static <A> Observer<A, Object> forEach(Consumer<A> f) {
-        return new Observer<>(Fold.forEach(f));
+        return from(Fold.forEach(f));
     }
 
     public static <A> Observer<A, List<A>> collect() {
-        return new Observer<>(Fold.collect());
+        return from(Fold.collect());
     }
 
     public static <A, B> Observer<A, List<B>> collectMap(Function<A, B> f) {
-        return new Observer<>(Fold.collectMap(f));
+        return from(Fold.collectMap(f));
     }
 
     public static <A> Observer<A, Long> count() {
-        return new Observer<>(Fold.count());
+        return from(Fold.count());
     }
 
     public static <A> Observer<A, Optional<A>> last() {
-        return new Observer<>(Fold.last());
+        return from(Fold.last());
     }
 
     public static <A> Observer<A, Optional<A>> first() {
-        return new Observer<>(Fold.first());
+        return from(Fold.first());
     }
 }

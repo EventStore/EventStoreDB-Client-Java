@@ -79,7 +79,7 @@ public class EventStoreDBClient extends EventStoreDBClientBase {
 
     public CompletableFuture<StreamMetadata> getStreamMetadata(String streamName, ReadStreamOptions options) {
 
-        return readStream("$$" + streamName, options, Observer.fromFold(Fold.<ResolvedEvent>last().map(o -> o.get())))
+        return readStream("$$" + streamName, options, Observer.from(Fold.<ResolvedEvent>last().map(o -> o.get())))
                 .thenCompose(resolvedEvent -> {
                     CompletableFuture<StreamMetadata> out = new CompletableFuture<>();
                     RecordedEvent event = resolvedEvent.getOriginalEvent();
