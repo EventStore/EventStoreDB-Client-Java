@@ -163,6 +163,23 @@ public class EventStoreDBConnectionString {
         return this.parseSearchParams(true);
     }
 
+    public static Optional<NodePreference> parseNodePreference(String value) {
+        switch (value.toLowerCase()) {
+            case "leader":
+                return Optional.of(NodePreference.LEADER);
+            case "follower":
+                return Optional.of(NodePreference.FOLLOWER);
+            case "readonlyreplica":
+                return Optional.of(NodePreference.READ_ONLY_REPLICA);
+            case "random":
+                return Optional.of(NodePreference.RANDOM);
+            default:
+                return Optional.empty();
+        }
+    }
+
+    private static final String[] NODE_PREFERENCE_VALUES = new String[] { "leader", "follower", "readonlyreplica","random" };
+
     private EventStoreDBClientSettings parseSearchParams(boolean first) throws ParseError {
         this.position = nextPosition;
         if (this.position == this.connectionString.length()) {
@@ -191,11 +208,12 @@ public class EventStoreDBConnectionString {
 
         switch (key) {
             case "nodePreference": {
-                try {
-                    NodePreference preference = NodePreference.valueOf(value.toUpperCase());
-                    this.settings.nodePreference(preference);
-                } catch (IllegalArgumentException e) {
-                    throw new ParseError(this.connectionString, keyPosition, this.nextPosition, Arrays.toString(NodePreference.values()));
+                Optional<NodePreference> preference = parseNodePreference(value);
+                if (preference.isPresent()) {
+                    this.settings.nodePreference(preference.get());
+                } else {
+                    throw new ParseError(this.connectionString, keyPosition, this.nextPosition,
+                            Arrays.toString(NODE_PREFERENCE_VALUES));
                 }
                 break;
             }
