@@ -34,6 +34,7 @@ public class ParseInvalidConnectionStringTests {
                 {"esdb://localhost?keepAliveInterval=sdfksjsfl"},
                 {"esdb://localhost?keepAliveTimeout=sdfksjsfl"},
                 {"esdb://localhost?keepAliveTimeout=-3"},
+                {"esdb://localhost?nodePreference=read_only_replica"},
         });
     }
 

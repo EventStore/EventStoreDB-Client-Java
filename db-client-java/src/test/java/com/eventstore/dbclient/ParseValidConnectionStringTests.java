@@ -96,6 +96,10 @@ public class ParseValidConnectionStringTests {
                         "esdb://localhost?keepAliveTimeout=20&keepAliveInterval=10",
                         "{\"dnsDiscover\":false,\"maxDiscoverAttempts\":3,\"discoveryInterval\":500,\"gossipTimeout\":3000,\"nodePreference\":\"random\",\"tls\":true,\"tlsVerifyCert\":true,\"throwOnAppendFailure\":true,\"hosts\":[{\"address\":\"localhost\",\"port\":2113}], \"keepAliveTimeout\": \"20\", \"keepAliveInterval\": \"10\"}"
                 },
+                {
+                        "esdb://localhost?keepAliveTimeout=20&keepAliveInterval=10&nodePreference=readOnlyReplica",
+                        "{\"dnsDiscover\":false,\"maxDiscoverAttempts\":3,\"discoveryInterval\":500,\"gossipTimeout\":3000,\"nodePreference\":\"readOnlyReplica\",\"tls\":true,\"tlsVerifyCert\":true,\"throwOnAppendFailure\":true,\"hosts\":[{\"address\":\"localhost\",\"port\":2113}], \"keepAliveTimeout\": \"20\", \"keepAliveInterval\": \"10\"}"
+                },
         });
     }
 
@@ -137,24 +141,35 @@ public class ParseValidConnectionStringTests {
         ConnectionSettingsBuilder builder = EventStoreDBClientSettings.builder();
         JsonNode tree = mapper.readTree(input);
 
-        builder
-                .dnsDiscover(tree.get("dnsDiscover").asBoolean())
-                .maxDiscoverAttempts(tree.get("maxDiscoverAttempts").asInt())
-                .discoveryInterval(tree.get("discoveryInterval").asInt())
-                .gossipTimeout(tree.get("gossipTimeout").asInt())
-                .nodePreference(NodePreference.valueOf(tree.get("nodePreference").asText().toUpperCase()))
-                .tls(tree.get("tls").asBoolean())
-                .tlsVerifyCert(tree.get("tlsVerifyCert").asBoolean())
-                .throwOnAppendFailure(tree.get("throwOnAppendFailure").asBoolean());
+        if (tree.get("dnsDiscover") != null)
+            builder.dnsDiscover(tree.get("dnsDiscover").asBoolean());
 
-        JsonNode keepAliveTimeoutNode = tree.get("keepAliveTimeout");
-        JsonNode keepAliveIntervalNode = tree.get("keepAliveInterval");
+        if (tree.get("maxDiscoverAttempts") != null)
+            builder.maxDiscoverAttempts(tree.get("maxDiscoverAttempts").asInt());
 
-        if (keepAliveTimeoutNode != null)
-            builder.keepAliveTimeout(Long.parseLong(keepAliveTimeoutNode.asText()));
+        if (tree.get("discoveryInterval") != null)
+            builder.discoveryInterval(tree.get("discoveryInterval").asInt());
 
-        if (keepAliveIntervalNode != null)
-            builder.keepAliveInterval(Long.parseLong(keepAliveIntervalNode.asText()));
+        if (tree.get("gossipTimeout") != null)
+            builder.gossipTimeout(tree.get("gossipTimeout").asInt());
+
+        if (tree.get("tls") != null)
+            builder.tls(tree.get("tls").asBoolean());
+
+        if (tree.get("tlsVerifyCert") != null)
+            builder.tlsVerifyCert(tree.get("tlsVerifyCert").asBoolean());
+
+        if (tree.get("throwOnAppendFailure") != null)
+            builder.throwOnAppendFailure(tree.get("throwOnAppendFailure").asBoolean());
+
+        if (tree.get("keepAliveTimeout") != null)
+            builder.keepAliveTimeout(Long.parseLong(tree.get("keepAliveTimeout").asText()));
+
+        if (tree.get("keepAliveInterval") != null)
+            builder.keepAliveInterval(Long.parseLong(tree.get("keepAliveInterval").asText()));
+
+        if (tree.get("nodePreference") != null)
+            builder.nodePreference(EventStoreDBConnectionString.parseNodePreference(tree.get("nodePreference").asText()).get());
 
         tree.get("hosts").elements().forEachRemaining((host) -> {
             builder.addHost(new Endpoint(host.get("address").asText(), host.get("port").asInt()));
