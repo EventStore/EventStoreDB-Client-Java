@@ -8,7 +8,6 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.stub.MetadataUtils;
 import io.grpc.stub.StreamObserver;
 
-import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 
 public abstract class AbstractRead {
@@ -30,7 +29,7 @@ public abstract class AbstractRead {
 
     public abstract StreamsOuterClass.ReadReq.Options.Builder createOptions();
 
-    public CompletableFuture<ReadResult> execute() {
+    public <R> CompletableFuture<R> execute(Observer<ResolvedEvent, R> obs) {
         return this.client.run(channel -> {
             StreamsOuterClass.ReadReq request = StreamsOuterClass.ReadReq.newBuilder()
                     .setOptions(createOptions())
@@ -39,37 +38,34 @@ public abstract class AbstractRead {
             Metadata headers = this.metadata;
             StreamsGrpc.StreamsStub client = MetadataUtils.attachHeaders(StreamsGrpc.newStub(channel), headers);
 
-            CompletableFuture<ReadResult> future = new CompletableFuture<>();
-            ArrayList<ResolvedEvent> resolvedEvents = new ArrayList<>();
-
             client.read(request, new StreamObserver<StreamsOuterClass.ReadResp>() {
-                private boolean completed = false;
-
                 @Override
                 public void onNext(StreamsOuterClass.ReadResp value) {
+                    if (obs.isCompleted())
+                        return;
+
                     if (value.hasStreamNotFound()) {
-                        future.completeExceptionally(new StreamNotFoundException());
-                        this.completed = true;
+                        obs.onError(new StreamNotFoundException());
                         return;
                     }
 
                     if (value.hasEvent()) {
-                        resolvedEvents.add(ResolvedEvent.fromWire(value.getEvent()));
+                        obs.onNext(ResolvedEvent.fromWire(value.getEvent()));
                     }
                 }
 
                 @Override
                 public void onCompleted() {
-                    if (this.completed) {
+                    if (obs.isCompleted()) {
                         return;
                     }
 
-                    future.complete(new ReadResult(resolvedEvents));
+                    obs.onComplete();
                 }
 
                 @Override
                 public void onError(Throwable t) {
-                    if (this.completed) {
+                    if (obs.isCompleted()) {
                         return;
                     }
 
@@ -80,15 +76,15 @@ public abstract class AbstractRead {
 
                         if (leaderHost != null && leaderPort != null) {
                             NotLeaderException reason = new NotLeaderException(leaderHost, Integer.valueOf(leaderPort));
-                            future.completeExceptionally(reason);
+                            obs.onError(reason);
                             return;
                         }
                     }
 
-                    future.completeExceptionally(t);
+                    obs.onError(t);
                 }
             });
-            return future;
+            return obs.getFuture();
         });
     }
 }

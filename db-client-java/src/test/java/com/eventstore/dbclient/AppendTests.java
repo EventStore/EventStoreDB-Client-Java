@@ -71,10 +71,9 @@ public class AppendTests {
                 .backwards();
 
         // Ensure appended event is readable
-        ReadResult readResult = client.readStream(streamName, 1, readStreamOptions)
+        List<ResolvedEvent> readEvents = client.readStream(streamName, 1, readStreamOptions, Observer.collect())
                 .get();
 
-        List<ResolvedEvent> readEvents = readResult.getEvents();
         assertEquals(1, readEvents.size());
         RecordedEvent first = readEvents.get(0).getEvent();
 

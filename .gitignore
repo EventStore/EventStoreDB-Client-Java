@@ -170,3 +170,11 @@ fabric.properties
 
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
 !gradle-wrapper.jar
+.project
+.classpath
+.settings/
+db-client-java/bin/
+jdt.ls-java-project/
+.metadata/
+.vscode/
+.envrc

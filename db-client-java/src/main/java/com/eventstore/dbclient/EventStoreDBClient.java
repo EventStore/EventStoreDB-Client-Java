@@ -22,11 +22,13 @@ public class EventStoreDBClient extends EventStoreDBClientBase {
         return this.appendToStream(streamName, AppendToStreamOptions.get(), events);
     }
 
-    public CompletableFuture<WriteResult> appendToStream(String streamName, AppendToStreamOptions options, EventData... events) {
+    public CompletableFuture<WriteResult> appendToStream(String streamName, AppendToStreamOptions options,
+            EventData... events) {
         return this.appendToStream(streamName, options, Arrays.stream(events).iterator());
     }
 
-    public CompletableFuture<WriteResult> appendToStream(String streamName, AppendToStreamOptions options, Iterator<EventData> events) {
+    public CompletableFuture<WriteResult> appendToStream(String streamName, AppendToStreamOptions options,
+            Iterator<EventData> events) {
         if (options == null)
             options = AppendToStreamOptions.get();
 
@@ -40,32 +42,35 @@ public class EventStoreDBClient extends EventStoreDBClientBase {
         return setStreamMetadata(streamName, null, metadata);
     }
 
-    public CompletableFuture<WriteResult> setStreamMetadata(String streamName, AppendToStreamOptions options, StreamMetadata metadata) {
+    public CompletableFuture<WriteResult> setStreamMetadata(String streamName, AppendToStreamOptions options,
+            StreamMetadata metadata) {
         EventData event = EventDataBuilder.json("$metadata", metadata.serialize()).build();
 
         return appendToStream("$$" + streamName, options, event);
-     }
-
-    public CompletableFuture<ReadResult> readStream(String streamName) {
-        return this.readStream(streamName, Long.MAX_VALUE, ReadStreamOptions.get());
     }
 
-    public CompletableFuture<ReadResult> readStream(String streamName, long maxCount) {
-        return this.readStream(streamName, maxCount, ReadStreamOptions.get());
+    public <R> CompletableFuture<R> readStream(String streamName, Observer<ResolvedEvent, R> obs) {
+        return this.readStream(streamName, Long.MAX_VALUE, ReadStreamOptions.get(), obs);
     }
 
-    public CompletableFuture<ReadResult> readStream(String streamName, ReadStreamOptions options) {
-        return this.readStream(streamName, Long.MAX_VALUE, options);
+    public <R> CompletableFuture<R> readStream(String streamName, long maxCount, Observer<ResolvedEvent, R> obs) {
+        return this.readStream(streamName, maxCount, ReadStreamOptions.get(), obs);
     }
 
-    public CompletableFuture<ReadResult> readStream(String streamName, long maxCount, ReadStreamOptions options) {
+    public <R> CompletableFuture<R> readStream(String streamName, ReadStreamOptions options,
+            Observer<ResolvedEvent, R> obs) {
+        return this.readStream(streamName, Long.MAX_VALUE, options, obs);
+    }
+
+    public <R> CompletableFuture<R> readStream(String streamName, long maxCount, ReadStreamOptions options,
+            Observer<ResolvedEvent, R> obs) {
         if (options == null)
             options = ReadStreamOptions.get();
 
         if (!options.hasUserCredentials())
             options.authenticated(this.credentials);
 
-        return new ReadStream(this.client, streamName, maxCount, options).execute();
+        return new ReadStream(this.client, streamName, maxCount, options).execute(obs);
     }
 
     public CompletableFuture<StreamMetadata> getStreamMetadata(String streamName) {
@@ -74,55 +79,57 @@ public class EventStoreDBClient extends EventStoreDBClientBase {
 
     public CompletableFuture<StreamMetadata> getStreamMetadata(String streamName, ReadStreamOptions options) {
 
-        return readStream("$$" + streamName, options).thenCompose(result -> {
-            RecordedEvent event = result.getEvents().get(0).getOriginalEvent();
-            CompletableFuture<StreamMetadata> out = new CompletableFuture<>();
+        return readStream("$$" + streamName, options, Observer.from(Fold.<ResolvedEvent>last().map(o -> o.get())))
+                .thenCompose(resolvedEvent -> {
+                    CompletableFuture<StreamMetadata> out = new CompletableFuture<>();
+                    RecordedEvent event = resolvedEvent.getOriginalEvent();
 
-            try {
-                HashMap<String, Object> source = event.getEventDataAs(HashMap.class);
+                    try {
+                        HashMap<String, Object> source = event.getEventDataAs(HashMap.class);
 
-                out.complete(StreamMetadata.deserialize(source));
-            } catch (Throwable e) {
-                out.completeExceptionally(e);
-            }
+                        out.complete(StreamMetadata.deserialize(source));
+                    } catch (Throwable e) {
+                        out.completeExceptionally(e);
+                    }
 
-            return out;
-        }).exceptionally(e -> {
-            if (e.getCause() instanceof StreamNotFoundException) {
-                return new StreamMetadata();
-            }
+                    return out;
+                }).exceptionally(e -> {
+                    if (e.getCause() instanceof StreamNotFoundException) {
+                        return new StreamMetadata();
+                    }
 
-            throw new RuntimeException(e);
-        });
+                    throw new RuntimeException(e);
+                });
     }
 
-    public CompletableFuture<ReadResult> readAll() {
-        return this.readAll(Long.MAX_VALUE, ReadAllOptions.get());
+    public <R> CompletableFuture<R> readAll(Observer<ResolvedEvent, R> obs) {
+        return this.readAll(Long.MAX_VALUE, ReadAllOptions.get(), obs);
     }
 
-    public CompletableFuture<ReadResult> readAll(long maxCount) {
-        return this.readAll(maxCount, ReadAllOptions.get());
+    public <R> CompletableFuture<R> readAll(long maxCount, Observer<ResolvedEvent, R> obs) {
+        return this.readAll(maxCount, ReadAllOptions.get(), obs);
     }
 
-    public CompletableFuture<ReadResult> readAll(ReadAllOptions options) {
-        return this.readAll(Long.MAX_VALUE, options);
+    public <R> CompletableFuture<R> readAll(ReadAllOptions options, Observer<ResolvedEvent, R> obs) {
+        return this.readAll(Long.MAX_VALUE, options, obs);
     }
 
-    public CompletableFuture<ReadResult> readAll(long maxCount, ReadAllOptions options) {
+    public <R> CompletableFuture<R> readAll(long maxCount, ReadAllOptions options, Observer<ResolvedEvent, R> obs) {
         if (options == null)
             options = ReadAllOptions.get();
 
         if (!options.hasUserCredentials())
             options.authenticated(this.credentials);
 
-        return new ReadAll(this.client, maxCount, options).execute();
+        return new ReadAll(this.client, maxCount, options).execute(obs);
     }
 
     public CompletableFuture<Subscription> subscribeToStream(String streamName, SubscriptionListener listener) {
         return this.subscribeToStream(streamName, listener, SubscribeToStreamOptions.get());
     }
 
-    public CompletableFuture<Subscription> subscribeToStream(String streamName, SubscriptionListener listener, SubscribeToStreamOptions options) {
+    public CompletableFuture<Subscription> subscribeToStream(String streamName, SubscriptionListener listener,
+            SubscribeToStreamOptions options) {
         if (options == null)
             options = SubscribeToStreamOptions.get();
 
@@ -136,7 +143,8 @@ public class EventStoreDBClient extends EventStoreDBClientBase {
         return this.subscribeToAll(listener, SubscribeToAllOptions.get());
     }
 
-    public CompletableFuture<Subscription> subscribeToAll(SubscriptionListener listener, SubscribeToAllOptions options) {
+    public CompletableFuture<Subscription> subscribeToAll(SubscriptionListener listener,
+            SubscribeToAllOptions options) {
         if (options == null)
             options = SubscribeToAllOptions.get();
 
