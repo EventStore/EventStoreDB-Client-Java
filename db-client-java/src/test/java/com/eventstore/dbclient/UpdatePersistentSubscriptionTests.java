@@ -11,12 +11,31 @@ public class UpdatePersistentSubscriptionTests extends PersistenSubscriptionTest
 
         PersistentSubscriptionSettings updatedSettings = PersistentSubscriptionSettings.builder()
                 .checkpointAfterInMs(5_000)
+                .revision(2)
                 .build();
 
         UpdatePersistentSubscriptionOptions options = UpdatePersistentSubscriptionOptions.get()
                 .settings(updatedSettings);
 
         client.update("aStream", "aGroupUpd", options)
-            .get();
+                .get();
+    }
+
+    @Test
+    public void testUpdatePersistentSubToAll() throws Throwable {
+
+        client.createToAll("aGroupUpd")
+                .get();
+
+        PersistentSubscriptionToAllSettings updatedSettings = PersistentSubscriptionToAllSettings.builder()
+                .checkpointAfterInMs(5_000)
+                .startFrom(4,3)
+                .build();
+
+        UpdatePersistentSubscriptionToAllOptions options = UpdatePersistentSubscriptionToAllOptions.get()
+                .settings(updatedSettings);
+
+        client.updateToAll("aGroupUpd", options)
+                .get();
     }
 }

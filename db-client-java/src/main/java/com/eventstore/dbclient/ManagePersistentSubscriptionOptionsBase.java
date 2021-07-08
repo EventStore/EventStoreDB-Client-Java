@@ -1,19 +1,20 @@
 package com.eventstore.dbclient;
 
-class ManagePersistentSubscriptionOptionsBase<T> extends OptionsBase<T> {
-    private PersistentSubscriptionSettings settings;
+abstract class ManagePersistentSubscriptionOptionsBase<TO,TS> extends OptionsBase<TO> {
+    private TS settings;
 
-    protected ManagePersistentSubscriptionOptionsBase() {
-        this.settings = PersistentSubscriptionSettings.builder().build();
+    protected ManagePersistentSubscriptionOptionsBase(TS settings)
+    {
+        this.settings = settings;
     }
 
-    public T settings(PersistentSubscriptionSettings settings) {
+    public TO settings(TS settings) {
         this.settings = settings;
 
-        return (T)this;
+        return (TO)this;
     }
 
-    public PersistentSubscriptionSettings getSettings() {
+    public TS getSettings() {
         return settings;
     }
 }
