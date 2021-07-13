@@ -88,7 +88,7 @@ public class SubscribePersistentSubcription extends PersistenSubscriptionTestsBa
         EventStoreDBClient streamsClient = server.getClient();
         String streamName = "aStream-" + UUID.randomUUID().toString();
 
-        client.create("$all", "aGroup")
+        client.createToAll("aGroup")
                 .get();
 
         EventDataBuilder builder = EventData.builderAsJson("foobar", new SubscribePersistentSubcription.Foo());
@@ -101,7 +101,7 @@ public class SubscribePersistentSubcription extends PersistenSubscriptionTestsBa
         SubscribePersistentSubscriptionOptions connectOptions = SubscribePersistentSubscriptionOptions.get()
                 .setBufferSize(32);
 
-        client.subscribe("$all", "aGroup", connectOptions, new PersistentSubscriptionListener() {
+        client.subscribeToAll("aGroup", connectOptions, new PersistentSubscriptionListener() {
             private int count = 0;
 
             @Override

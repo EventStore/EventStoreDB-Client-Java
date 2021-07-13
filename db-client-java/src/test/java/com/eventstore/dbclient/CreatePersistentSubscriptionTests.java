@@ -15,7 +15,7 @@ public class CreatePersistentSubscriptionTests extends PersistenSubscriptionTest
 
     @Test
     public void testCreatePersistentSubToAll() throws Throwable {
-        client.create("$all", "aGroup")
+        client.createToAll("aGroup")
                 .get();
     }
 }

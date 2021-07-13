@@ -18,10 +18,10 @@ public class DeletePersistentSubscriptionTests extends PersistenSubscriptionTest
 
     @Test
     public void testDeletePersistentSubToAll() throws Throwable {
-        client.create("$all", "aGroupUpd")
+        client.createToAll("aGroupUpd")
                 .get();
 
-        client.delete("$all", "aGroupUpd")
+        client.deleteToAll("aGroupUpd")
                 .get();
     }
 }

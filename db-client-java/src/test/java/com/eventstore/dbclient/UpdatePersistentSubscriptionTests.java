@@ -23,7 +23,7 @@ public class UpdatePersistentSubscriptionTests extends PersistenSubscriptionTest
     @Test
     public void testUpdatePersistentSubToAll() throws Throwable {
 
-        client.create("$all", "aGroupUpd")
+        client.createToAll("aGroupUpd")
                 .get();
 
         PersistentSubscriptionSettings updatedSettings = PersistentSubscriptionSettings.builder()
@@ -34,7 +34,7 @@ public class UpdatePersistentSubscriptionTests extends PersistenSubscriptionTest
         UpdatePersistentSubscriptionOptions options = UpdatePersistentSubscriptionOptions.get()
                 .settings(updatedSettings);
 
-        client.update("$all", "aGroupUpd", options)
+        client.updateToAll("aGroupUpd", options)
                 .get();
     }
 }
