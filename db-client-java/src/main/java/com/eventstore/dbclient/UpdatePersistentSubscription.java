@@ -28,14 +28,18 @@ public class UpdatePersistentSubscription {
         return this.connection.run(channel -> {
             CompletableFuture result = new CompletableFuture();
             Metadata headers = this.options.getMetadata();
-            PersistentSubscriptionsGrpc.PersistentSubscriptionsStub client = MetadataUtils.attachHeaders(PersistentSubscriptionsGrpc.newStub(channel), headers);
+            PersistentSubscriptionsGrpc.PersistentSubscriptionsStub client = MetadataUtils
+                    .attachHeaders(PersistentSubscriptionsGrpc.newStub(channel), headers);
 
-            Persistent.UpdateReq.Options.Builder builder = Persistent.UpdateReq.Options.newBuilder();
+            Persistent.UpdateReq.Options.Builder optionsBuilder = Persistent.UpdateReq.Options.newBuilder();
             Persistent.UpdateReq.Settings.Builder settingsBuilder = Persistent.UpdateReq.Settings.newBuilder();
+            Persistent.UpdateReq.StreamOptions.Builder streamOptionsBuilder = Persistent.UpdateReq.StreamOptions
+                    .newBuilder();
+            Persistent.UpdateReq.AllOptions.Builder allOptionsBuilder = Persistent.UpdateReq.AllOptions.newBuilder();
             Shared.StreamIdentifier.Builder streamIdentifierBuilder = Shared.StreamIdentifier.newBuilder();
 
             PersistentSubscriptionSettings settings = options.getSettings();
-            settingsBuilder.setRevision(settings.getRevision())
+            settingsBuilder
                     .setResolveLinks(settings.isResolveLinks())
                     .setReadBatchSize(settings.getReadBatchSize())
                     .setMinCheckpointCount(settings.getMinCheckpointCount())
@@ -60,15 +64,40 @@ public class UpdatePersistentSubscription {
                     break;
             }
 
-            streamIdentifierBuilder.setStreamName(ByteString.copyFromUtf8(stream));
+            if (stream == SystemStreams.ALL_STREAM) {
+                if (settings.getFromStart()) {
+                    allOptionsBuilder.setStart(Shared.Empty.newBuilder());
+                } else if (settings.getFromEnd()){
+                    allOptionsBuilder.setEnd(Shared.Empty.newBuilder());
+                } else {
+                    Position position = settings.getPosition();
+                    allOptionsBuilder.setPosition(Persistent.UpdateReq.Position.newBuilder()
+                            .setCommitPosition(position.getCommitUnsigned())
+                            .setPreparePosition(position.getPrepareUnsigned()));
+                }
+                optionsBuilder.setAll(allOptionsBuilder);
+            } else {
+                if (settings.getFromStart()) {
+                    streamOptionsBuilder.setStart(Shared.Empty.newBuilder());
+                } else if (settings.getFromEnd()){
+                    streamOptionsBuilder.setEnd(Shared.Empty.newBuilder());
+                } else {
+                    streamOptionsBuilder.setRevision(settings.getRevision());
+                }
 
-            builder.setSettings(settingsBuilder)
+                settingsBuilder.setRevision(settings.getRevision());
+                streamIdentifierBuilder.setStreamName(ByteString.copyFromUtf8(stream));
+                streamOptionsBuilder.setStreamIdentifier(streamIdentifierBuilder);
+                optionsBuilder.setStream(streamOptionsBuilder);
+                optionsBuilder.setStreamIdentifier(streamIdentifierBuilder);
+            }
+
+            optionsBuilder.setSettings(settingsBuilder)
                     .setGroupName(group)
-                    .setStreamIdentifier(streamIdentifierBuilder)
                     .build();
 
             Persistent.UpdateReq req = Persistent.UpdateReq.newBuilder()
-                    .setOptions(builder)
+                    .setOptions(optionsBuilder)
                     .build();
 
             client.update(req, GrpcUtils.convertSingleResponse(result));

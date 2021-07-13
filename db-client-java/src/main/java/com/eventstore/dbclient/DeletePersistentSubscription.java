@@ -29,15 +29,19 @@ public class DeletePersistentSubscription {
             Metadata headers = this.options.getMetadata();
             PersistentSubscriptionsGrpc.PersistentSubscriptionsStub client = MetadataUtils.attachHeaders(PersistentSubscriptionsGrpc.newStub(channel), headers);
 
-            Shared.StreamIdentifier streamIdentifier =
-                    Shared.StreamIdentifier.newBuilder()
-                            .setStreamName(ByteString.copyFromUtf8(stream))
-                            .build();
+            Persistent.DeleteReq.Options.Builder options = Persistent.DeleteReq.Options.newBuilder()
+                    .setGroupName(group);
 
-            Persistent.DeleteReq.Options options = Persistent.DeleteReq.Options.newBuilder()
-                    .setStreamIdentifier(streamIdentifier)
-                    .setGroupName(group)
-                    .build();
+            if (stream == SystemStreams.ALL_STREAM){
+                options.setAll(Shared.Empty.newBuilder());
+            } else {
+                Shared.StreamIdentifier streamIdentifier =
+                        Shared.StreamIdentifier.newBuilder()
+                                .setStreamName(ByteString.copyFromUtf8(stream))
+                                .build();
+
+                options.setStreamIdentifier(streamIdentifier);
+            }
 
             Persistent.DeleteReq req = Persistent.DeleteReq.newBuilder()
                     .setOptions(options)
