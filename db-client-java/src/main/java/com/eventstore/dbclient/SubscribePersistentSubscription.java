@@ -50,11 +50,15 @@ public class SubscribePersistentSubscription {
 
             int bufferSize = this.options.getBufferSize();
 
-            Persistent.ReadReq.Options options = defaultReadOptions.clone()
+            Persistent.ReadReq.Options.Builder options = defaultReadOptions.clone()
                     .setBufferSize(bufferSize)
-                    .setStreamIdentifier(streamIdentifier)
-                    .setGroupName(group)
-                    .build();
+                    .setGroupName(group);
+
+            if (stream == SystemStreams.ALL_STREAM){
+                options.setAll(Shared.Empty.newBuilder());
+            } else {
+                options.setStreamIdentifier(streamIdentifier);
+            }
 
             Persistent.ReadReq req = Persistent.ReadReq.newBuilder()
                     .setOptions(options)
