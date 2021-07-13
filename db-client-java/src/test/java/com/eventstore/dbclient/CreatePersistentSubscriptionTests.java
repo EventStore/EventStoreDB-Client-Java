@@ -12,4 +12,10 @@ public class CreatePersistentSubscriptionTests extends PersistenSubscriptionTest
         client.create("aStream", "aGroup")
                 .get();
     }
+
+    @Test
+    public void testCreatePersistentSubToAll() throws Throwable {
+        client.create("$all", "aGroup")
+                .get();
+    }
 }
