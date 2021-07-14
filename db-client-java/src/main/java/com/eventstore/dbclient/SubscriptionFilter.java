@@ -46,15 +46,15 @@ public class SubscriptionFilter {
             throw new IllegalArgumentException("Regex and Prefix expressions are mutually exclusive");
         }
 
-        StreamsOuterClass.ReadReq.Options.FilterOptions.Expression expression = null;
+        Shared.FilterOptions.Expression expression = null;
         if (regex != null) {
-            expression = StreamsOuterClass.ReadReq.Options.FilterOptions.Expression.newBuilder()
+            expression = Shared.FilterOptions.Expression.newBuilder()
                     .setRegex(regex.toString())
                     .build();
         }
 
         if (prefixes != null && prefixes.length > 0) {
-            StreamsOuterClass.ReadReq.Options.FilterOptions.Expression.Builder expressionB = StreamsOuterClass.ReadReq.Options.FilterOptions.Expression.newBuilder();
+            Shared.FilterOptions.Expression.Builder expressionB = Shared.FilterOptions.Expression.newBuilder();
             Stream.of(prefixes)
                     .map(Object::toString)
                     .filter(Objects::nonNull)
@@ -68,9 +68,9 @@ public class SubscriptionFilter {
             return;
         }
 
-        StreamsOuterClass.ReadReq.Options.FilterOptions.Builder optsB = StreamsOuterClass.ReadReq.Options.FilterOptions.newBuilder();
+        Shared.FilterOptions.Builder optsB = Shared.FilterOptions.newBuilder();
         if (filter instanceof StreamFilter) {
-            optsB.setStreamIdentifier(expression);
+            optsB.setStreamName(expression);
         }
         if (filter instanceof EventTypeFilter) {
             optsB.setEventType(expression);
