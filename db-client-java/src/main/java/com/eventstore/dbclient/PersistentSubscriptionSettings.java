@@ -4,6 +4,8 @@ public class PersistentSubscriptionSettings {
     private int checkpointAfterMs;
     private boolean extraStatistics;
     private boolean resolveLinks;
+    private boolean fromStart;
+    private boolean fromEnd;
     private int historyBufferSize;
     private int liveBufferSize;
     private int maxCheckpointCount;
@@ -14,8 +16,14 @@ public class PersistentSubscriptionSettings {
     private int readBatchSize;
     private long revision;
     private ConsumerStrategy strategy;
+    private Position position;
 
-    public PersistentSubscriptionSettings(int checkpointAfterMs, boolean extraStatistics, boolean resolveLinks, int historyBufferSize, int liveBufferSize, int maxCheckpointCount, int maxRetryCount, int maxSubscriberCount, int messageTimeoutMs, int minCheckpointCount, int readBatchSize, long revision, ConsumerStrategy strategy) {
+    public PersistentSubscriptionSettings(int checkpointAfterMs, boolean extraStatistics, boolean resolveLinks,
+                                          int historyBufferSize, int liveBufferSize, int maxCheckpointCount,
+                                          int maxRetryCount, int maxSubscriberCount, int messageTimeoutMs,
+                                          int minCheckpointCount, int readBatchSize, long revision,
+                                          ConsumerStrategy strategy, boolean fromStart, boolean fromEnd,
+                                          Position position) {
         this.checkpointAfterMs = checkpointAfterMs;
         this.extraStatistics = extraStatistics;
         this.resolveLinks = resolveLinks;
@@ -28,6 +36,9 @@ public class PersistentSubscriptionSettings {
         this.minCheckpointCount = minCheckpointCount;
         this.readBatchSize = readBatchSize;
         this.revision = revision;
+        this.position = position;
+        this.fromStart = fromStart;
+        this.fromEnd = fromEnd;
         this.strategy = strategy;
     }
 
@@ -67,9 +78,7 @@ public class PersistentSubscriptionSettings {
         return maxRetryCount;
     }
 
-    public int getMaxSubscriberCount() {
-        return maxSubscriberCount;
-    }
+    public int getMaxSubscriberCount() { return maxSubscriberCount; }
 
     public int getMessageTimeoutMs() {
         return messageTimeoutMs;
@@ -87,7 +96,11 @@ public class PersistentSubscriptionSettings {
         return revision;
     }
 
-    public ConsumerStrategy getStrategy() {
-        return strategy;
-    }
+    public Position getPosition() { return position; }
+
+    public boolean getFromStart() { return fromStart; }
+
+    public boolean getFromEnd() { return fromEnd; }
+
+    public ConsumerStrategy getStrategy() { return strategy; }
 }

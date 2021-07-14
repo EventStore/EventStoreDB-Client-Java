@@ -16,7 +16,8 @@ public class CreatePersistentSubscription {
     private final String group;
     private final CreatePersistentSubscriptionOptions options;
 
-    public CreatePersistentSubscription(GrpcClient client, String stream, String group, CreatePersistentSubscriptionOptions options) {
+    public CreatePersistentSubscription(GrpcClient client, String stream, String group,
+                                        CreatePersistentSubscriptionOptions options) {
         this.client = client;
         this.stream = stream;
         this.group = group;
@@ -27,14 +28,18 @@ public class CreatePersistentSubscription {
         return this.client.run(channel -> {
             CompletableFuture result = new CompletableFuture();
             Metadata headers = this.options.getMetadata();
-            PersistentSubscriptionsGrpc.PersistentSubscriptionsStub client = MetadataUtils.attachHeaders(PersistentSubscriptionsGrpc.newStub(channel), headers);
+            PersistentSubscriptionsGrpc.PersistentSubscriptionsStub client = MetadataUtils
+                    .attachHeaders(PersistentSubscriptionsGrpc.newStub(channel), headers);
 
-            Persistent.CreateReq.Options.Builder builder = Persistent.CreateReq.Options.newBuilder();
+            Persistent.CreateReq.Options.Builder optionsBuilder = Persistent.CreateReq.Options.newBuilder();
             Persistent.CreateReq.Settings.Builder settingsBuilder = Persistent.CreateReq.Settings.newBuilder();
+            Persistent.CreateReq.StreamOptions.Builder streamOptionsBuilder = Persistent.CreateReq.StreamOptions
+                    .newBuilder();
+            Persistent.CreateReq.AllOptions.Builder allOptionsBuilder = Persistent.CreateReq.AllOptions.newBuilder();
             Shared.StreamIdentifier.Builder streamIdentifierBuilder = Shared.StreamIdentifier.newBuilder();
 
             PersistentSubscriptionSettings settings = options.getSettings();
-            settingsBuilder.setRevision(settings.getRevision())
+            settingsBuilder
                     .setResolveLinks(settings.isResolveLinks())
                     .setReadBatchSize(settings.getReadBatchSize())
                     .setMinCheckpointCount(settings.getMinCheckpointCount())
@@ -59,15 +64,40 @@ public class CreatePersistentSubscription {
                     break;
             }
 
-            streamIdentifierBuilder.setStreamName(ByteString.copyFromUtf8(stream));
+            if (stream == SystemStreams.ALL_STREAM) {
+                if (settings.getFromStart()) {
+                    allOptionsBuilder.setStart(Shared.Empty.newBuilder());
+                } else if (settings.getFromEnd()){
+                    allOptionsBuilder.setEnd(Shared.Empty.newBuilder());
+                } else {
+                    Position position = settings.getPosition();
+                    allOptionsBuilder.setPosition(Persistent.CreateReq.Position.newBuilder()
+                        .setCommitPosition(position.getCommitUnsigned())
+                        .setPreparePosition(position.getPrepareUnsigned()));
+                }
+                optionsBuilder.setAll(allOptionsBuilder);
+            } else {
+                if (settings.getFromStart()) {
+                    streamOptionsBuilder.setStart(Shared.Empty.newBuilder());
+                } else if (settings.getFromEnd()){
+                    streamOptionsBuilder.setEnd(Shared.Empty.newBuilder());
+                } else {
+                    streamOptionsBuilder.setRevision(settings.getRevision());
+                }
 
-            builder.setSettings(settingsBuilder)
+                settingsBuilder.setRevision(settings.getRevision());
+                streamIdentifierBuilder.setStreamName(ByteString.copyFromUtf8(stream));
+                streamOptionsBuilder.setStreamIdentifier(streamIdentifierBuilder);
+                optionsBuilder.setStream(streamOptionsBuilder);
+                optionsBuilder.setStreamIdentifier(streamIdentifierBuilder);
+            }
+
+            optionsBuilder.setSettings(settingsBuilder)
                     .setGroupName(group)
-                    .setStreamIdentifier(streamIdentifierBuilder)
                     .build();
 
             Persistent.CreateReq req = Persistent.CreateReq.newBuilder()
-                    .setOptions(builder)
+                    .setOptions(optionsBuilder)
                     .build();
 
             client.create(req, GrpcUtils.convertSingleResponse(result));
