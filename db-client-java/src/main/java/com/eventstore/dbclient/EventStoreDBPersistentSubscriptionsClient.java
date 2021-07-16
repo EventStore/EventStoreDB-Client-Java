@@ -130,13 +130,18 @@ public class EventStoreDBPersistentSubscriptionsClient extends EventStoreDBClien
     }
 
     public CompletableFuture subscribe(String stream, String group, SubscribePersistentSubscriptionOptions options, PersistentSubscriptionListener listener) {
-        if (options == null)
+        if (options == null) {
             options = SubscribePersistentSubscriptionOptions.get();
+        }
 
         if (!options.hasUserCredentials()) {
             options.authenticated(this.credentials);
         }
 
-        return new SubscribePersistentSubscription(this.client, stream, group, options, listener).execute();
+        if (stream == SystemStreams.ALL_STREAM) {
+            return new SubscribePersistentSubscriptionToAll(this.client, group, options, listener).execute();
+        }
+
+        return new SubscribePersistentSubscriptionToStream(this.client, stream, group, options, listener).execute();
     }
 }

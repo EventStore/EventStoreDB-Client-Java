@@ -20,7 +20,6 @@ public class DeletePersistentSubscriptionToStream extends AbstractDeletePersiste
                         .setStreamName(ByteString.copyFromUtf8(stream));
 
         return Persistent.DeleteReq.Options.newBuilder()
-                .setStreamIdentifier(streamIdentifier)
-                .setAll(Shared.Empty.newBuilder());
+                .setStreamIdentifier(streamIdentifier);
     }
 }
