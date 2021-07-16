@@ -82,4 +82,59 @@ public class SubscribePersistentSubcription extends PersistenSubscriptionTestsBa
 
         Assert.assertEquals(6, result.get().intValue());
     }
+
+    @Test
+    public void testSubscribePersistentSubToAll() throws Throwable {
+        EventStoreDBClient streamsClient = server.getClient();
+        String streamName = "aStream-" + UUID.randomUUID().toString();
+
+        client.createToAll("aGroup")
+                .get();
+
+        EventDataBuilder builder = EventData.builderAsJson("foobar", new SubscribePersistentSubcription.Foo());
+
+        streamsClient.appendToStream(streamName, builder.build(), builder.build(), builder.build())
+                .get();
+
+        final CompletableFuture<Integer> result = new CompletableFuture<>();
+
+        SubscribePersistentSubscriptionOptions connectOptions = SubscribePersistentSubscriptionOptions.get()
+                .setBufferSize(32);
+
+        client.subscribeToAll("aGroup", connectOptions, new PersistentSubscriptionListener() {
+            private int count = 0;
+
+            @Override
+            public void onEvent(PersistentSubscription subscription, ResolvedEvent resolvedEvent) {
+                RecordedEvent event = resolvedEvent.getEvent();
+
+                subscription.ack(resolvedEvent);
+
+                if (!event.getEventType().equals("foobar"))
+                    return;
+
+                ++this.count;
+
+                if (this.count == 6) {
+                    result.complete(this.count);
+                    subscription.stop();
+                }
+            }
+
+            @Override
+            public void onError(PersistentSubscription subscription, Throwable throwable) {
+                result.completeExceptionally(throwable);
+            }
+
+            @Override
+            public void onCancelled(PersistentSubscription subscription) {
+                result.complete(count);
+            }
+        }).get();
+
+        streamsClient.appendToStream(streamName, builder.build(), builder.build(), builder.build())
+                .get();
+
+        Assert.assertEquals(6, result.get().intValue());
+    }
 }

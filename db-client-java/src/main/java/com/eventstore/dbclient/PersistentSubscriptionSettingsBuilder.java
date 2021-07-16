@@ -1,11 +1,11 @@
 package com.eventstore.dbclient;
 
-import com.eventstore.dbclient.proto.persistentsubscriptions.Persistent;
-
 public class PersistentSubscriptionSettingsBuilder {
     private int checkpointAfterMs;
     private boolean extraStatistics;
     private boolean resolveLinks;
+    private boolean fromStart;
+    private boolean fromEnd;
     private int historyBufferSize;
     private int liveBufferSize;
     private int maxCheckpointCount;
@@ -16,12 +16,15 @@ public class PersistentSubscriptionSettingsBuilder {
     private int readBatchSize;
     private long revision;
     private ConsumerStrategy strategy;
+    private Position position;
 
     public PersistentSubscriptionSettingsBuilder() {
         checkpointAfterMs = 2_000;
         resolveLinks = false;
         extraStatistics = false;
         revision = 0;
+        fromStart = false;
+        fromEnd = false;
         messageTimeoutMs = 30_000;
         maxRetryCount = 10;
         minCheckpointCount = 10;
@@ -31,6 +34,7 @@ public class PersistentSubscriptionSettingsBuilder {
         readBatchSize = 20;
         historyBufferSize = 500;
         strategy = ConsumerStrategy.RoundRobin;
+        position = Position.START;
     }
 
     public PersistentSubscriptionSettingsBuilder(PersistentSubscriptionSettings settings) {
@@ -38,6 +42,8 @@ public class PersistentSubscriptionSettingsBuilder {
         resolveLinks = settings.isResolveLinks();
         extraStatistics = settings.isExtraStatistics();
         revision = settings.getRevision();
+        fromStart = settings.getFromStart();
+        fromEnd = settings.getFromEnd();
         messageTimeoutMs = settings.getMessageTimeoutMs();
         maxRetryCount = settings.getMaxRetryCount();
         minCheckpointCount = settings.getMinCheckpointCount();
@@ -47,10 +53,11 @@ public class PersistentSubscriptionSettingsBuilder {
         readBatchSize = settings.getReadBatchSize();
         historyBufferSize = settings.getHistoryBufferSize();
         strategy = settings.getStrategy();
+        position = settings.getPosition();
     }
 
     public PersistentSubscriptionSettings build() {
-        return new PersistentSubscriptionSettings(checkpointAfterMs, extraStatistics, resolveLinks, historyBufferSize, liveBufferSize, maxCheckpointCount, maxRetryCount, maxSubscriberCount, messageTimeoutMs, minCheckpointCount, readBatchSize, revision, strategy);
+        return new PersistentSubscriptionSettings(checkpointAfterMs, extraStatistics, resolveLinks, historyBufferSize, liveBufferSize, maxCheckpointCount, maxRetryCount, maxSubscriberCount, messageTimeoutMs, minCheckpointCount, readBatchSize, revision, strategy, fromStart, fromEnd, position);
     }
 
     public PersistentSubscriptionSettingsBuilder enableLinkResolution() {
@@ -86,6 +93,23 @@ public class PersistentSubscriptionSettingsBuilder {
 
     public PersistentSubscriptionSettingsBuilder revision(long value) {
         this.revision = value;
+        return this;
+    }
+
+    public PersistentSubscriptionSettingsBuilder position(Position value) {
+        this.position = value;
+        return this;
+    }
+
+    public PersistentSubscriptionSettingsBuilder fromStart() {
+        this.fromStart = true;
+        this.fromEnd = false;
+        return this;
+    }
+
+    public PersistentSubscriptionSettingsBuilder fromEnd() {
+        this.fromEnd = true;
+        this.fromStart = false;
         return this;
     }
 

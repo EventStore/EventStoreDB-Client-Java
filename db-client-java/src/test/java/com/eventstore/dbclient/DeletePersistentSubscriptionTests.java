@@ -15,4 +15,13 @@ public class DeletePersistentSubscriptionTests extends PersistenSubscriptionTest
         client.delete("aStream", "aGroupUpd")
                 .get();
     }
+
+    @Test
+    public void testDeletePersistentSubToAll() throws Throwable {
+        client.createToAll("aGroupUpd")
+                .get();
+
+        client.deleteToAll("aGroupUpd")
+                .get();
+    }
 }
