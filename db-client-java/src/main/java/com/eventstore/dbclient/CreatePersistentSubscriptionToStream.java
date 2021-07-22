@@ -6,15 +6,25 @@ import com.google.protobuf.ByteString;
 
 public class CreatePersistentSubscriptionToStream extends AbstractCreatePersistentSubscription {
     private final String stream;
-    private final CreatePersistentSubscriptionOptions options;
-    private final PersistentSubscriptionSettings settings;
+    private final PersistentSubscriptionToStreamSettings settings;
 
+    /**
+     * @deprecated prefer {@link #CreatePersistentSubscriptionToStream(GrpcClient, String, String, CreatePersistentSubscriptionToStreamOptions)}
+     */
+    @Deprecated
     public CreatePersistentSubscriptionToStream(GrpcClient client, String stream, String group,
                                                 CreatePersistentSubscriptionOptions options) {
-        super(client, group, options);
+        super(client, group, options.getSettings(), options.getMetadata());
 
         this.stream = stream;
-        this.options = options;
+        this.settings = PersistentSubscriptionToStreamSettings.copy(options.getSettings()).build();
+    }
+
+    public CreatePersistentSubscriptionToStream(GrpcClient client, String stream, String group,
+                                                CreatePersistentSubscriptionToStreamOptions options) {
+        super(client, group, options.getSettings(), options.getMetadata());
+
+        this.stream = stream;
         this.settings = options.getSettings();
     }
 
@@ -26,7 +36,6 @@ public class CreatePersistentSubscriptionToStream extends AbstractCreatePersiste
 
     @Override
     protected Persistent.CreateReq.Options.Builder createOptions() {
-        PersistentSubscriptionSettings settings = options.getSettings();
         Persistent.CreateReq.Options.Builder optionsBuilder = Persistent.CreateReq.Options.newBuilder();
         Shared.StreamIdentifier.Builder streamIdentifierBuilder = Shared.StreamIdentifier.newBuilder();
         Persistent.CreateReq.StreamOptions.Builder streamOptionsBuilder = Persistent.CreateReq.StreamOptions

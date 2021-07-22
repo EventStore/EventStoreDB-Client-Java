@@ -4,11 +4,11 @@ import com.eventstore.dbclient.proto.persistentsubscriptions.Persistent;
 import com.eventstore.dbclient.proto.shared.Shared;
 
 public class CreatePersistentSubscriptionToAll extends AbstractCreatePersistentSubscription {
-    private final PersistentSubscriptionSettings settings;
+    private final PersistentSubscriptionToAllSettings settings;
 
     public CreatePersistentSubscriptionToAll(GrpcClient client, String group,
-                                             CreatePersistentSubscriptionOptions options) {
-        super(client, group, options);
+                                             CreatePersistentSubscriptionToAllOptions options) {
+        super(client, group, options.getSettings(), options.getMetadata());
 
         this.settings = options.getSettings();
     }

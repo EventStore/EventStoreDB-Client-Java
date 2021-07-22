@@ -10,13 +10,15 @@ import java.util.concurrent.CompletableFuture;
 public abstract class AbstractCreatePersistentSubscription {
     private final GrpcClient client;
     private final String group;
-    private final CreatePersistentSubscriptionOptions options;
+    private final AbstractPersistentSubscriptionSettings settings;
+    private Metadata metadata;
 
     public AbstractCreatePersistentSubscription(GrpcClient client, String group,
-                                                CreatePersistentSubscriptionOptions options) {
+                                                AbstractPersistentSubscriptionSettings settings, Metadata metadata) {
         this.client = client;
         this.group = group;
-        this.options = options;
+        this.settings = settings;
+        this.metadata = metadata;
     }
 
     protected Persistent.CreateReq.Settings.Builder createSettings(){
@@ -28,12 +30,10 @@ public abstract class AbstractCreatePersistentSubscription {
     public CompletableFuture execute() {
         return this.client.run(channel -> {
             CompletableFuture result = new CompletableFuture();
-            Metadata headers = this.options.getMetadata();
             PersistentSubscriptionsGrpc.PersistentSubscriptionsStub client = MetadataUtils
-                    .attachHeaders(PersistentSubscriptionsGrpc.newStub(channel), headers);
+                    .attachHeaders(PersistentSubscriptionsGrpc.newStub(channel), this.metadata);
             Persistent.CreateReq.Settings.Builder settingsBuilder = createSettings();
 
-            PersistentSubscriptionSettings settings = options.getSettings();
             settingsBuilder
                     .setResolveLinks(settings.isResolveLinks())
                     .setReadBatchSize(settings.getReadBatchSize())

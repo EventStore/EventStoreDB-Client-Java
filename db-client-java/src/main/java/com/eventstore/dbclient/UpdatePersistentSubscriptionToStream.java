@@ -5,12 +5,24 @@ import com.eventstore.dbclient.proto.shared.Shared;
 import com.google.protobuf.ByteString;
 
 public class UpdatePersistentSubscriptionToStream extends AbstractUpdatePersistentSubscription {
-    private final PersistentSubscriptionSettings settings;
+    private final PersistentSubscriptionToStreamSettings settings;
     private String stream;
 
+    /**
+     * @deprecated prefer {@link #UpdatePersistentSubscriptionToStream(GrpcClient, String, String, UpdatePersistentSubscriptionToStreamOptions)}
+     */
+    @Deprecated
     public UpdatePersistentSubscriptionToStream(GrpcClient connection, String stream, String group,
                                                 UpdatePersistentSubscriptionOptions options) {
-        super(connection, group, options);
+        super(connection, group, options.getSettings(), options.getMetadata());
+
+        this.stream = stream;
+        this.settings = PersistentSubscriptionToStreamSettings.copy(options.getSettings()).build();
+    }
+
+    public UpdatePersistentSubscriptionToStream(GrpcClient connection, String stream, String group,
+                                                UpdatePersistentSubscriptionToStreamOptions options) {
+        super(connection, group, options.getSettings(), options.getMetadata());
 
         this.stream = stream;
         this.settings = options.getSettings();
