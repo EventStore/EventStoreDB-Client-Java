@@ -15,6 +15,7 @@ public class SubscribeToAll extends AbstractRegularSubscription {
 
     @Override
     protected StreamsOuterClass.ReadReq.Options.Builder createOptions() {
+        SubscriptionFilter filter = this.options.getFilter();
         StreamsOuterClass.ReadReq.Options.Builder options =
                 defaultSubscribeOptions.clone()
                         .setResolveLinks(this.options.shouldResolveLinkTos())
@@ -24,9 +25,15 @@ public class SubscribeToAll extends AbstractRegularSubscription {
                                         .setPreparePosition(this.options.getPosition().getPrepareUnsigned()))
                                 .build());
 
-        if (this.options.getFilter() != null) {
-            this.options.getFilter().addToWireReadReq(options);
+        if (filter != null) {
+            Shared.FilterOptions.Builder filterOptionsBuilder = filter.getBuilder();
             this.checkpointer = this.options.getFilter().getCheckpointer();
+
+            if (filterOptionsBuilder == null) {
+                options.setNoFilter(Shared.Empty.getDefaultInstance());
+            } else {
+                options.setFilter(filterOptionsBuilder);
+            }
         } else {
             options.setNoFilter(Shared.Empty.getDefaultInstance());
         }

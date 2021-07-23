@@ -37,7 +37,21 @@ public class SubscriptionFilter {
         return checkpointer;
     }
 
-    void addToWireReadReq(StreamsOuterClass.ReadReq.Options.Builder builder) {
+    /**
+     * @deprecated prefer {@link #getBuilder()}
+     */
+    @Deprecated
+    void addToWireReadReq(StreamsOuterClass.ReadReq.Options.Builder optionsBuilder) {
+        Shared.FilterOptions.Builder filterOptionsBuilder = this.getBuilder();
+
+        if (filterOptionsBuilder == null) {
+            optionsBuilder.setNoFilter(Shared.Empty.getDefaultInstance());
+        } else {
+            optionsBuilder.setFilter(filterOptionsBuilder);
+        }
+    }
+
+    Shared.FilterOptions.Builder getBuilder() {
         RegularFilterExpression regex = filter.getRegularFilterExpression();
         PrefixFilterExpression[] prefixes = filter.getPrefixFilterExpressions();
         Optional<Integer> maxSearchWindow = filter.getMaxSearchWindow();
@@ -64,8 +78,7 @@ public class SubscriptionFilter {
         }
 
         if (expression == null) {
-            builder.setNoFilter(Shared.Empty.getDefaultInstance());
-            return;
+            return null;
         }
 
         Shared.FilterOptions.Builder optsB = Shared.FilterOptions.newBuilder();
@@ -82,9 +95,7 @@ public class SubscriptionFilter {
             optsB.setCount(Shared.Empty.getDefaultInstance());
         }
 
-        optsB.setCheckpointIntervalMultiplier(this.checkpointIntervalUnsigned);
-
-        builder.setFilter(optsB.build());
+        return optsB.setCheckpointIntervalMultiplier(this.checkpointIntervalUnsigned);
     }
 }
 
