@@ -12,18 +12,18 @@ import java.util.Iterator;
 public class PersistentSubscription {
     private final ClientCallStreamObserver<Persistent.ReadReq> requestStream;
     private final String subscriptionId;
-    private final String streamName;
-    private final String groupName;
-    private final int bufferSize;
-    private final Persistent.ReadReq.Options.Builder options;
 
-    public PersistentSubscription(ClientCallStreamObserver<Persistent.ReadReq> requestStream, String subscriptionId, String streamName, String groupName, int bufferSize, Persistent.ReadReq.Options.Builder options) {
+    @Deprecated
+    public PersistentSubscription(ClientCallStreamObserver<Persistent.ReadReq> requestStream, String subscriptionId,
+                                  String streamName, String groupName, int bufferSize,
+                                  Persistent.ReadReq.Options.Builder options) {
         this.requestStream = requestStream;
         this.subscriptionId = subscriptionId;
-        this.streamName = streamName;
-        this.groupName = groupName;
-        this.bufferSize = bufferSize;
-        this.options = options;
+    }
+
+    public PersistentSubscription(ClientCallStreamObserver<Persistent.ReadReq> requestStream, String subscriptionId) {
+        this.requestStream = requestStream;
+        this.subscriptionId = subscriptionId;
     }
 
     public String getSubscriptionId() {

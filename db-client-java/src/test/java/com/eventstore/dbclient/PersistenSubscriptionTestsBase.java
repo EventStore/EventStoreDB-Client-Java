@@ -9,7 +9,7 @@ import java.util.concurrent.ExecutionException;
 
 class PersistenSubscriptionTestsBase {
     @Rule
-    public final EventStoreTestDBContainer server = new EventStoreTestDBContainer(false);
+    public final EventStoreTestDBContainer server = new EventStoreTestDBContainer(true);
     protected EventStoreDBPersistentSubscriptionsClient client;
 
     @Before

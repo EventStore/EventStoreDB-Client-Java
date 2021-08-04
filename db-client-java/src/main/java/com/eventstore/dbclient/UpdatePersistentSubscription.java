@@ -1,79 +1,47 @@
 package com.eventstore.dbclient;
 
 import com.eventstore.dbclient.proto.persistentsubscriptions.Persistent;
-import com.eventstore.dbclient.proto.persistentsubscriptions.PersistentSubscriptionsGrpc;
 import com.eventstore.dbclient.proto.shared.Shared;
 import com.google.protobuf.ByteString;
-import io.grpc.Metadata;
-import io.grpc.stub.MetadataUtils;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
+public class UpdatePersistentSubscription extends AbstractUpdatePersistentSubscription {
+    private final PersistentSubscriptionSettings settings;
+    private String stream;
 
-public class UpdatePersistentSubscription {
-    private final GrpcClient connection;
-    private final String stream;
-    private final String group;
-    private final UpdatePersistentSubscriptionOptions options;
+    public UpdatePersistentSubscription(GrpcClient connection, String stream, String group,
+                                        UpdatePersistentSubscriptionOptions options) {
+        super(connection, group, options.getSettings(), options.getMetadata());
 
-    public UpdatePersistentSubscription(GrpcClient connection, String stream, String group, UpdatePersistentSubscriptionOptions options) {
-        this.connection = connection;
         this.stream = stream;
-        this.group = group;
-
-        this.options = options;
+        this.settings = options.getSettings();
     }
 
-    public CompletableFuture execute() {
-        return this.connection.run(channel -> {
-            CompletableFuture result = new CompletableFuture();
-            Metadata headers = this.options.getMetadata();
-            PersistentSubscriptionsGrpc.PersistentSubscriptionsStub client = MetadataUtils.attachHeaders(PersistentSubscriptionsGrpc.newStub(channel), headers);
+    @Override
+    protected Persistent.UpdateReq.Settings.Builder createSettings() {
+        return Persistent.UpdateReq.Settings.newBuilder()
+                .setRevision(settings.getRevision());
+    }
 
-            Persistent.UpdateReq.Options.Builder builder = Persistent.UpdateReq.Options.newBuilder();
-            Persistent.UpdateReq.Settings.Builder settingsBuilder = Persistent.UpdateReq.Settings.newBuilder();
-            Shared.StreamIdentifier.Builder streamIdentifierBuilder = Shared.StreamIdentifier.newBuilder();
+    @Override
+    protected Persistent.UpdateReq.Options.Builder createOptions() {
+        Persistent.UpdateReq.Options.Builder optionsBuilder = Persistent.UpdateReq.Options.newBuilder();
+        Shared.StreamIdentifier.Builder streamIdentifierBuilder = Shared.StreamIdentifier.newBuilder();
+        Persistent.UpdateReq.StreamOptions.Builder streamOptionsBuilder = Persistent.UpdateReq.StreamOptions
+                .newBuilder();
 
-            PersistentSubscriptionSettings settings = options.getSettings();
-            settingsBuilder.setRevision(settings.getRevision())
-                    .setResolveLinks(settings.isResolveLinks())
-                    .setReadBatchSize(settings.getReadBatchSize())
-                    .setMinCheckpointCount(settings.getMinCheckpointCount())
-                    .setMaxCheckpointCount(settings.getMaxCheckpointCount())
-                    .setMessageTimeoutMs(settings.getMessageTimeoutMs())
-                    .setMaxSubscriberCount(settings.getMaxSubscriberCount())
-                    .setMaxRetryCount(settings.getMaxRetryCount())
-                    .setLiveBufferSize(settings.getLiveBufferSize())
-                    .setHistoryBufferSize(settings.getHistoryBufferSize())
-                    .setExtraStatistics(settings.isExtraStatistics())
-                    .setCheckpointAfterMs(settings.getCheckpointAfterMs());
+        if (settings.getStreamRevision() == StreamRevision.START) {
+            streamOptionsBuilder.setStart(Shared.Empty.newBuilder());
+        } else if (settings.getStreamRevision() == StreamRevision.END) {
+            streamOptionsBuilder.setEnd(Shared.Empty.newBuilder());
+        } else {
+            streamOptionsBuilder.setRevision(settings.getRevision());
+        }
 
-            switch (settings.getStrategy()) {
-                case DispatchToSingle:
-                    settingsBuilder.setNamedConsumerStrategy(Persistent.UpdateReq.ConsumerStrategy.DispatchToSingle);
-                    break;
-                case RoundRobin:
-                    settingsBuilder.setNamedConsumerStrategy(Persistent.UpdateReq.ConsumerStrategy.RoundRobin);
-                    break;
-                case Pinned:
-                    settingsBuilder.setNamedConsumerStrategy(Persistent.UpdateReq.ConsumerStrategy.Pinned);
-                    break;
-            }
+        streamIdentifierBuilder.setStreamName(ByteString.copyFromUtf8(stream));
+        streamOptionsBuilder.setStreamIdentifier(streamIdentifierBuilder);
+        optionsBuilder.setStream(streamOptionsBuilder);
+        optionsBuilder.setStreamIdentifier(streamIdentifierBuilder);
 
-            streamIdentifierBuilder.setStreamName(ByteString.copyFromUtf8(stream));
-
-            builder.setSettings(settingsBuilder)
-                    .setGroupName(group)
-                    .setStreamIdentifier(streamIdentifierBuilder)
-                    .build();
-
-            Persistent.UpdateReq req = Persistent.UpdateReq.newBuilder()
-                    .setOptions(builder)
-                    .build();
-
-            client.update(req, GrpcUtils.convertSingleResponse(result));
-
-            return result;
-        });
+        return optionsBuilder;
     }
 }
