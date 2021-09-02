@@ -3,6 +3,8 @@ package com.eventstore.dbclient;
 import com.eventstore.dbclient.proto.shared.Shared;
 import com.eventstore.dbclient.proto.streams.StreamsOuterClass;
 
+import java.util.Objects;
+
 public abstract class ExpectedRevision {
     public final static ExpectedRevision ANY = new AnyExpectedRevision();
     public final static ExpectedRevision NO_STREAM = new NoStreamExpectedRevision();
@@ -71,6 +73,19 @@ public abstract class ExpectedRevision {
 
         SpecificExpectedRevision(long version) {
             this.version = version;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            SpecificExpectedRevision that = (SpecificExpectedRevision) o;
+            return version == that.version;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(version);
         }
 
         @Override
