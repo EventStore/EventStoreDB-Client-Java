@@ -134,15 +134,15 @@ public class EventStoreDBPersistentSubscriptionsClient extends EventStoreDBClien
         return new DeletePersistentSubscriptionToAll(this.client, group, options).execute();
     }
 
-    public CompletableFuture subscribe(String stream, String group, PersistentSubscriptionListener listener) {
+    public CompletableFuture<PersistentSubscription> subscribe(String stream, String group, PersistentSubscriptionListener listener) {
         return this.subscribe(stream, group, listener);
     }
 
-    public CompletableFuture subscribeToAll(String group, PersistentSubscriptionListener listener) {
+    public CompletableFuture<PersistentSubscription> subscribeToAll(String group, PersistentSubscriptionListener listener) {
         return this.subscribeToAll(group, SubscribePersistentSubscriptionOptions.get(), listener);
     }
 
-    public CompletableFuture subscribe(String stream, String group, SubscribePersistentSubscriptionOptions options, PersistentSubscriptionListener listener) {
+    public CompletableFuture<PersistentSubscription> subscribe(String stream, String group, SubscribePersistentSubscriptionOptions options, PersistentSubscriptionListener listener) {
         if (options == null) {
             options = SubscribePersistentSubscriptionOptions.get();
         }
@@ -153,7 +153,7 @@ public class EventStoreDBPersistentSubscriptionsClient extends EventStoreDBClien
 
         return new SubscribePersistentSubscription(this.client, stream, group, options, listener).execute();    }
 
-    public CompletableFuture subscribeToAll(String group, SubscribePersistentSubscriptionOptions options, PersistentSubscriptionListener listener) {
+    public CompletableFuture<PersistentSubscription> subscribeToAll(String group, SubscribePersistentSubscriptionOptions options, PersistentSubscriptionListener listener) {
         if (options == null) {
             options = SubscribePersistentSubscriptionOptions.get();
         }

@@ -37,7 +37,7 @@ public abstract class AbstractSubscribePersistentSubscription {
 
     protected abstract Persistent.ReadReq.Options.Builder createOptions();
 
-    public CompletableFuture execute() {
+    public CompletableFuture<PersistentSubscription> execute() {
         return this.connection.run(channel -> {
             Metadata headers = this.options.getMetadata();
             PersistentSubscriptionsGrpc.PersistentSubscriptionsStub client = MetadataUtils
