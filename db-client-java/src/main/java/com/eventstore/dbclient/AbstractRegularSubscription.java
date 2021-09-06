@@ -96,23 +96,23 @@ public abstract class AbstractRegularSubscription {
 
                 @Override
                 public void onError(Throwable throwable) {
-                    if (throwable instanceof StatusRuntimeException) {
-                        StatusRuntimeException e = (StatusRuntimeException) throwable;
-                        if (e.getStatus().getCode() == Status.Code.CANCELLED) {
+                    Throwable error = throwable;
+                    if (error instanceof StatusRuntimeException) {
+                        StatusRuntimeException sre = (StatusRuntimeException) error;
+                        if (sre.getStatus().getCode() == Status.Code.CANCELLED) {
                             listener.onCancelled(this._subscription);
                             return;
                         }
 
-                        String leaderHost = e.getTrailers().get(Metadata.Key.of("leader-endpoint-host", Metadata.ASCII_STRING_MARSHALLER));
-                        String leaderPort = e.getTrailers().get(Metadata.Key.of("leader-endpoint-port", Metadata.ASCII_STRING_MARSHALLER));
+                        String leaderHost = sre.getTrailers().get(Metadata.Key.of("leader-endpoint-host", Metadata.ASCII_STRING_MARSHALLER));
+                        String leaderPort = sre.getTrailers().get(Metadata.Key.of("leader-endpoint-port", Metadata.ASCII_STRING_MARSHALLER));
 
                         if (leaderHost != null && leaderPort != null) {
-                            NotLeaderException reason = new NotLeaderException(leaderHost, Integer.valueOf(leaderPort));
-                            listener.onError(this._subscription, reason);
+                            error = new NotLeaderException(leaderHost, Integer.valueOf(leaderPort));
                         }
                     }
 
-                    listener.onError(this._subscription, throwable);
+                    listener.onError(this._subscription, error);
                 }
 
                 @Override

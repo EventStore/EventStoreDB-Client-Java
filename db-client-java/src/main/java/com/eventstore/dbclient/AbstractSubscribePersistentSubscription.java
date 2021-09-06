@@ -89,16 +89,24 @@ public abstract class AbstractSubscribePersistentSubscription {
                 }
 
                 @Override
-                public void onError(Throwable t) {
-                    if (t instanceof StatusRuntimeException) {
-                        Status s = ((StatusRuntimeException) t).getStatus();
-                        if (s.getCode() == Status.Code.CANCELLED) {
+                public void onError(Throwable throwable) {
+                    Throwable error = throwable;
+                    if (error instanceof StatusRuntimeException) {
+                        StatusRuntimeException sre = (StatusRuntimeException) error;
+                        if (sre.getStatus().getCode() == Status.Code.CANCELLED) {
                             listener.onCancelled(this._subscription);
                             return;
                         }
+
+                        String leaderHost = sre.getTrailers().get(Metadata.Key.of("leader-endpoint-host", Metadata.ASCII_STRING_MARSHALLER));
+                        String leaderPort = sre.getTrailers().get(Metadata.Key.of("leader-endpoint-port", Metadata.ASCII_STRING_MARSHALLER));
+
+                        if (leaderHost != null && leaderPort != null) {
+                            error = new NotLeaderException(leaderHost, Integer.valueOf(leaderPort));
+                        }
                     }
 
-                    listener.onError(this._subscription, t);
+                    listener.onError(this._subscription, error);
                 }
 
                 @Override
