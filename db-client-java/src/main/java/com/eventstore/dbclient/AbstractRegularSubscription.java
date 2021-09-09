@@ -96,6 +96,10 @@ public abstract class AbstractRegularSubscription {
 
                 @Override
                 public void onError(Throwable throwable) {
+                    if (!_confirmed) {
+                        future.completeExceptionally(throwable);
+                    }
+
                     Throwable error = throwable;
                     if (error instanceof StatusRuntimeException) {
                         StatusRuntimeException sre = (StatusRuntimeException) error;

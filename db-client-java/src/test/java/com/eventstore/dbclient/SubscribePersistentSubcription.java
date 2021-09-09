@@ -1,11 +1,18 @@
 package com.eventstore.dbclient;
 
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class SubscribePersistentSubcription extends PersistenSubscriptionTestsBase {
     class Foo {
@@ -136,5 +143,23 @@ public class SubscribePersistentSubcription extends PersistenSubscriptionTestsBa
                 .get();
 
         Assert.assertEquals(6, result.get().intValue());
+    }
+
+    @Test
+    public void testPersistentSubscriptionFutureReturnsExecutionExceptionOnErrorDuringSubscribe() throws InterruptedException {
+        EventStoreDBPersistentSubscriptionsClient client = server.getPersistentSubscriptionsClient();
+        server.stop();
+
+        try {
+            SubscribePersistentSubscriptionOptions connectOptions = SubscribePersistentSubscriptionOptions.get()
+                    .setBufferSize(32);
+            client.subscribeToAll("unknown-group", connectOptions, new PersistentSubscriptionListener() {}).get();
+            fail("Expected execution exception!");
+        } catch (ExecutionException ex) {
+            Throwable cause = ex.getCause();
+            assertTrue(cause instanceof StatusRuntimeException);
+            StatusRuntimeException statusRuntimeException = (StatusRuntimeException) cause;
+            assertEquals(Status.UNAVAILABLE.getCode(), statusRuntimeException.getStatus().getCode());
+        }
     }
 }

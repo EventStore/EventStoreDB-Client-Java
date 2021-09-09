@@ -1,5 +1,7 @@
 package com.eventstore.dbclient;
 
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import org.junit.Rule;
 import org.junit.Test;
 import testcontainers.module.EventStoreTestDBContainer;
@@ -162,5 +164,21 @@ public class SubscribeToStreamTests {
         // Clean up subscription
         subscription.stop();
         cancellation.await();
+    }
+
+    @Test
+    public void testSubscriptionFutureReturnsExecutionExceptionOnErrorDuringSubscribe() throws InterruptedException {
+        EventStoreDBClient client = server.getClient();
+        server.stop();
+
+        try {
+            client.subscribeToAll(new SubscriptionListener() {}).get();
+            fail("Expected execution exception!");
+        } catch (ExecutionException ex) {
+            Throwable cause = ex.getCause();
+            assertTrue(cause instanceof StatusRuntimeException);
+            StatusRuntimeException statusRuntimeException = (StatusRuntimeException) cause;
+            assertEquals(Status.UNAVAILABLE.getCode(), statusRuntimeException.getStatus().getCode());
+        }
     }
 }
