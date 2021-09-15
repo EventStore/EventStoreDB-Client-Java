@@ -15,34 +15,16 @@ import java.util.concurrent.TimeoutException;
 
 public class EventStoreDBClusterClient extends GrpcClient {
     private final Logger logger = LoggerFactory.getLogger(EventStoreDBClusterClient.class);
-    private static final Set<ClusterInfo.MemberState> invalidStates;
-    private static final Random random = new Random();
-
-    static {
-        invalidStates = new HashSet<ClusterInfo.MemberState>() {{
-            add(ClusterInfo.MemberState.MANAGER);
-            add(ClusterInfo.MemberState.SHUTTING_DOWN);
-            add(ClusterInfo.MemberState.SHUT_DOWN);
-            add(ClusterInfo.MemberState.UNKNOWN);
-            add(ClusterInfo.MemberState.INITIALIZING);
-            add(ClusterInfo.MemberState.RESIGNING_LEADER);
-            add(ClusterInfo.MemberState.PRE_LEADER);
-            add(ClusterInfo.MemberState.PRE_REPLICA);
-            add(ClusterInfo.MemberState.PRE_READ_ONLY_REPLICA);
-            add(ClusterInfo.MemberState.CLONE);
-            add(ClusterInfo.MemberState.DISCOVER_LEADER);
-        }};
-    }
 
     private final List<InetSocketAddress> seedNodes;
-    private final NodePreference nodePreference;
+    private final NodeSelector nodeSelector;
     private final Endpoint domainEndpoint;
 
     public EventStoreDBClusterClient(List<InetSocketAddress> seedNodes, Endpoint domainEndpoint, NodePreference nodePreference, SslContext sslContext, EventStoreDBClientSettings settings) {
         super(settings, sslContext);
 
         this.seedNodes = seedNodes;
-        this.nodePreference = nodePreference;
+        this.nodeSelector = new NodeSelector(nodePreference);
         this.domainEndpoint = domainEndpoint;
 
         startConnectionLoop();
@@ -83,50 +65,8 @@ public class EventStoreDBClusterClient extends GrpcClient {
                 .build();
         GossipClient client = new GossipClient(channel);
         return client.read()
-                .thenApply(this::determineBestFitNode)
+                .thenApply(nodeSelector::determineBestFitNode)
                 .thenApply(m -> m.map(ClusterInfo.Member::getHttpEndpoint).orElse(null));
-    }
-
-    private Optional<ClusterInfo.Member> determineBestFitNode(ClusterInfo clusterInfo) {
-        return clusterInfo.getMembers()
-                .stream()
-                .filter(ClusterInfo.Member::isAlive)
-                .filter(m -> !invalidStates.contains(m.getState()))
-                .sorted((o1, o2) -> {
-                    switch (nodePreference) {
-                        case LEADER:
-                            if (o1.getState().equals(ClusterInfo.MemberState.LEADER)) {
-                                return -1;
-                            }
-                            if (o2.getState().equals(ClusterInfo.MemberState.LEADER)) {
-                                return 1;
-                            }
-                            return 0;
-                        case FOLLOWER:
-                            if (o1.getState().equals(ClusterInfo.MemberState.FOLLOWER)) {
-                                return -1;
-                            }
-                            if (o2.getState().equals(ClusterInfo.MemberState.FOLLOWER)) {
-                                return 1;
-                            }
-                            return 0;
-                        case READ_ONLY_REPLICA:
-                            if (o1.getState().equals(ClusterInfo.MemberState.READ_ONLY_REPLICA)) {
-                                return -1;
-                            }
-                            if (o2.getState().equals(ClusterInfo.MemberState.READ_ONLY_REPLICA)) {
-                                return 1;
-                            }
-                            return 0;
-                        case RANDOM:
-                            if (random.nextBoolean()) {
-                                return 1;
-                            }
-
-                            return 1;
-                    }
-                    return 0;
-                }).findFirst();
     }
 
     @Override
