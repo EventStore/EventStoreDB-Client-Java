@@ -57,6 +57,8 @@ Server setup instructions can be found in the [docs], follow the docker setup fo
 
 The following snippet showcases a simple example where we form a connection, then write and read events from the server.
 
+Note: If testing locally using `--insecure` the url should be `esdb://localhost:2113?tls=false`.
+
 ```java
 class AccountCreated {
     private UUID id;
@@ -83,15 +85,16 @@ class AccountCreated {
 import com.eventstore.dbclient.EventStoreDBClient;
 import com.eventstore.dbclient.EventStoreDBClientSettings;
 import com.eventstore.dbclient.EventStoreDBConnectionString;
-import com.eventstore.dbclient.GrpcClient;
 import com.eventstore.dbclient.EventData;
+import com.eventstore.dbclient.ReadStreamOptions;
+import com.eventstore.dbclient.ResolvedEvent;
 import com.eventstore.dbclient.WriteResult;
 import com.eventstore.dbclient.ReadResult;
 
 public class Main {
     public static void main(String args[]) {
-        EventStoreDbClientSettings setts = EventStoreDBConnectionString.parseOrThrow("esdb://localhost:2113");
-        EventStoreDbClient client = EventStoreDbClient.create(setts);
+        EventStoreDBClientSettings setts = EventStoreDBConnectionString.parseOrThrow("esdb://localhost:2113");
+        EventStoreDBClient client = EventStoreDBClient.create(setts);
 
         AccountCreated createdEvent = new AccountCreated();
 
@@ -108,7 +111,7 @@ public class Main {
 
         ReadStreamOptions readStreamOptions = ReadStreamOptions.get()
                 .fromStart()
-                .notResolveLinks();
+                .notResolveLinkTos();
 
         ReadResult readResult = client
                 .readStream("accounts", 1, readStreamOptions)
@@ -190,6 +193,6 @@ review our [Contributing Guide][contributing] and [Code of Conduct][code-of-cond
 [contributing]: https://github.com/EventStore/EventStoreDB-Client-Java/tree/master/CONTRIBUTING.md
 [code-of-conduct]: https://github.com/EventStore/EventStoreDB-Client-Java/tree/master/CODE-OF-CONDUCT.md
 [support]: https://eventstore.com/support/
-[docs]: https://developers.eventstore.com/server/20.6/server/installation/
+[docs]: https://developers.eventstore.com/server/v21.6/installation/
 [discuss]: https://discuss.eventstore.com/
 [Maven Central]: https://search.maven.org/artifact/com.eventstore/db-client-java
