@@ -30,7 +30,7 @@ public abstract class AbstractRead {
 
     public abstract StreamsOuterClass.ReadReq.Options.Builder createOptions();
 
-    public CompletableFuture<ReadResult> execute() {
+    public <A> CompletableFuture<A> execute(final ReadObserver<A> observer) {
         return this.client.run(channel -> {
             StreamsOuterClass.ReadReq request = StreamsOuterClass.ReadReq.newBuilder()
                     .setOptions(createOptions())
@@ -39,22 +39,27 @@ public abstract class AbstractRead {
             Metadata headers = this.metadata;
             StreamsGrpc.StreamsStub client = MetadataUtils.attachHeaders(StreamsGrpc.newStub(channel), headers);
 
-            CompletableFuture<ReadResult> future = new CompletableFuture<>();
-            ArrayList<ResolvedEvent> resolvedEvents = new ArrayList<>();
-
+            CompletableFuture<A> future = new CompletableFuture<>();
             client.read(request, new StreamObserver<StreamsOuterClass.ReadResp>() {
                 private boolean completed = false;
 
                 @Override
                 public void onNext(StreamsOuterClass.ReadResp value) {
                     if (value.hasStreamNotFound()) {
+                        observer.onStreamNotFound();
                         future.completeExceptionally(new StreamNotFoundException());
                         this.completed = true;
                         return;
                     }
 
                     if (value.hasEvent()) {
-                        resolvedEvents.add(ResolvedEvent.fromWire(value.getEvent()));
+                        try {
+                            observer.onNext(ResolvedEvent.fromWire(value.getEvent()));
+                        } catch (Throwable t) {
+                            observer.onError(t);
+                            future.completeExceptionally(t);
+                            this.completed = true;
+                        }
                     }
                 }
 
@@ -64,7 +69,11 @@ public abstract class AbstractRead {
                         return;
                     }
 
-                    future.complete(new ReadResult(resolvedEvents));
+                    try {
+                        future.complete(observer.onCompleted());
+                    } catch (Throwable t) {
+                        future.completeExceptionally(t);
+                    }
                 }
 
                 @Override
@@ -80,11 +89,13 @@ public abstract class AbstractRead {
 
                         if (leaderHost != null && leaderPort != null) {
                             NotLeaderException reason = new NotLeaderException(leaderHost, Integer.valueOf(leaderPort));
+                            observer.onError(reason);
                             future.completeExceptionally(reason);
                             return;
                         }
                     }
 
+                    observer.onError(t);
                     future.completeExceptionally(t);
                 }
             });

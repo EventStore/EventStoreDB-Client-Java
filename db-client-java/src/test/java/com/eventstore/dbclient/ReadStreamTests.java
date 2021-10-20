@@ -20,10 +20,10 @@ public class ReadStreamTests {
                 .fromStart()
                 .notResolveLinkTos();
 
-        ReadResult result = client.readStream("dataset20M-1800", 10, options)
+        List<ResolvedEvent> result = client.readStream("dataset20M-1800", 10, options, new EventCollectorReadObserver())
                 .get();
 
-        verifyAgainstTestData(result.getEvents(), "dataset20M-1800-e0-e10");
+        verifyAgainstTestData(result, "dataset20M-1800-e0-e10");
     }
 
     @Test
@@ -35,10 +35,10 @@ public class ReadStreamTests {
                 .fromEnd()
                 .notResolveLinkTos();
 
-        ReadResult result = client.readStream("dataset20M-1800", 10, options)
+        List<ResolvedEvent> result = client.readStream("dataset20M-1800", 10, options,  new EventCollectorReadObserver())
                 .get();
 
-        verifyAgainstTestData(result.getEvents(), "dataset20M-1800-e1999-e1990");
+        verifyAgainstTestData(result, "dataset20M-1800-e1999-e1990");
     }
 
     @Test
@@ -50,16 +50,16 @@ public class ReadStreamTests {
                 .fromEnd()
                 .notResolveLinkTos();
 
-        ReadResult result1 = client.readStream("dataset20M-1800", Long.MAX_VALUE, options)
+        List<ResolvedEvent> result1 = client.readStream("dataset20M-1800", Long.MAX_VALUE, options, new EventCollectorReadObserver())
                 .get();
 
-        ReadResult result2 = client.readStream("dataset20M-1800", options)
+        List<ResolvedEvent> result2 = client.readStream("dataset20M-1800", options, new EventCollectorReadObserver())
                 .get();
 
-        RecordedEvent firstEvent1 = result1.getEvents().get(0).getOriginalEvent();
-        RecordedEvent firstEvent2 = result2.getEvents().get(0).getOriginalEvent();
+        RecordedEvent firstEvent1 = result1.get(0).getOriginalEvent();
+        RecordedEvent firstEvent2 = result2.get(0).getOriginalEvent();
 
-        Assert.assertEquals(result1.getEvents().size(), result2.getEvents().size());
+        Assert.assertEquals(result1.size(), result2.size());
         Assert.assertEquals(firstEvent1.getEventId(), firstEvent2.getEventId());
     }
 

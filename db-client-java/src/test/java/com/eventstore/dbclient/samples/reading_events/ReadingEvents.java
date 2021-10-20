@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+
+
 public class ReadingEvents {
     private static void readFromStream(EventStoreDBClient client) throws ExecutionException, InterruptedException, JsonProcessingException {
         // region read-from-stream
@@ -14,17 +16,54 @@ public class ReadingEvents {
                 .forwards()
                 .fromStart();
 
-        ReadResult result = client.readStream("some-stream", options)
-                .get();
+        client.readStream("some-stream", options, new ReadObserver<Object>() {
+            @Override
+            public void onNext(ResolvedEvent event) {
+                RecordedEvent recordedEvent = event.getOriginalEvent();
+                try {
+                    System.out.println(new ObjectMapper().writeValueAsString(recordedEvent.getEventData()));
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+            }
 
-        List<ResolvedEvent> events = result.getEvents();
+            @Override
+            public Object onCompleted() {
+                return null;
+            }
+
+            @Override
+            public void onError(Throwable error) {
+
+            }
+        }).get();
+
         // endregion read-from-stream
 
         // region iterate-stream
-        for (ResolvedEvent resolvedEvent : events) {
-            RecordedEvent recordedEvent = resolvedEvent.getOriginalEvent();
-            System.out.println(new ObjectMapper().writeValueAsString(recordedEvent.getEventData()));
-        }
+
+        client.readStream("some-stream", options, new ReadObserver<Object>() {
+            @Override
+            public void onNext(ResolvedEvent event) {
+                RecordedEvent recordedEvent = event.getOriginalEvent();
+                try {
+                    System.out.println(new ObjectMapper().writeValueAsString(recordedEvent.getEventData()));
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            @Override
+            public Object onCompleted() {
+                return null;
+            }
+
+            @Override
+            public void onError(Throwable error) {
+
+            }
+        }).get();
+
         // endregion iterate-stream
     }
 
@@ -34,21 +73,60 @@ public class ReadingEvents {
                 .forwards()
                 .fromRevision(10);
 
-        ReadResult result = client.readStream("some-stream", 20, options)
-                .get();
+        client.readStream("some-stream", 20, options, new ReadObserver<Object>() {
+            @Override
+            public void onNext(ResolvedEvent event) {
+                RecordedEvent recordedEvent = event.getOriginalEvent();
+                try {
+                    System.out.println(new ObjectMapper().writeValueAsString(recordedEvent.getEventData()));
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+            }
 
-        List<ResolvedEvent> events = result.getEvents();
+            @Override
+            public Object onCompleted() {
+                return null;
+            }
+
+            @Override
+            public void onError(Throwable error) {
+
+            }
+        })
+        .get();
+
         // endregion read-from-stream-position
 
         // region iterate-stream
-        for (ResolvedEvent resolvedEvent : events) {
-            RecordedEvent recordedEvent = resolvedEvent.getOriginalEvent();
-            System.out.println(new ObjectMapper().writeValueAsString(recordedEvent.getEventData()));
-        }
+        client.readStream("some-stream", 20, options, new ReadObserver<Object>() {
+            @Override
+            public void onNext(ResolvedEvent event) {
+                RecordedEvent recordedEvent = event.getOriginalEvent();
+                try {
+                    System.out.println(new ObjectMapper().writeValueAsString(recordedEvent.getEventData()));
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            @Override
+            public Object onCompleted() {
+                return null;
+            }
+
+            @Override
+            public void onError(Throwable error) {
+
+            }
+        })
+        .get();
+
         // endregion iterate-stream
     }
 
     private static void readStreamOverridingUserCredentials(EventStoreDBClient client) throws ExecutionException, InterruptedException {
+
         // region overriding-user-credentials
         UserCredentials credentials = new UserCredentials("admin", "changeit");
 
@@ -57,7 +135,7 @@ public class ReadingEvents {
                 .fromStart()
                 .authenticated(credentials);
 
-        ReadResult result = client.readStream("some-stream", options)
+        client.readStream("some-stream", options, observer)
                 .get();
         // endregion overriding-user-credentials
     }
@@ -70,20 +148,14 @@ public class ReadingEvents {
 
         List<ResolvedEvent> events = null;
         try {
-            ReadResult result = client.readStream("some-stream", 20, options)
+            client.readStream("some-stream", 20, options, observer)
                     .get();
-            events = result.getEvents();
         } catch (ExecutionException e) {
             Throwable innerException = e.getCause();
 
             if (innerException instanceof StreamNotFoundException) {
-                return;
+                // ...
             }
-        }
-
-        for (ResolvedEvent resolvedEvent : events) {
-            RecordedEvent recordedEvent = resolvedEvent.getOriginalEvent();
-            System.out.println(new ObjectMapper().writeValueAsString(recordedEvent.getEventData()));
         }
         // endregion checking-for-stream-presence
     }
@@ -94,15 +166,8 @@ public class ReadingEvents {
                 .backwards()
                 .fromEnd();
 
-        ReadResult result = client.readStream("some-stream", options)
+        client.readStream("some-stream", options, observer)
                 .get();
-
-        List<ResolvedEvent> events = result.getEvents();
-
-        for (ResolvedEvent resolvedEvent : events) {
-            RecordedEvent recordedEvent = resolvedEvent.getOriginalEvent();
-            System.out.println(new ObjectMapper().writeValueAsString(recordedEvent.getEventData()));
-        }
         // endregion reading-backwards
     }
 
@@ -112,17 +177,43 @@ public class ReadingEvents {
                 .forwards()
                 .fromStart();
 
-        ReadResult result = client.readAll(options)
-                .get();
+        client.readAll(new ReadObserver<Object>() {
+            @Override
+            public void onNext(ResolvedEvent event) {
+                // ...
+            }
 
-        List<ResolvedEvent> events = result.getEvents();
+            @Override
+            public Object onCompleted() {
+                return null;
+            }
+
+            @Override
+            public void onError(Throwable error) {
+
+            }
+        })
+        .get();
         // endregion read-from-all-stream
 
         // region read-from-all-stream-iterate
-        for (ResolvedEvent resolvedEvent : events) {
-            RecordedEvent recordedEvent = resolvedEvent.getOriginalEvent();
-            System.out.println(new ObjectMapper().writeValueAsString(recordedEvent.getEventData()));
-        }
+        client.readAll(new ReadObserver<Object>() {
+            @Override
+            public void onNext(ResolvedEvent event) {
+                // ...
+            }
+
+            @Override
+            public Object onCompleted() {
+                return null;
+            }
+
+            @Override
+            public void onError(Throwable error) {
+
+            }
+        })
+        .get();
         // endregion read-from-all-stream-iterate
     }
 
@@ -135,8 +226,7 @@ public class ReadingEvents {
                 .fromStart()
                 .authenticated(credentials);
 
-        ReadResult result = client.readAll(options)
-                .get();
+        client.readAll(options, observer).get();
         // endregion read-all-overriding-user-credentials
     }
 
@@ -146,18 +236,25 @@ public class ReadingEvents {
                 .forwards()
                 .fromStart();
 
-        ReadResult result = client.readAll(options)
-                .get();
+        client.readAll(options, new ReadObserver<Object>() {
+                    @Override
+                    public void onNext(ResolvedEvent event) {
+                        if (!event.getOriginalEvent().getEventType().startsWith("$")) {
+                            // ...
+                        }
+                    }
 
-        List<ResolvedEvent> events = result.getEvents();
+                    @Override
+                    public Object onCompleted() {
+                        return null;
+                    }
 
-        for (ResolvedEvent resolvedEvent : events) {
-            RecordedEvent recordedEvent = resolvedEvent.getOriginalEvent();
-            if (recordedEvent.getEventType().startsWith("$")) {
-                continue;
-            }
-            System.out.println(new ObjectMapper().writeValueAsString(recordedEvent.getEventData()));
-        }
+                    @Override
+                    public void onError(Throwable error) {
+
+                    }
+                })
+       .get();
         // endregion ignore-system-events
     }
 
@@ -167,37 +264,44 @@ public class ReadingEvents {
                 .backwards()
                 .fromEnd();
 
-        ReadResult result = client.readAll(options)
-                .get();
+        client.readAll(options, new ReadObserver<Object>() {
+            @Override
+            public void onNext(ResolvedEvent event) {
 
-        List<ResolvedEvent> events = result.getEvents();
+            }
+
+            @Override
+            public Object onCompleted() {
+                return null;
+            }
+
+            @Override
+            public void onError(Throwable error) {
+
+            }
+        }).get();
         // endregion read-from-all-stream-backwards
 
         // region read-from-all-stream-iterate
-        for (ResolvedEvent resolvedEvent : events) {
-            RecordedEvent recordedEvent = resolvedEvent.getOriginalEvent();
-            System.out.println(new ObjectMapper().writeValueAsString(recordedEvent.getEventData()));
-        }
-        // endregion read-from-all-stream-iterate
-    }
 
-    private static void filteringOutSystemEvents(EventStoreDBClient client) throws JsonProcessingException, ExecutionException, InterruptedException {
-        ReadAllOptions options = ReadAllOptions.get()
-                .forwards()
-                .fromStart();
-
-        ReadResult result = client.readAll(options)
-                .get();
-
-        List<ResolvedEvent> events = result.getEvents();
-
-        for (ResolvedEvent resolvedEvent : events) {
-            RecordedEvent recordedEvent = resolvedEvent.getOriginalEvent();
-            if (!recordedEvent.getEventType().startsWith("$")) {
-                continue;
+        client.readAll(options, new ReadObserver<Object>() {
+            @Override
+            public void onNext(ResolvedEvent event) {
+                // Doing something...
             }
-            System.out.println(new ObjectMapper().writeValueAsString(recordedEvent.getEventData()));
-        }
+
+            @Override
+            public Object onCompleted() {
+                return null;
+            }
+
+            @Override
+            public void onError(Throwable error) {
+
+            }
+        }).get();
+
+        // endregion read-from-all-stream-iterate
     }
 
     private static void readFromStreamResolvingLinkTos(EventStoreDBClient client) throws JsonProcessingException, ExecutionException, InterruptedException {
@@ -207,14 +311,25 @@ public class ReadingEvents {
                 .fromStart()
                 .resolveLinkTos();
 
-        ReadResult result = client.readAll(options)
+        client.readAll(options, observer)
                 .get();
 
-        List<ResolvedEvent> events = result.getEvents();
         // endregion read-from-all-stream-resolving-link-Tos
-        for (ResolvedEvent resolvedEvent : events) {
-            RecordedEvent recordedEvent = resolvedEvent.getOriginalEvent();
-            System.out.println(new ObjectMapper().writeValueAsString(recordedEvent.getEventData()));
-        }
     }
+
+    private static ReadObserver<Object> observer = new ReadObserver<Object>() {
+        @Override
+        public void onNext(ResolvedEvent event) {
+        }
+
+        @Override
+        public Object onCompleted() {
+            return null;
+        }
+
+        @Override
+        public void onError(Throwable error) {
+
+        }
+    };
 }

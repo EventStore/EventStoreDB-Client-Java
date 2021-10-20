@@ -1,5 +1,6 @@
 package com.eventstore.dbclient;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -46,76 +47,97 @@ public class EventStoreDBClient extends EventStoreDBClientBase {
         return appendToStream("$$" + streamName, options, event);
      }
 
-    public CompletableFuture<ReadResult> readStream(String streamName) {
-        return this.readStream(streamName, Long.MAX_VALUE, ReadStreamOptions.get());
+    public <A> CompletableFuture<A> readStream(String streamName, ReadObserver<A> observer) {
+        return this.readStream(streamName, Long.MAX_VALUE, ReadStreamOptions.get(), observer);
     }
 
-    public CompletableFuture<ReadResult> readStream(String streamName, long maxCount) {
-        return this.readStream(streamName, maxCount, ReadStreamOptions.get());
+    public <A> CompletableFuture<A> readStream(String streamName, long maxCount, ReadObserver<A> observer) {
+        return this.readStream(streamName, maxCount, ReadStreamOptions.get(), observer);
     }
 
-    public CompletableFuture<ReadResult> readStream(String streamName, ReadStreamOptions options) {
-        return this.readStream(streamName, Long.MAX_VALUE, options);
+    public <A> CompletableFuture<A> readStream(String streamName, ReadStreamOptions options, ReadObserver<A> observer) {
+        return this.readStream(streamName, Long.MAX_VALUE, options, observer);
     }
 
-    public CompletableFuture<ReadResult> readStream(String streamName, long maxCount, ReadStreamOptions options) {
+    public <A> CompletableFuture<A> readStream(String streamName, long maxCount, ReadStreamOptions options, ReadObserver<A> observer) {
         if (options == null)
             options = ReadStreamOptions.get();
 
         if (!options.hasUserCredentials())
             options.authenticated(this.credentials);
 
-        return new ReadStream(this.client, streamName, maxCount, options).execute();
+        return new ReadStream(this.client, streamName, maxCount, options).execute(observer);
     }
 
     public CompletableFuture<StreamMetadata> getStreamMetadata(String streamName) {
         return getStreamMetadata(streamName, null);
     }
 
-    public CompletableFuture<StreamMetadata> getStreamMetadata(String streamName, ReadStreamOptions options) {
+    static class StreamMetadataReadObserver extends ReadObserver<StreamMetadata> {
+        StreamMetadata metadata;
 
-        return readStream("$$" + streamName, options).thenCompose(result -> {
-            RecordedEvent event = result.getEvents().get(0).getOriginalEvent();
-            CompletableFuture<StreamMetadata> out = new CompletableFuture<>();
-
+        @Override
+        public void onNext(ResolvedEvent event) {
             try {
-                HashMap<String, Object> source = event.getEventDataAs(HashMap.class);
-
-                out.complete(StreamMetadata.deserialize(source));
-            } catch (Throwable e) {
-                out.completeExceptionally(e);
+                HashMap<String, Object> source = event.getOriginalEvent().getEventDataAs(HashMap.class);
+                metadata = StreamMetadata.deserialize(source);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
+        }
 
-            return out;
-        }).exceptionally(e -> {
-            if (e.getCause() instanceof StreamNotFoundException) {
-                return new StreamMetadata();
+        @Override
+        public void onStreamNotFound() {
+            metadata = new StreamMetadata();
+        }
+
+        @Override
+        public  StreamMetadata onCompleted() {
+            return metadata;
+        }
+
+        @Override
+        public void onError(Throwable error) {
+
+        }
+
+        public StreamMetadata getStreamMetadata() {
+            return metadata;
+        }
+    }
+
+    public CompletableFuture<StreamMetadata> getStreamMetadata(String streamName, ReadStreamOptions options) {
+        final StreamMetadataReadObserver observer = new StreamMetadataReadObserver();
+        return readStream("$$" + streamName, options, observer).exceptionally(e -> {
+            Throwable reason = e.getCause() != null ? e.getCause() : e;
+            if (reason instanceof StreamNotFoundException) {
+                return observer.getStreamMetadata();
             }
 
             throw new RuntimeException(e);
         });
     }
 
-    public CompletableFuture<ReadResult> readAll() {
-        return this.readAll(Long.MAX_VALUE, ReadAllOptions.get());
+    public <A> CompletableFuture<A> readAll(ReadObserver<A> observer) {
+        return this.readAll(Long.MAX_VALUE, ReadAllOptions.get(), observer);
     }
 
-    public CompletableFuture<ReadResult> readAll(long maxCount) {
-        return this.readAll(maxCount, ReadAllOptions.get());
+    public <A> CompletableFuture<A> readAll(long maxCount, ReadObserver<A> observer) {
+        return this.readAll(maxCount, ReadAllOptions.get(), observer);
     }
 
-    public CompletableFuture<ReadResult> readAll(ReadAllOptions options) {
-        return this.readAll(Long.MAX_VALUE, options);
+    public <A> CompletableFuture<A> readAll(ReadAllOptions options, ReadObserver<A> observer) {
+        return this.readAll(Long.MAX_VALUE, options, observer);
     }
 
-    public CompletableFuture<ReadResult> readAll(long maxCount, ReadAllOptions options) {
+    public <A> CompletableFuture<A> readAll(long maxCount, ReadAllOptions options, ReadObserver<A> observer) {
         if (options == null)
             options = ReadAllOptions.get();
 
         if (!options.hasUserCredentials())
             options.authenticated(this.credentials);
 
-        return new ReadAll(this.client, maxCount, options).execute();
+        return new ReadAll(this.client, maxCount, options).execute(observer);
     }
 
     public CompletableFuture<Subscription> subscribeToStream(String streamName, SubscriptionListener listener) {

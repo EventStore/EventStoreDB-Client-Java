@@ -93,10 +93,9 @@ public class AppendingEvents {
                 .forwards()
                 .fromStart();
 
-        ReadResult result = client.readStream("concurrency-stream", readStreamOptions)
+        List<ResolvedEvent> events = client.readStream("concurrency-stream", readStreamOptions, new EventCollectorReadObserver())
                 .get();
 
-        List<ResolvedEvent> events = result.getEvents();
         ResolvedEvent lastEvent = events.get(events.size() - 1);
         StreamRevision revision = lastEvent.getEvent().getStreamRevision();
 

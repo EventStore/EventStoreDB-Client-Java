@@ -43,10 +43,23 @@ public class QuickStart {
                 .forwards()
                 .fromStart();
 
-        ReadResult result = client.readStream("some-stream", 10, options)
-                .get();
+        client.readStream("some-stream", 10, options, new ReadObserver<Object>() {
+            @Override
+            public void onNext(ResolvedEvent event) {
+                // Doing something...
+            }
 
-        List<ResolvedEvent> events = result.getEvents();
+            @Override
+            public Object onCompleted() {
+                return null;
+            }
+
+            @Override
+            public void onError(Throwable error) {
+
+            }
+        })
+        .get();
         // endregion readStream
     }
 }
