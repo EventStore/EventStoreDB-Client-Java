@@ -3,6 +3,9 @@ package com.eventstore.dbclient;
 import com.eventstore.dbclient.proto.persistentsubscriptions.Persistent;
 import com.eventstore.dbclient.proto.streams.StreamsOuterClass;
 
+import java.util.Objects;
+import java.util.StringJoiner;
+
 public class ResolvedEvent {
     private final RecordedEvent event;
     private final RecordedEvent link;
@@ -22,6 +25,19 @@ public class ResolvedEvent {
 
     public RecordedEvent getOriginalEvent() {
         return this.link != null ? this.link : this.event;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ResolvedEvent that = (ResolvedEvent) o;
+        return event.equals(that.event) && Objects.equals(link, that.link);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(event, link);
     }
 
     static ResolvedEvent fromWire(StreamsOuterClass.ReadResp.ReadEvent wireEvent) {
