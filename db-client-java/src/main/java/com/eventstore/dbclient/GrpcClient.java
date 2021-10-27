@@ -93,7 +93,7 @@ public abstract class GrpcClient {
                 if (error instanceof StatusRuntimeException) {
                     StatusRuntimeException ex = (StatusRuntimeException) error;
 
-                    if (ex.getStatus().getCode().equals(Status.Code.UNAVAILABLE)) {
+                    if (ex.getStatus().getCode().equals(Status.Code.UNAVAILABLE) || ex.getStatus().getCode().equals(Status.Code.ABORTED)) {
                         self.pushMsg(new CreateChannel(id));
                     }
                 }
