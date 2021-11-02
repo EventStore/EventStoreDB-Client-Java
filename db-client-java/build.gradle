@@ -118,7 +118,7 @@ publishing {
             def snapshotUrl = 'https://oss.sonatype.org/content/repositories/snapshots'
             def finalUrl = isSnapshot ? snapshotUrl : releaseUrl
 
-            name = 'Sonatype'
+            name = 'OSSRH'
             url = finalUrl
             credentials {
                 username = System.getenv("MAVEN_USERNAME")
