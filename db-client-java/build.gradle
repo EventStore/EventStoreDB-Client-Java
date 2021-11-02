@@ -74,8 +74,6 @@ protobuf {
 }
 
 def isSnapshot = project.version.toString().endsWith("-SNAPSHOT")
-def publishLogin = project.hasProperty("ossrhUsername") ? project.getProperties().get("ossrhUsername") : ""
-def publishPassword = project.hasProperty("ossrhPassword") ? project.getProperties().get("ossrhPassword") : ""
 
 publishing {
     publications {
@@ -123,16 +121,16 @@ publishing {
             name = 'Sonatype'
             url = finalUrl
             credentials {
-                username = publishLogin
-                password = publishPassword
+                username = System.getenv("MAVEN_USERNAME")
+                password = System.getenv("MAVEN_PASSWORD")
             }
         }
     }
 }
 
 signing {
-    useGpgCmd()
-    sign configurations.archives
+//    useGpgCmd()
+//    sign configurations.archives
     sign publishing.publications.mavenJava
 }
 
