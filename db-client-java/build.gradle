@@ -114,8 +114,8 @@ publishing {
 
     repositories {
         maven {
-            def releaseUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
-            def snapshotUrl = 'https://oss.sonatype.org/content/repositories/snapshots'
+            def releaseUrl = 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
+            def snapshotUrl = 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
             def finalUrl = isSnapshot ? snapshotUrl : releaseUrl
 
             name = 'OSSRH'
