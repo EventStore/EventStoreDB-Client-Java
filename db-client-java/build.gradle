@@ -113,16 +113,24 @@ publishing {
     }
 
     repositories {
+//        maven {
+//            def releaseUrl = 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
+//            def snapshotUrl = 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
+//            def finalUrl = isSnapshot ? snapshotUrl : releaseUrl
+//
+//            name = 'OSSRH'
+//            url = finalUrl
+//            credentials {
+//                username = System.getenv("MAVEN_USERNAME")
+//                password = System.getenv("MAVEN_PASSWORD")
+//            }
+//        }
         maven {
-            def releaseUrl = 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
-            def snapshotUrl = 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
-            def finalUrl = isSnapshot ? snapshotUrl : releaseUrl
-
-            name = 'OSSRH'
-            url = finalUrl
+            name = "GitHubPackages"
+            url = "https://maven.pkg.github.com/eventstore/eventStoredb-client-java"
             credentials {
-                username = System.getenv("MAVEN_USERNAME")
-                password = System.getenv("MAVEN_PASSWORD")
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
             }
         }
     }
