@@ -128,17 +128,17 @@ publishing {
     }
 }
 
-signing {
-//    useGpgCmd()
-//    sign configurations.archives
-    sign publishing.publications.mavenJava
-}
-
-tasks.withType(Sign) {
-    onlyIf {
-        gradle.taskGraph.hasTask(":db-client-java:publish")
-    }
-}
+//signing {
+////    useGpgCmd()
+////    sign configurations.archives
+//    sign publishing.publications.mavenJava
+//}
+//
+//tasks.withType(Sign) {
+//    onlyIf {
+//        gradle.taskGraph.hasTask(":db-client-java:publish")
+//    }
+//}
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
