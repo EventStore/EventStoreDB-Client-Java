@@ -73,7 +73,10 @@ public class StreamMetadata {
         insertValue(output, "$maxCount", this.maxCount);
         insertValue(output, "$tb", this.truncateBefore);
         insertValue(output, "$cacheControl", this.cacheControl);
-        insertValue(output, "$acl", this.acl.serialize());
+
+        if (this.acl != null) {
+            insertValue(output, "$acl", this.acl.serialize());
+        }
 
         if (this.customProperties != null) {
             this.customProperties.forEach((key, value) -> {

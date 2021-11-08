@@ -37,4 +37,21 @@ public class OfflineMetadataTests {
 
         Assert.assertEquals(expected, actual);
     }
+
+    @Test
+    public void testNullAcl() throws Throwable {
+        StreamMetadata expected = new StreamMetadata();
+
+        expected.setMaxAge(2);
+        expected.setCacheControl(15);
+        expected.setTruncateBefore(1);
+        expected.setMaxCount(12);
+
+        ObjectMapper mapper = new ObjectMapper();
+        HashMap<String, Object> source = mapper.readValue(mapper.writeValueAsString(expected.serialize()), HashMap.class);
+        StreamMetadata actual = StreamMetadata.deserialize(source);
+
+
+        Assert.assertEquals(expected, actual);
+    }
 }
