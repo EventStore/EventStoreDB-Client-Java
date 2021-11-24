@@ -5,13 +5,15 @@ import com.eventstore.dbclient.proto.streams.StreamsGrpc;
 import com.eventstore.dbclient.proto.streams.StreamsOuterClass;
 import io.grpc.Metadata;
 import io.grpc.StatusRuntimeException;
+import io.grpc.stub.ClientCallStreamObserver;
+import io.grpc.stub.ClientResponseObserver;
 import io.grpc.stub.MetadataUtils;
-import io.grpc.stub.StreamObserver;
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
 
-import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 
-public abstract class AbstractRead {
+public abstract class AbstractRead implements Publisher<ResolvedEvent> {
     protected static final StreamsOuterClass.ReadReq.Options.Builder defaultReadOptions;
 
     private final GrpcClient client;
@@ -30,8 +32,12 @@ public abstract class AbstractRead {
 
     public abstract StreamsOuterClass.ReadReq.Options.Builder createOptions();
 
-    public CompletableFuture<ReadResult> execute() {
-        return this.client.run(channel -> {
+    @Override
+    public void subscribe(Subscriber<? super ResolvedEvent> subscriber) {
+        ReadSubscription readSubscription = new ReadSubscription(subscriber);
+        subscriber.onSubscribe(readSubscription);
+
+        this.client.run(channel -> {
             StreamsOuterClass.ReadReq request = StreamsOuterClass.ReadReq.newBuilder()
                     .setOptions(createOptions())
                     .build();
@@ -39,22 +45,29 @@ public abstract class AbstractRead {
             Metadata headers = this.metadata;
             StreamsGrpc.StreamsStub client = MetadataUtils.attachHeaders(StreamsGrpc.newStub(channel), headers);
 
-            CompletableFuture<ReadResult> future = new CompletableFuture<>();
-            ArrayList<ResolvedEvent> resolvedEvents = new ArrayList<>();
+            client.read(request, new ClientResponseObserver<StreamsOuterClass.ReadReq, StreamsOuterClass.ReadResp>() {
+                @Override
+                public void beforeStart(ClientCallStreamObserver<StreamsOuterClass.ReadReq> requestStream) {
+                    readSubscription.setStreamObserver(requestStream);
+                }
 
-            client.read(request, new StreamObserver<StreamsOuterClass.ReadResp>() {
                 private boolean completed = false;
 
                 @Override
                 public void onNext(StreamsOuterClass.ReadResp value) {
                     if (value.hasStreamNotFound()) {
-                        future.completeExceptionally(new StreamNotFoundException());
+                        readSubscription.onStreamNotFound();
                         this.completed = true;
                         return;
                     }
 
                     if (value.hasEvent()) {
-                        resolvedEvents.add(ResolvedEvent.fromWire(value.getEvent()));
+                        try {
+                            readSubscription.onNext(ResolvedEvent.fromWire(value.getEvent()));
+                        } catch (Throwable t) {
+                            readSubscription.onError(t);
+                            this.completed = true;
+                        }
                     }
                 }
 
@@ -64,7 +77,7 @@ public abstract class AbstractRead {
                         return;
                     }
 
-                    future.complete(new ReadResult(resolvedEvents));
+                    readSubscription.onCompleted();
                 }
 
                 @Override
@@ -80,15 +93,18 @@ public abstract class AbstractRead {
 
                         if (leaderHost != null && leaderPort != null) {
                             NotLeaderException reason = new NotLeaderException(leaderHost, Integer.valueOf(leaderPort));
-                            future.completeExceptionally(reason);
+                            readSubscription.onError(reason);
                             return;
                         }
                     }
 
-                    future.completeExceptionally(t);
+                    readSubscription.onError(t);
                 }
             });
-            return future;
+            return CompletableFuture.completedFuture(this);
+        }).exceptionally(t -> {
+            subscriber.onError(t);
+            return this;
         });
     }
 }

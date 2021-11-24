@@ -9,6 +9,8 @@ import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Map;
+import java.util.Objects;
+import java.util.StringJoiner;
 import java.util.UUID;
 
 public class RecordedEvent {
@@ -110,6 +112,19 @@ public class RecordedEvent {
     @NotNull
     public String getContentType() {
         return contentType;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RecordedEvent that = (RecordedEvent) o;
+        return streamId.equals(that.streamId) && streamRevision.equals(that.streamRevision) && eventId.equals(that.eventId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(streamId, streamRevision, eventId);
     }
 
     static RecordedEvent fromWire(StreamsOuterClass.ReadResp.ReadEvent.RecordedEvent wireEvent) {
