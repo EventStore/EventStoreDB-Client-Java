@@ -135,7 +135,7 @@ public class EventStoreDBPersistentSubscriptionsClient extends EventStoreDBClien
     }
 
     public CompletableFuture<PersistentSubscription> subscribe(String stream, String group, PersistentSubscriptionListener listener) {
-        return this.subscribe(stream, group, listener);
+        return this.subscribe(stream, group, SubscribePersistentSubscriptionOptions.get(), listener);
     }
 
     public CompletableFuture<PersistentSubscription> subscribeToAll(String group, PersistentSubscriptionListener listener) {
