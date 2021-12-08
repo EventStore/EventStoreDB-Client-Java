@@ -91,24 +91,6 @@ public class EventStoreDBProjectionManagementClient extends EventStoreDBClientBa
     /**
      * Deletes the projection.
      * @param projectionName Name of the projection.
-     * @param deleteEmittedStreams Whether the streams that have been emitted by the projection should be deleted.
-     *                             This only has an effect if trackEmittedStreams was enabled
-     * @param deleteStateStream Whether the projection's state stream should also be deleted.
-     * @param deleteCheckpointStream Whether the projection's checkpoint stream should also be deleted.
-     */
-    public CompletableFuture delete(final String projectionName, final boolean deleteEmittedStreams,
-                                    final boolean deleteStateStream, final boolean deleteCheckpointStream) {
-        DeleteProjectionOptions options = DeleteProjectionOptions.get()
-                .deleteEmittedStreams(deleteEmittedStreams)
-                .deleteStateStream(deleteStateStream)
-                .deleteCheckpointStream(deleteCheckpointStream);
-
-        return this.delete(projectionName, options);
-    }
-
-    /**
-     * Deletes the projection.
-     * @param projectionName Name of the projection.
      * @param options Additional options.
      */
     public CompletableFuture delete(final String projectionName, DeleteProjectionOptions options) {
