@@ -298,29 +298,16 @@ public class EventStoreDBProjectionManagementClient extends EventStoreDBClientBa
      * @param query The JavaScript projection.
      */
     public CompletableFuture update(final String projectionName, final String query) {
-        return this.update(projectionName, query, null, UpdateProjectionOptions.get());
+        return this.update(projectionName, query, UpdateProjectionOptions.get());
     }
 
     /**
      * Updates the projection's query and emit options.
      * @param projectionName Name of the projection.
      * @param query The JavaScript projection.
-     * @param emitEnabled Whether the projection can emit events.
-     *                    If this is false then the projection will fault if linkTo or emit are used in the projection query.
-     */
-    public CompletableFuture update(final String projectionName, final String query, final Boolean emitEnabled) {
-        return this.update(projectionName, query, emitEnabled, UpdateProjectionOptions.get());
-    }
-
-    /**
-     * Updates the projection's query and emit options.
-     * @param projectionName Name of the projection.
-     * @param query The JavaScript projection.
-     * @param emitEnabled Whether the projection can emit events.
-     *                    If this is false then the projection will fault if linkTo or emit are used in the projection query.
      * @param options Additional options.
      */
-    public CompletableFuture update(final String projectionName, final String query, final Boolean emitEnabled, UpdateProjectionOptions options) {
-        return new UpdateProjection(this.client, projectionName, query, emitEnabled, options).execute();
+    public CompletableFuture update(final String projectionName, final String query, UpdateProjectionOptions options) {
+        return new UpdateProjection(this.client, projectionName, query, options).execute();
     }
 }

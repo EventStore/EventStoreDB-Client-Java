@@ -222,9 +222,11 @@ public class ProjectionManagementTests {
             .create(PROJECTION_NAME, COUNT_EVENTS_PROJECTION)
             .get();
 
-        projectionClient.update(PROJECTION_NAME, EMPTY_PROJECTION, true).get();
-        projectionClient.update(PROJECTION_NAME, COUNT_EVENTS_PROJECTION, null).get();
-        projectionClient.update(PROJECTION_NAME, EMPTY_PROJECTION, false).get();
+        UpdateProjectionOptions options = UpdateProjectionOptions.get().emitEnabled(true);
+
+        projectionClient.update(PROJECTION_NAME, EMPTY_PROJECTION, options).get();
+        projectionClient.update(PROJECTION_NAME, COUNT_EVENTS_PROJECTION).get();
+        projectionClient.update(PROJECTION_NAME, EMPTY_PROJECTION).get();
     }
 
     @Test

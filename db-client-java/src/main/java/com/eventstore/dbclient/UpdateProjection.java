@@ -16,11 +16,11 @@ public class UpdateProjection {
     private final Metadata metadata;
 
     public UpdateProjection(final GrpcClient client, final String projectionName, final String query,
-                            final Boolean emitEnabled, final UpdateProjectionOptions options) {
+                            final UpdateProjectionOptions options) {
         this.client = client;
         this.projectionName = projectionName;
         this.query = query;
-        this.emitEnabled = emitEnabled;
+        this.emitEnabled = options.isEmitEnabled();
         this.metadata = options.getMetadata();
     }
 
