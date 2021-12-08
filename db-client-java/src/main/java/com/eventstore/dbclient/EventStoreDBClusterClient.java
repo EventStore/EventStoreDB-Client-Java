@@ -75,6 +75,7 @@ public class EventStoreDBClusterClient extends GrpcClient {
         Tuple<Endpoint, Exception> result = nodeSelection();
 
         if (result.get_2() == null) {
+            logger.debug("Cluster connection: selected node: " + result.get_1().getHostname() + ":" + result.get_2());
             this.channel = this.createChannel(result.get_1());
         } else {
             this.lastException = result.get_2();
