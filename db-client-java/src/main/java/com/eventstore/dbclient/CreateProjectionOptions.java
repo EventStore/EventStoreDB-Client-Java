@@ -2,6 +2,7 @@ package com.eventstore.dbclient;
 
 public class CreateProjectionOptions extends OptionsBase<CreateProjectionOptions> {
     private boolean trackEmittedStreams;
+    private boolean emitEnabled;
 
     private CreateProjectionOptions() {
         this.trackEmittedStreams = false;
@@ -15,7 +16,16 @@ public class CreateProjectionOptions extends OptionsBase<CreateProjectionOptions
         return trackEmittedStreams;
     }
 
-    public void trackEmittedStreams(boolean trackEmittedStreams) {
+    public boolean isEmitEnabled() {
+        return emitEnabled;
+    }
+
+    public CreateProjectionOptions trackEmittedStreams(boolean trackEmittedStreams) {
         this.trackEmittedStreams = trackEmittedStreams;
+        return this;
+    }
+    public CreateProjectionOptions emitEnabled(boolean value) {
+        this.emitEnabled = value;
+        return this;
     }
 }

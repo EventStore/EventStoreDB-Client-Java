@@ -183,7 +183,7 @@ public class ProjectionManagementTests {
         DeleteProjectionOptions options = DeleteProjectionOptions.get()
             .deleteCheckpointStream()
             .deleteStateStream()
-            .keepEmittedStreams();
+            .deleteEmittedStreams(false);
 
         projectionClient.disable(PROJECTION_NAME).get();
 
