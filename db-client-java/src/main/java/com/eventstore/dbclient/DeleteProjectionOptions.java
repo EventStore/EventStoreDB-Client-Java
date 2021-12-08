@@ -53,19 +53,4 @@ public class DeleteProjectionOptions extends OptionsBase<DeleteProjectionOptions
     public boolean getDeleteCheckpointStream() {
         return deleteCheckpointStream;
     }
-
-    public DeleteProjectionOptions keepEmittedStreams() {
-        deleteEmittedStreams = false;
-        return this;
-    }
-
-    public DeleteProjectionOptions keepStateStream() {
-        deleteStateStream = false;
-        return this;
-    }
-
-    public DeleteProjectionOptions keepCheckpointStream() {
-        deleteCheckpointStream = false;
-        return this;
-    }
 }
