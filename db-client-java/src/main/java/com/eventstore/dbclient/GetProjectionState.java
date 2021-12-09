@@ -13,7 +13,7 @@ import io.grpc.stub.MetadataUtils;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
-public class GetProjectionResult<TResult> {
+public class GetProjectionState<TResult> {
 
     private final GrpcClient client;
     private final String projectionName;
@@ -23,34 +23,35 @@ public class GetProjectionResult<TResult> {
 
     private ThrowingBiFunction<JsonMapper, String, TResult, JsonProcessingException> deserializationStrategy;
 
-    GetProjectionResult(final GrpcClient client, final UserCredentials credentials,
-                        final String projectionName, Class<TResult> resultType) {
+    GetProjectionState(final GrpcClient client, final UserCredentials credentials,
+                       final String projectionName, Class<TResult> resultType) {
 
         this(client, credentials, projectionName, null, resultType);
     }
 
-    GetProjectionResult(final GrpcClient client, final UserCredentials credentials, final String projectionName,
-                        final String partition, Class<TResult> resultType) {
+    GetProjectionState(final GrpcClient client, final UserCredentials credentials,
+                       final String projectionName, final String partition, Class<TResult> resultType) {
 
         this(client, credentials, projectionName, partition);
         deserializationStrategy = ((jsonMapper, json) -> jsonMapper.readValue(json, resultType));
     }
 
-    GetProjectionResult(final GrpcClient client, final UserCredentials credentials, final String projectionName,
-                        Function<TypeFactory, JavaType> javaTypeFunction) {
+    GetProjectionState(final GrpcClient client, final UserCredentials credentials,
+                       final String projectionName, Function<TypeFactory, JavaType> javaTypeFunction) {
 
         this(client, credentials, projectionName, null, javaTypeFunction);
     }
 
-    GetProjectionResult(final GrpcClient client, final UserCredentials credentials, final String projectionName,
-                        final String partition, Function<TypeFactory, JavaType> javaTypeFunction) {
+    GetProjectionState(final GrpcClient client, final UserCredentials credentials,
+                       final String projectionName, final String partition,
+                       Function<TypeFactory, JavaType> javaTypeFunction) {
 
         this(client, credentials, projectionName, partition);
         deserializationStrategy = ((jsonMapper, json)
                 -> jsonMapper.readValue(json, javaTypeFunction.apply(jsonMapper.getTypeFactory())));
     }
 
-    private GetProjectionResult(final GrpcClient client, final UserCredentials credentials,
+    private GetProjectionState(final GrpcClient client, final UserCredentials credentials,
                                final String projectionName, final String partition) {
 
         this.client = client;
@@ -65,7 +66,7 @@ public class GetProjectionResult<TResult> {
     }
 
 
-    public GetProjectionResult authenticated(UserCredentials credentials) {
+    public GetProjectionState authenticated(UserCredentials credentials) {
         if(credentials == null)
             return this;
 
@@ -77,17 +78,17 @@ public class GetProjectionResult<TResult> {
 
         return this.client.run(channel -> {
 
-            Projectionmanagement.ResultReq.Options.Builder optionsBuilder =
-                Projectionmanagement.ResultReq.Options.newBuilder()
-                    .setName(projectionName);
+            Projectionmanagement.StateReq.Options.Builder optionsBuilder =
+                    Projectionmanagement.StateReq.Options.newBuilder()
+                            .setName(projectionName);
 
             if(partition != null && !partition.isEmpty()) {
                 optionsBuilder.setPartition(partition);
             }
 
-            Projectionmanagement.ResultReq request = Projectionmanagement.ResultReq.newBuilder()
-                .setOptions(optionsBuilder)
-                .build();
+            Projectionmanagement.StateReq request = Projectionmanagement.StateReq.newBuilder()
+                    .setOptions(optionsBuilder)
+                    .build();
 
             Metadata headers = this.metadata.build();
 
@@ -95,13 +96,13 @@ public class GetProjectionResult<TResult> {
 
             CompletableFuture<TResult> result = new CompletableFuture<>();
 
-            ThrowingFunction<Projectionmanagement.ResultResp, TResult, Exception> converter = source -> {
+            ThrowingFunction<Projectionmanagement.StateResp, TResult, Exception> converter = source -> {
 
-                String json = JsonFormat.printer().print(source.getResult());
+                String json = JsonFormat.printer().print(source.getState());
                 return deserializationStrategy.apply(new JsonMapper(), json);
             };
 
-            client.result(request, GrpcUtils.convertSingleResponse(result, converter));
+            client.state(request, GrpcUtils.convertSingleResponse(result, converter));
 
             return result;
         });
