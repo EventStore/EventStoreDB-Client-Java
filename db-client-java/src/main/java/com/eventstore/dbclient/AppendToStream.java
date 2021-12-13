@@ -63,16 +63,16 @@ public class AppendToStream {
                     StreamsOuterClass.AppendResp.WrongExpectedVersion wev = resp.getWrongExpectedVersion();
 
                     StreamRevision expectedRevision;
-                    if (wev.getExpectedRevisionOptionCase() == StreamsOuterClass.AppendResp.WrongExpectedVersion.ExpectedRevisionOptionCase.ANY) {
+                    if (wev.getExpectedRevisionOptionCase() == StreamsOuterClass.AppendResp.WrongExpectedVersion.ExpectedRevisionOptionCase.EXPECTED_ANY) {
                         expectedRevision = new StreamRevision(2); // StreamState.Constants.Any;
-                    } else if (wev.getExpectedRevisionOptionCase() == StreamsOuterClass.AppendResp.WrongExpectedVersion.ExpectedRevisionOptionCase.STREAM_EXISTS) {
+                    } else if (wev.getExpectedRevisionOptionCase() == StreamsOuterClass.AppendResp.WrongExpectedVersion.ExpectedRevisionOptionCase.EXPECTED_STREAM_EXISTS) {
                         expectedRevision = new StreamRevision(4); // StreamState.Constants.StreamExists;
                     } else {
                         expectedRevision = new StreamRevision(wev.getExpectedRevision());
                     }
 
                     StreamRevision currentRevision;
-                    if (wev.getCurrentRevisionOptionCase() == StreamsOuterClass.AppendResp.WrongExpectedVersion.CurrentRevisionOptionCase.NO_STREAM) {
+                    if (wev.getCurrentRevisionOptionCase() == StreamsOuterClass.AppendResp.WrongExpectedVersion.CurrentRevisionOptionCase.CURRENT_NO_STREAM) {
                         // TODO(jen20): This feels very wrong?
                         currentRevision = new StreamRevision(2); //StreamState.Constants.NoStream
                     } else {
