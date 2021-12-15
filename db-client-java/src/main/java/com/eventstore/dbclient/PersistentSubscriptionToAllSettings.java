@@ -1,21 +1,26 @@
 package com.eventstore.dbclient;
 
 public class PersistentSubscriptionToAllSettings extends AbstractPersistentSubscriptionSettings {
-    private Position position;
+    final private Position position;
+    final private SubscriptionFilter filter;
 
     public PersistentSubscriptionToAllSettings(int checkpointAfterMs, boolean extraStatistics, boolean resolveLinks,
                                                int historyBufferSize, int liveBufferSize, int maxCheckpointCount,
                                                int maxRetryCount, int maxSubscriberCount, int messageTimeoutMs,
                                                int minCheckpointCount, int readBatchSize, String strategy,
-                                               Position position) {
+                                               Position position, SubscriptionFilter filter) {
         super(checkpointAfterMs, extraStatistics, resolveLinks, historyBufferSize, liveBufferSize, maxCheckpointCount,
                 maxRetryCount, maxSubscriberCount, messageTimeoutMs, minCheckpointCount, readBatchSize, strategy);
 
         this.position = position;
+        this.filter = filter;
     }
 
     public Position getPosition() {
         return position;
+    }
+    public SubscriptionFilter getFilter() {
+        return filter;
     }
 
     public static PersistentSubscriptionToAllSettingsBuilder builder() {

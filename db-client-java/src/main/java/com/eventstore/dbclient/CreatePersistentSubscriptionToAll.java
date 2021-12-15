@@ -29,6 +29,13 @@ public class CreatePersistentSubscriptionToAll extends AbstractCreatePersistentS
                     .setPreparePosition(position.getPrepareUnsigned()));
         }
 
+        SubscriptionFilter filter = settings.getFilter();
+        if (filter != null) {
+            filter.addToWirePersistentCreateReq(allOptionsBuilder);
+        } else {
+            allOptionsBuilder.setNoFilter(Shared.Empty.getDefaultInstance());
+        }
+
         optionsBuilder.setAll(allOptionsBuilder);
 
         return optionsBuilder;

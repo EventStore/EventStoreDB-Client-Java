@@ -14,7 +14,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-public class SubscribePersistentSubcription extends PersistenSubscriptionTestsBase {
+public class SubscribePersistentSubcription extends PersistentSubscriptionTestsBase {
     class Foo {
         @Override
         public boolean equals(Object o) {

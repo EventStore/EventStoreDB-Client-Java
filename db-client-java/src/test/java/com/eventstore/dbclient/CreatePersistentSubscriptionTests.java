@@ -2,7 +2,7 @@ package com.eventstore.dbclient;
 
 import org.junit.Test;
 
-public class CreatePersistentSubscriptionTests extends PersistenSubscriptionTestsBase {
+public class CreatePersistentSubscriptionTests extends PersistentSubscriptionTestsBase {
     @Test
     public void testCreatePersistentSub() throws Throwable {
         client.create("aStream", "aGroup")
