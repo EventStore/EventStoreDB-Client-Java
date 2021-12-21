@@ -58,10 +58,17 @@ public class EventStoreDBClusterClient extends GrpcClient {
     }
 
     private CompletableFuture<ClusterInfo.Endpoint> attemptDiscovery(InetSocketAddress seed) {
-        ManagedChannel channel = NettyChannelBuilder.forAddress(seed)
+        NettyChannelBuilder builder = NettyChannelBuilder.forAddress(seed)
                 // FIXME - Find if we could get the version out the Gradle configuration file.
-                .userAgent("EventStoreDB Client (Java)")
-                .sslContext(this.sslContext)
+                .userAgent("EventStoreDB Client (Java)");
+
+        if (this.sslContext == null) {
+            builder.usePlaintext();
+        } else {
+            builder.sslContext(this.sslContext);
+        }
+
+        ManagedChannel channel = builder
                 .build();
         GossipClient client = new GossipClient(channel);
         return client.read()
