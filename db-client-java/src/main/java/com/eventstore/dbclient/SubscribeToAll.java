@@ -25,7 +25,7 @@ public class SubscribeToAll extends AbstractRegularSubscription {
                                 .build());
 
         if (this.options.getFilter() != null) {
-            this.options.getFilter().addToWireReadReq(options);
+            this.options.getFilter().addToWireStreamsReadReq(options);
             this.checkpointer = this.options.getFilter().getCheckpointer();
         } else {
             options.setNoFilter(Shared.Empty.getDefaultInstance());

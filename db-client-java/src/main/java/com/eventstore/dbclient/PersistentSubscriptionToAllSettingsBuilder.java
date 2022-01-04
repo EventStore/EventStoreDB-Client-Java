@@ -3,6 +3,7 @@ package com.eventstore.dbclient;
 public class PersistentSubscriptionToAllSettingsBuilder
         extends AbstractPersistentSubscriptionSettingsBuilder<PersistentSubscriptionToAllSettingsBuilder> {
     private Position position;
+    private SubscriptionFilter filter;
 
     public PersistentSubscriptionToAllSettingsBuilder() {
         position = Position.END;
@@ -17,7 +18,7 @@ public class PersistentSubscriptionToAllSettingsBuilder
     public PersistentSubscriptionToAllSettings build() {
         return new PersistentSubscriptionToAllSettings(checkpointAfterMs, extraStatistics, resolveLinkTos, historyBufferSize,
                 liveBufferSize, checkPointUpperBound, maxRetryCount, maxSubscriberCount, messageTimeoutMs,
-                checkPointLowerBound, readBatchSize, consumerStrategyName, position);
+                checkPointLowerBound, readBatchSize, consumerStrategyName, position, filter);
     }
 
     public PersistentSubscriptionToAllSettingsBuilder fromStart() {
@@ -40,6 +41,11 @@ public class PersistentSubscriptionToAllSettingsBuilder
      */
     public PersistentSubscriptionToAllSettingsBuilder startFrom(Position value) {
         this.position = value;
+        return this;
+    }
+
+    public PersistentSubscriptionToAllSettingsBuilder filter(SubscriptionFilter filter) {
+        this.filter = filter;
         return this;
     }
 }

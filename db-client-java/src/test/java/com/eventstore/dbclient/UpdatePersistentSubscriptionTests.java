@@ -2,7 +2,7 @@ package com.eventstore.dbclient;
 
 import org.junit.Test;
 
-public class UpdatePersistentSubscriptionTests extends PersistenSubscriptionTestsBase {
+public class UpdatePersistentSubscriptionTests extends PersistentSubscriptionTestsBase {
     @Test
     public void testUpdatePersistentSub() throws Throwable {
 

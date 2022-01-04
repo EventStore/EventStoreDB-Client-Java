@@ -1,5 +1,6 @@
 package com.eventstore.dbclient;
 
+import com.eventstore.dbclient.proto.persistentsubscriptions.Persistent;
 import com.eventstore.dbclient.proto.shared.Shared;
 import com.eventstore.dbclient.proto.streams.StreamsOuterClass;
 
@@ -37,54 +38,173 @@ public class SubscriptionFilter {
         return checkpointer;
     }
 
-    void addToWireReadReq(StreamsOuterClass.ReadReq.Options.Builder builder) {
-        RegularFilterExpression regex = filter.getRegularFilterExpression();
-        PrefixFilterExpression[] prefixes = filter.getPrefixFilterExpressions();
-        Optional<Integer> maxSearchWindow = filter.getMaxSearchWindow();
+    void addToWireStreamsReadReq(StreamsOuterClass.ReadReq.Options.Builder builder) {
+        builder.setFilter(new StreamsReadReqWireBuilder(builder).build());
+    }
 
-        if (regex != null && prefixes != null && prefixes.length != 0) {
-            throw new IllegalArgumentException("Regex and Prefix expressions are mutually exclusive");
+    void addToWirePersistentCreateReq(Persistent.CreateReq.AllOptions.Builder builder) {
+        builder.setFilter(new PersistentReadReqWireBuilder(builder).build());
+    }
+
+    private class PersistentReadReqWireBuilder
+            extends FilterWireBase<Persistent.CreateReq.AllOptions.FilterOptions.Expression.Builder> {
+        Persistent.CreateReq.AllOptions.FilterOptions.Expression.Builder expression = null;
+        Persistent.CreateReq.AllOptions.FilterOptions.Builder filter = null;
+        Persistent.CreateReq.AllOptions.Builder allOptionsBuilder = null;
+
+        PersistentReadReqWireBuilder(Persistent.CreateReq.AllOptions.Builder builder) {
+            expression = Persistent.CreateReq.AllOptions.FilterOptions.Expression.newBuilder();
+            filter = Persistent.CreateReq.AllOptions.FilterOptions.newBuilder();
+            allOptionsBuilder = builder;
         }
 
-        StreamsOuterClass.ReadReq.Options.FilterOptions.Expression expression = null;
-        if (regex != null) {
-            expression = StreamsOuterClass.ReadReq.Options.FilterOptions.Expression.newBuilder()
-                    .setRegex(regex.toString())
-                    .build();
+        public Persistent.CreateReq.AllOptions.FilterOptions.Builder build() {
+            internalBuild();
+            return filter;
         }
 
-        if (prefixes != null && prefixes.length > 0) {
-            StreamsOuterClass.ReadReq.Options.FilterOptions.Expression.Builder expressionB = StreamsOuterClass.ReadReq.Options.FilterOptions.Expression.newBuilder();
-            Stream.of(prefixes)
-                    .map(Object::toString)
-                    .filter(Objects::nonNull)
-                    .distinct()
-                    .forEach(expressionB::addPrefix);
-            expression = expressionB.build();
+        Persistent.CreateReq.AllOptions.FilterOptions.Expression.Builder newExprBuilder() {
+            return Persistent.CreateReq.AllOptions.FilterOptions.Expression.newBuilder();
         }
 
-        if (expression == null) {
-            builder.setNoFilter(Shared.Empty.getDefaultInstance());
-            return;
+        Persistent.CreateReq.AllOptions.FilterOptions.Expression.Builder setRegEx(String regEx) {
+            expression.setRegex(regEx);
+            return expression;
         }
 
-        StreamsOuterClass.ReadReq.Options.FilterOptions.Builder optsB = StreamsOuterClass.ReadReq.Options.FilterOptions.newBuilder();
-        if (filter instanceof StreamFilter) {
-            optsB.setStreamIdentifier(expression);
-        }
-        if (filter instanceof EventTypeFilter) {
-            optsB.setEventType(expression);
+        void addPrefix(Persistent.CreateReq.AllOptions.FilterOptions.Expression.Builder builder, String prefix) {
+            builder.setRegex(prefix);
         }
 
-        if (maxSearchWindow != null && maxSearchWindow.isPresent()) {
-            optsB.setMax(maxSearchWindow.get());
-        } else {
-            optsB.setCount(Shared.Empty.getDefaultInstance());
+        void setNoFilter() {
+            allOptionsBuilder.setNoFilter(Shared.Empty.getDefaultInstance());
         }
 
-        optsB.setCheckpointIntervalMultiplier(this.checkpointIntervalUnsigned);
+        void setStreamIdentifier(Persistent.CreateReq.AllOptions.FilterOptions.Expression.Builder expression) {
+            filter.setStreamIdentifier(expression);
+        }
 
-        builder.setFilter(optsB.build());
+        void setEventType(Persistent.CreateReq.AllOptions.FilterOptions.Expression.Builder expression) {
+            filter.setEventType(expression);
+        }
+
+        void setMaxSearchWindow(Integer count) {
+            filter.setMax(count);
+        }
+
+        void setSearchWindowCount() {
+            filter.setCount(Shared.Empty.getDefaultInstance());
+        }
+    }
+
+    private class StreamsReadReqWireBuilder
+            extends FilterWireBase<StreamsOuterClass.ReadReq.Options.FilterOptions.Expression.Builder> {
+        StreamsOuterClass.ReadReq.Options.FilterOptions.Expression.Builder expression = null;
+        StreamsOuterClass.ReadReq.Options.FilterOptions.Builder filter = null;
+        StreamsOuterClass.ReadReq.Options.Builder allOptionsBuilder = null;
+
+        StreamsReadReqWireBuilder(StreamsOuterClass.ReadReq.Options.Builder builder) {
+            expression = StreamsOuterClass.ReadReq.Options.FilterOptions.Expression.newBuilder();
+            filter = StreamsOuterClass.ReadReq.Options.FilterOptions.newBuilder();
+            allOptionsBuilder = builder;
+        }
+
+        public StreamsOuterClass.ReadReq.Options.FilterOptions.Builder build() {
+            internalBuild();
+            filter.setCheckpointIntervalMultiplier(checkpointIntervalUnsigned);
+            return filter;
+        }
+
+        StreamsOuterClass.ReadReq.Options.FilterOptions.Expression.Builder newExprBuilder() {
+            return StreamsOuterClass.ReadReq.Options.FilterOptions.Expression.newBuilder();
+        }
+
+        StreamsOuterClass.ReadReq.Options.FilterOptions.Expression.Builder setRegEx(String regEx) {
+            expression.setRegex(regEx);
+            return expression;
+        }
+
+        void addPrefix(StreamsOuterClass.ReadReq.Options.FilterOptions.Expression.Builder builder, String prefix) {
+            builder.setRegex(prefix);
+        }
+
+        void setNoFilter() {
+            allOptionsBuilder.setNoFilter(Shared.Empty.getDefaultInstance());
+        }
+
+        void setStreamIdentifier(StreamsOuterClass.ReadReq.Options.FilterOptions.Expression.Builder expression) {
+            filter.setStreamIdentifier(expression);
+        }
+
+        void setEventType(StreamsOuterClass.ReadReq.Options.FilterOptions.Expression.Builder expression) {
+            filter.setEventType(expression);
+        }
+
+        void setMaxSearchWindow(Integer count) {
+            filter.setMax(count);
+        }
+
+        void setSearchWindowCount() {
+            filter.setCount(Shared.Empty.getDefaultInstance());
+        }
+    }
+
+    private abstract class FilterWireBase<TE> {
+        void internalBuild(){
+            RegularFilterExpression regex = filter.getRegularFilterExpression();
+            PrefixFilterExpression[] prefixes = filter.getPrefixFilterExpressions();
+            Optional<Integer> maxSearchWindow = filter.getMaxSearchWindow();
+
+            if (regex != null && prefixes != null && prefixes.length != 0) {
+                throw new IllegalArgumentException("Regex and Prefix expressions are mutually exclusive");
+            }
+
+            TE expression = null;
+
+            if (regex != null) {
+                expression = setRegEx(regex.toString());
+            }
+
+            if (prefixes != null && prefixes.length > 0) {
+                TE tmp = newExprBuilder();
+
+                Stream.of(prefixes)
+                        .map(Object::toString)
+                        .filter(Objects::nonNull)
+                        .distinct()
+                        .forEach((s) -> addPrefix(tmp, s));
+
+                expression = tmp;
+            }
+
+            if (expression == null) {
+                setNoFilter();
+                return;
+            }
+
+            if (filter instanceof StreamFilter) {
+                setStreamIdentifier(expression);
+            }
+
+            if (filter instanceof EventTypeFilter) {
+                setEventType(expression);
+            }
+
+            if (maxSearchWindow != null && maxSearchWindow.isPresent()) {
+                setMaxSearchWindow(maxSearchWindow.get());
+            } else {
+                setSearchWindowCount();
+            }
+        }
+
+        abstract TE setRegEx(String regEx);
+        abstract TE newExprBuilder();
+        abstract void addPrefix(TE builder, String prefix);
+        abstract void setNoFilter();
+        abstract void setStreamIdentifier(TE expression);
+        abstract void setEventType(TE expression);
+        abstract void setMaxSearchWindow(Integer count);
+        abstract void setSearchWindowCount();
     }
 }
 
