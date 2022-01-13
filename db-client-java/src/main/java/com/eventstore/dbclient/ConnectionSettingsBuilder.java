@@ -12,7 +12,7 @@ public class ConnectionSettingsBuilder {
     private int _maxDiscoverAttempts = 3;
     private int _discoveryInterval = 500;
     private int _gossipTimeout = 3000;
-    private NodePreference _nodePreference = NodePreference.RANDOM;
+    private NodePreference _nodePreference = NodePreference.LEADER;
     private boolean _tls = true;
     private boolean _tlsVerifyCert = true;
     private boolean _throwOnAppendFailure = true;
