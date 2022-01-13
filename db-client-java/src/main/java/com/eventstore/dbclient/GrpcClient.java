@@ -26,6 +26,7 @@ public abstract class GrpcClient {
     private final Logger logger = LoggerFactory.getLogger(GrpcClient.class);
     private final LinkedBlockingQueue<Msg> messages;
     protected ManagedChannel channel;
+    protected Endpoint endpoint;
     protected Exception lastException;
     protected UUID currentChannelId;
 
@@ -74,17 +75,17 @@ public abstract class GrpcClient {
         }
     }
 
-    public <A> CompletableFuture<A> run(Function<ManagedChannel, CompletableFuture<A>> action) {
+    public <A> CompletableFuture<A> runWithArgs(Function<WorkItemArgs, CompletableFuture<A>> action) {
         final CompletableFuture<A> result = new CompletableFuture<>();
         final GrpcClient self = this;
 
-        this.pushMsg(new RunWorkItem((id, channel, fatalError) -> {
+        this.pushMsg(new RunWorkItem((args, fatalError) -> {
             if (fatalError != null) {
                 result.completeExceptionally(fatalError);
                 return;
             }
 
-            action.apply(channel).whenComplete((outcome, error) -> {
+            action.apply(args).whenComplete((outcome, error) -> {
                 if (outcome != null) {
                     result.complete(outcome);
                     return;
@@ -95,7 +96,7 @@ public abstract class GrpcClient {
                     // TODO - Currently we don't retry on not leader exception but we might consider
                     // allowing this on a case-by-case basis.
                     result.completeExceptionally(ex);
-                    self.pushMsg(new CreateChannel(id, ex.getLeaderEndpoint()));
+                    self.pushMsg(new CreateChannel(args.id, ex.getLeaderEndpoint()));
 
                     return;
                 }
@@ -104,7 +105,7 @@ public abstract class GrpcClient {
                     StatusRuntimeException ex = (StatusRuntimeException) error;
 
                     if (ex.getStatus().getCode().equals(Status.Code.UNAVAILABLE) || ex.getStatus().getCode().equals(Status.Code.ABORTED)) {
-                        self.pushMsg(new CreateChannel(id));
+                        self.pushMsg(new CreateChannel(args.id));
                     }
                 }
 
@@ -115,6 +116,14 @@ public abstract class GrpcClient {
         return result;
     }
 
+    public <A> CompletableFuture<A> run(Function<ManagedChannel, CompletableFuture<A>> action) {
+        return runWithArgs(args -> action.apply(args.getChannel()));
+    }
+
+    public CompletableFuture<Endpoint> getCurrentEndpoint() {
+        return runWithArgs(args -> CompletableFuture.completedFuture(args.endpoint));
+    }
+
     private boolean discover(UUID previousId, Optional<Endpoint> candidate) {
         long attempts = 1;
 
@@ -123,7 +132,8 @@ public abstract class GrpcClient {
             return true;
 
         if (candidate.isPresent()) {
-            this.channel = createChannel(candidate.get());
+            this.endpoint = candidate.get();
+            this.channel = createChannel(this.endpoint);
             this.currentChannelId = UUID.randomUUID();
 
             return true;
@@ -176,7 +186,7 @@ public abstract class GrpcClient {
                 Exception e = this.lastException != null ? this.lastException : new ConnectionShutdownException();
 
                 logger.warn("Receive an command request but the connection is already closed", e);
-                args.item.accept(null, null, e);
+                args.item.accept(null, e);
             } else {
                 // In case if the channel hasn't been resolved yet.
                 if (this.channel == null) {
@@ -186,10 +196,11 @@ public abstract class GrpcClient {
                     } catch (InterruptedException e) {
                         logger.error("Exception occurred when parking a work item", e);
 
-                        args.item.accept(null, null, e);
+                        args.item.accept(null, e);
                     }
                 } else {
-                    args.item.accept(this.currentChannelId, this.channel, null);
+                    WorkItemArgs workItemArgs = new WorkItemArgs(this.currentChannelId, this.channel, this.endpoint);
+                    args.item.accept(workItemArgs, null);
                 }
             }
 
@@ -289,9 +300,33 @@ public abstract class GrpcClient {
         completion.get();
     }
 
+    class WorkItemArgs {
+        private final UUID id;
+        private final ManagedChannel channel;
+        private final Endpoint endpoint;
+
+        public WorkItemArgs(UUID id, ManagedChannel channel, Endpoint endpoint) {
+            this.id = id;
+            this.channel = channel;
+            this.endpoint = endpoint;
+        }
+
+        public UUID getId() {
+            return id;
+        }
+
+        public ManagedChannel getChannel() {
+            return channel;
+        }
+
+        public Endpoint getEndpoint() {
+            return endpoint;
+        }
+    }
+
     @FunctionalInterface
     interface WorkItem {
-        void accept(UUID id, ManagedChannel channel, Exception error);
+        void accept(WorkItemArgs args, Exception error);
     }
 
     private interface Msg {
@@ -320,7 +355,7 @@ public abstract class GrpcClient {
         }
 
         void reportError(Exception e) {
-            this.item.accept(null, null, e);
+            this.item.accept(null, e);
         }
     }
 

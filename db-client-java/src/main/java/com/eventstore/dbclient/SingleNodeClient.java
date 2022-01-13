@@ -17,7 +17,8 @@ public class SingleNodeClient extends GrpcClient {
 
     @Override
     protected boolean doConnect() {
-        this.channel = createChannel(new Endpoint(host, port));
+        this.endpoint = new Endpoint(host, port);
+        this.channel = createChannel(this.endpoint);
 
         return true;
     }
