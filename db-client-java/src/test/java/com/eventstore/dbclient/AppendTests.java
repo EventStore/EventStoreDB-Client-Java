@@ -5,6 +5,7 @@ import org.junit.Test;
 import testcontainers.module.EventStoreTestDBContainer;
 import testcontainers.module.EventStoreStreamsClient;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -83,5 +84,18 @@ public class AppendTests {
         assertEquals(eventId, first.getEventId().toString());
         assertArrayEquals(eventMetaData, first.getUserMetadata());
         assertEquals(new Foo(), first.getEventDataAs(Foo.class));
+    }
+
+    @Test
+    public void testMessageLimit() throws Throwable {
+        EventStoreDBClient client = server.getClient();
+        StringBuilder builder = new StringBuilder();
+
+        for (int i = 0; i < 16_000_000; i++) {
+            builder.append(' ');
+        }
+
+        EventData data = EventData.builderAsBinary("foobar", builder.toString().getBytes(StandardCharsets.UTF_8)).build();
+        client.appendToStream("abcdef", data).get();
     }
 }

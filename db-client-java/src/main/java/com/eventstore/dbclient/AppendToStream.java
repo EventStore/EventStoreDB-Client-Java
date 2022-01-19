@@ -4,6 +4,7 @@ import com.eventstore.dbclient.proto.shared.Shared;
 import com.eventstore.dbclient.proto.streams.StreamsGrpc;
 import com.eventstore.dbclient.proto.streams.StreamsOuterClass;
 import com.google.protobuf.ByteString;
+import io.grpc.CallOptions;
 import io.grpc.Metadata;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.MetadataUtils;
@@ -38,7 +39,8 @@ public class AppendToStream {
                     .setStreamIdentifier(Shared.StreamIdentifier.newBuilder()
                             .setStreamName(ByteString.copyFromUtf8(streamName))
                             .build()));
-            StreamsGrpc.StreamsStub client = MetadataUtils.attachHeaders(StreamsGrpc.newStub(channel), headers);
+
+            StreamsGrpc.StreamsStub client = MetadataUtils.attachHeaders(StreamsGrpc.newStub(channel).withMaxOutboundMessageSize(16 * 1024 * 1024).withMaxInboundMessageSize(16 * 1024 * 1024), headers);
 
             StreamObserver<StreamsOuterClass.AppendReq> requestStream = client.append(GrpcUtils.convertSingleResponse(result, resp -> {
                 if (resp.hasSuccess()) {

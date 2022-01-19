@@ -260,7 +260,12 @@ public abstract class GrpcClient {
 
     protected ManagedChannel createChannel(Endpoint endpoint) {
         NettyChannelBuilder builder = NettyChannelBuilder
-                .forAddress(endpoint.getHostname(), endpoint.getPort());
+                .forAddress(endpoint.getHostname(), endpoint.getPort())
+                .maxInboundMessageSize(16 * 1024 * 1024)
+                .maxInboundMetadataSize(16 * 1024 * 1024)
+                .flowControlWindow(16 * 1024 * 1024)
+                .initialFlowControlWindow(16 * 1024 * 1024)
+                .perRpcBufferLimit(16 * 1024 * 1024);
 
         if (this.sslContext == null) {
             builder.usePlaintext();
