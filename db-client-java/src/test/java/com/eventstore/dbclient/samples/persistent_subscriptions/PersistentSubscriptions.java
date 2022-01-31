@@ -11,7 +11,7 @@ public class PersistentSubscriptions {
             PersistentSubscriptionSettings.builder()
                 .fromStart()
                 .build());
-        // region create-persistent-subscription-to-stream
+        // endregion create-persistent-subscription-to-stream
     }
 
     public static void connectToPersistentSubscriptionToStream(EventStoreDBPersistentSubscriptionsClient client) {
@@ -37,7 +37,31 @@ public class PersistentSubscriptions {
                     System.out.println("Subscription is cancelled");
                 }
             });
-        // region subscribe-to-persistent-subscription-to-stream
+        // endregion subscribe-to-persistent-subscription-to-stream
+    }
+
+
+
+    public static void connectToPersistentSubscriptionToStreamWithManualAcks(EventStoreDBPersistentSubscriptionsClient client) {
+        // region subscribe-to-persistent-subscription-with-manual-acks
+        client.subscribe(
+                "test-stream",
+                "subscription-group",
+                new PersistentSubscriptionListener() {
+                    @Override
+                    public void onEvent(PersistentSubscription subscription, ResolvedEvent event) {
+                        try {
+                            System.out.println("Received event"
+                                    + event.getOriginalEvent().getStreamRevision()
+                                    + "@" + event.getOriginalEvent().getStreamId());
+                            subscription.ack(event);
+                        }
+                        catch (Exception ex) {
+                            subscription.nack(NackAction.Park, ex.getMessage(), event);
+                        }
+                    }
+                });
+        // endregion subscribe-to-persistent-subscription-with-manual-acks
     }
 
     public static void createPersistentSubscriptionToAll(EventStoreDBPersistentSubscriptionsClient client) {
@@ -47,7 +71,7 @@ public class PersistentSubscriptions {
             PersistentSubscriptionToAllSettings.builder()
                 .fromStart()
                 .build());
-        // region create-persistent-subscription-to-all
+        // endregion create-persistent-subscription-to-all
     }
 
     public static void connectToPersistentSubscriptionToAll(EventStoreDBPersistentSubscriptionsClient client) {
@@ -78,11 +102,11 @@ public class PersistentSubscriptions {
                     System.out.println("Subscription is cancelled");
                 }
             });
-        // region subscribe-to-persistent-subscription-to-all
+        // endregion subscribe-to-persistent-subscription-to-all
     }
 
     public static void updatePersistentSubscription(EventStoreDBPersistentSubscriptionsClient client) {
-        // region update-persistent-subscription-to-stream
+        // region update-persistent-subscription
         client.update(
             "test-stream",
             "subscription-group",
@@ -90,14 +114,14 @@ public class PersistentSubscriptions {
                 .resolveLinkTos()
                 .checkPointLowerBound(20)
                 .build());
-        // region update-persistent-subscription-to-stream
+        // endregion update-persistent-subscription
     }
 
     public static void deletePersistentSubscription(EventStoreDBPersistentSubscriptionsClient client) {
-        // region delete-persistent-subscription-to-stream
+        // region delete-persistent-subscription
         client.delete(
             "test-stream",
             "subscription-group");
-        // region delete-persistent-subscription-to-stream
+        // endregion delete-persistent-subscription
     }
 }
