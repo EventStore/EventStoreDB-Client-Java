@@ -27,6 +27,10 @@ class OptionsBase<T> {
         return this.metadata.hasUserCredentials();
     }
 
+    public String getUserCredentials() {
+        return this.metadata.getUserCredentials();
+    }
+
     public T authenticated(UserCredentials credentials) {
         if(credentials == null)
             return (T)this;

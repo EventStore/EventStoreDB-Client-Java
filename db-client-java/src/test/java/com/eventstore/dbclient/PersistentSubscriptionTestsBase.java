@@ -11,19 +11,26 @@ class PersistentSubscriptionTestsBase {
     @Rule
     public final EventStoreTestDBContainer server = new EventStoreTestDBContainer(true);
     protected EventStoreDBPersistentSubscriptionsClient client;
+    protected EventStoreDBClient streamClient;
 
     @Before
     public void before() throws Throwable {
         client = server.getPersistentSubscriptionsClient();
+        streamClient = server.getClient();
     }
 
     @After
     public void after() {
-        if(client == null)
+        if(client == null && streamClient == null)
             return;
 
         try {
-            client.shutdown();
+            if (client != null)
+                client.shutdown();
+
+            if (streamClient != null)
+                streamClient.shutdown();
+
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }

@@ -82,7 +82,8 @@ public class EventStoreDBClusterClient extends GrpcClient {
         Tuple<Endpoint, Exception> result = nodeSelection();
 
         if (result.get_2() == null) {
-            this.channel = this.createChannel(result.get_1());
+            this.endpoint = result.get_1();
+            this.channel = this.createChannel(this.endpoint);
         } else {
             this.lastException = result.get_2();
             return false;
