@@ -28,17 +28,17 @@ public abstract class AbstractUpdatePersistentSubscription {
     protected abstract Persistent.UpdateReq.Options.Builder createOptions();
 
     public CompletableFuture execute() {
-        return this.connection.run(channel -> {
+        return this.connection.runWithArgs(args -> {
             CompletableFuture result = new CompletableFuture();
             PersistentSubscriptionsGrpc.PersistentSubscriptionsStub client = MetadataUtils
-                    .attachHeaders(PersistentSubscriptionsGrpc.newStub(channel), metadata);
+                    .attachHeaders(PersistentSubscriptionsGrpc.newStub(args.getChannel()), metadata);
             Persistent.UpdateReq.Settings.Builder settingsBuilder = createSettings();
 
             settingsBuilder
-                    .setResolveLinks(settings.isResolveLinks())
+                    .setResolveLinks(settings.shouldResolveLinkTos())
                     .setReadBatchSize(settings.getReadBatchSize())
-                    .setMinCheckpointCount(settings.getMinCheckpointCount())
-                    .setMaxCheckpointCount(settings.getMaxCheckpointCount())
+                    .setMinCheckpointCount(settings.getCheckPointLowerBound())
+                    .setMaxCheckpointCount(settings.getCheckPointUpperBound())
                     .setMessageTimeoutMs(settings.getMessageTimeoutMs())
                     .setMaxSubscriberCount(settings.getMaxSubscriberCount())
                     .setMaxRetryCount(settings.getMaxRetryCount())
@@ -65,7 +65,11 @@ public abstract class AbstractUpdatePersistentSubscription {
                             .setGroupName(group))
                     .build();
 
-            client.update(req, GrpcUtils.convertSingleResponse(result));
+            if (req.getOptions().hasAll() && !args.supportFeature(FeatureFlags.PERSISTENT_SUBSCRIPTION_TO_ALL)) {
+                result.completeExceptionally(new UnsupportedFeature());
+            } else {
+                client.update(req, GrpcUtils.convertSingleResponse(result));
+            }
 
             return result;
         });

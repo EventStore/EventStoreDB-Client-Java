@@ -29,6 +29,7 @@ public abstract class GrpcClient {
     protected Endpoint endpoint;
     protected Exception lastException;
     protected UUID currentChannelId;
+    protected Optional<ServerInfo> serverInfo = Optional.empty();
 
     protected volatile boolean shutdown = false;
 
@@ -134,6 +135,13 @@ public abstract class GrpcClient {
         if (candidate.isPresent()) {
             this.endpoint = candidate.get();
             this.channel = createChannel(this.endpoint);
+            try {
+                this.serverInfo = ServerFeatures.getSupportedFeatures(this.settings, this.channel);
+            } catch (Exception e) {
+                logger.error("An exception happened when fetching server supported features", e);
+                return false;
+            }
+
             this.currentChannelId = UUID.randomUUID();
 
             return true;
@@ -142,6 +150,12 @@ public abstract class GrpcClient {
         for (; ; ) {
             logger.debug("Start connection attempt ({}/{})", attempts, settings.getMaxDiscoverAttempts());
             if (doConnect()) {
+                try {
+                    serverInfo = ServerFeatures.getSupportedFeatures(settings, channel);
+                } catch (Exception e) {
+                    logger.error("An exception happened when fetching server supported features", e);
+                    return false;
+                }
                 currentChannelId = UUID.randomUUID();
 
                 logger.info("Connection created successfully");
@@ -199,7 +213,7 @@ public abstract class GrpcClient {
                         args.item.accept(null, e);
                     }
                 } else {
-                    WorkItemArgs workItemArgs = new WorkItemArgs(this.currentChannelId, this.channel, this.endpoint);
+                    WorkItemArgs workItemArgs = new WorkItemArgs(this.currentChannelId, this.channel, this.endpoint, this.serverInfo);
                     args.item.accept(workItemArgs, null);
                 }
             }
@@ -304,11 +318,13 @@ public abstract class GrpcClient {
         private final UUID id;
         private final ManagedChannel channel;
         private final Endpoint endpoint;
+        private final Optional<ServerInfo> info;
 
-        public WorkItemArgs(UUID id, ManagedChannel channel, Endpoint endpoint) {
+        public WorkItemArgs(UUID id, ManagedChannel channel, Endpoint endpoint, Optional<ServerInfo> info) {
             this.id = id;
             this.channel = channel;
             this.endpoint = endpoint;
+            this.info = info;
         }
 
         public UUID getId() {
@@ -321,6 +337,14 @@ public abstract class GrpcClient {
 
         public Endpoint getEndpoint() {
             return endpoint;
+        }
+
+        public boolean supportFeature(int feature) {
+            if (info.isPresent()) {
+                return info.get().supportFeature(feature);
+            }
+
+            return false;
         }
     }
 

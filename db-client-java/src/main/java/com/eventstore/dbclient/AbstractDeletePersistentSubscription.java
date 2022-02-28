@@ -21,18 +21,22 @@ public abstract class AbstractDeletePersistentSubscription {
     protected abstract Persistent.DeleteReq.Options.Builder createOptions();
 
     public CompletableFuture execute() {
-        return this.client.run(channel -> {
+        return this.client.runWithArgs(args -> {
             CompletableFuture result = new CompletableFuture();
             Metadata headers = this.options.getMetadata();
             PersistentSubscriptionsGrpc.PersistentSubscriptionsStub client = MetadataUtils
-                    .attachHeaders(PersistentSubscriptionsGrpc.newStub(channel), headers);
+                    .attachHeaders(PersistentSubscriptionsGrpc.newStub(args.getChannel()), headers);
 
             Persistent.DeleteReq req = Persistent.DeleteReq.newBuilder()
                     .setOptions(createOptions()
                             .setGroupName(group))
                     .build();
 
-            client.delete(req, GrpcUtils.convertSingleResponse(result));
+            if (req.getOptions().hasAll() && !args.supportFeature(FeatureFlags.PERSISTENT_SUBSCRIPTION_TO_ALL)) {
+                result.completeExceptionally(new UnsupportedFeature());
+            } else {
+                client.delete(req, GrpcUtils.convertSingleResponse(result));
+            }
 
             return result;
         });
