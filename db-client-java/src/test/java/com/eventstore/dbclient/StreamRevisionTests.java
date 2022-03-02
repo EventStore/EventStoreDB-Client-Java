@@ -1,9 +1,9 @@
 package com.eventstore.dbclient;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class StreamRevisionTests {
     static final String largeUnsigned = "9223372036854776000";

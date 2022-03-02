@@ -1,26 +1,31 @@
 package com.eventstore.dbclient;
 
-import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import testcontainers.module.ESDBTests;
+import testcontainers.module.EventStoreDB;
 
 import java.util.Objects;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+public class SubscribePersistentSubscriptionTests extends ESDBTests {
+    private EventStoreDBClient streamsClient;
+    private EventStoreDBPersistentSubscriptionsClient client;
 
-public class SubscribePersistentSubcription extends PersistentSubscriptionTestsBase {
+    @BeforeEach
+    public void init() {
+        streamsClient = getEmptyServer().getClient();
+        client = getEmptyServer().getPersistentSubscriptionsClient();
+    }
+
     class Foo {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            SubscribePersistentSubcription.Foo foo1 = (SubscribePersistentSubcription.Foo) o;
+            SubscribePersistentSubscriptionTests.Foo foo1 = (SubscribePersistentSubscriptionTests.Foo) o;
             return foo == foo1.foo;
         }
 
@@ -42,13 +47,12 @@ public class SubscribePersistentSubcription extends PersistentSubscriptionTestsB
 
     @Test
     public void testSubscribePersistentSub() throws Throwable {
-        EventStoreDBClient streamsClient = server.getClient();
-        String streamName = "aStream-" + UUID.randomUUID().toString();
+        String streamName = generateName();
 
         client.create(streamName, "aGroup")
                 .get();
 
-        EventDataBuilder builder = EventData.builderAsJson("foobar", new SubscribePersistentSubcription.Foo());
+        EventDataBuilder builder = EventData.builderAsJson("foobar", new SubscribePersistentSubscriptionTests.Foo());
 
         streamsClient.appendToStream(streamName, builder.build(), builder.build(), builder.build())
                 .get();
@@ -87,18 +91,25 @@ public class SubscribePersistentSubcription extends PersistentSubscriptionTestsB
         streamsClient.appendToStream(streamName, builder.build(), builder.build(), builder.build())
                 .get();
 
-        Assert.assertEquals(6, result.get().intValue());
+        Assertions.assertEquals(6, result.get().intValue());
     }
 
     @Test
     public void testSubscribePersistentSubToAll() throws Throwable {
-        EventStoreDBClient streamsClient = server.getClient();
-        String streamName = "aStream-" + UUID.randomUUID().toString();
+        String streamName = generateName();
 
-        client.createToAll("aGroup")
-                .get();
+        try {
+            client.createToAll("aGroup")
+                    .get();
+        } catch (ExecutionException e) {
+            if (e.getCause() instanceof UnsupportedFeature && !EventStoreDB.isTestedAgainstVersion20()) {
+                throw e;
+            }
 
-        EventDataBuilder builder = EventData.builderAsJson("foobar", new SubscribePersistentSubcription.Foo());
+            return;
+        }
+
+        EventDataBuilder builder = EventData.builderAsJson("foobar", new SubscribePersistentSubscriptionTests.Foo());
 
         streamsClient.appendToStream(streamName, builder.build(), builder.build(), builder.build())
                 .get();
@@ -142,24 +153,6 @@ public class SubscribePersistentSubcription extends PersistentSubscriptionTestsB
         streamsClient.appendToStream(streamName, builder.build(), builder.build(), builder.build())
                 .get();
 
-        Assert.assertEquals(6, result.get().intValue());
-    }
-
-    @Test
-    public void testPersistentSubscriptionFutureReturnsExecutionExceptionOnErrorDuringSubscribe() throws InterruptedException {
-        EventStoreDBPersistentSubscriptionsClient client = server.getPersistentSubscriptionsClient();
-        server.stop();
-
-        try {
-            SubscribePersistentSubscriptionOptions connectOptions = SubscribePersistentSubscriptionOptions.get()
-                    .setBufferSize(32);
-            client.subscribeToAll("unknown-group", connectOptions, new PersistentSubscriptionListener() {}).get();
-            fail("Expected execution exception!");
-        } catch (ExecutionException ex) {
-            Throwable cause = ex.getCause();
-            assertTrue(cause instanceof StatusRuntimeException);
-            StatusRuntimeException statusRuntimeException = (StatusRuntimeException) cause;
-            assertEquals(Status.UNAVAILABLE.getCode(), statusRuntimeException.getStatus().getCode());
-        }
+        Assertions.assertEquals(6, result.get().intValue());
     }
 }

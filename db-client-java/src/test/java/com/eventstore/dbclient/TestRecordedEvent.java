@@ -1,11 +1,9 @@
 package com.eventstore.dbclient;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 
 import java.time.Instant;
 import java.util.UUID;
-
-import static org.junit.Assert.assertNull;
 
 /**
  * This class exists to support `jackson-databind` deserialization of test event
@@ -20,13 +18,13 @@ class TestResolvedEvent {
         if (event != null) {
             event.assertEquals(other.getEvent());
         } else {
-            assertNull(other.getEvent());
+            Assertions.assertNull(other.getEvent());
         }
 
         if (link != null) {
             link.assertEquals(other.getLink());
         } else {
-            assertNull(other.getLink());
+            Assertions.assertNull(other.getLink());
         }
     }
 
@@ -56,7 +54,7 @@ class TestStreamRevision {
     private long value;
 
     public void assertEquals(StreamRevision other) {
-        Assert.assertEquals(value, other.getValueUnsigned());
+        Assertions.assertEquals(value, other.getValueUnsigned());
     }
 
     public long getValue() {
@@ -73,8 +71,8 @@ class TestPosition {
     private long commit;
 
     public void assertEquals(Position other) {
-        Assert.assertEquals(prepare, other.getPrepareUnsigned());
-        Assert.assertEquals(commit, other.getCommitUnsigned());
+        Assertions.assertEquals(prepare, other.getPrepareUnsigned());
+        Assertions.assertEquals(commit, other.getCommitUnsigned());
     }
 
     public long getPrepare() {
@@ -115,7 +113,7 @@ class TestInstant {
     }
 
     public void assertEquals(Instant instant) {
-        Assert.assertEquals(Instant.ofEpochSecond(seconds, nanos), instant);
+        Assertions.assertEquals(Instant.ofEpochSecond(seconds, nanos), instant);
     }
 }
 
@@ -136,15 +134,15 @@ class TestRecordedEvent {
     private String contentType;
 
     public void assertEquals(RecordedEvent other) {
-        Assert.assertEquals(streamId, other.getStreamId());
+        Assertions.assertEquals(streamId, other.getStreamId());
         streamRevision.assertEquals(other.getStreamRevision());
-        Assert.assertEquals(eventId, other.getEventId());
-        Assert.assertEquals(eventType, other.getEventType());
+        Assertions.assertEquals(eventId, other.getEventId());
+        Assertions.assertEquals(eventType, other.getEventType());
         created.assertEquals(other.getCreated());
         position.assertEquals(other.getPosition());
-        Assert.assertEquals(contentType, other.getContentType());
-        Assert.assertArrayEquals(eventData, other.getEventData());
-        Assert.assertArrayEquals(userMetadata, other.getUserMetadata());
+        Assertions.assertEquals(contentType, other.getContentType());
+        Assertions.assertArrayEquals(eventData, other.getEventData());
+        Assertions.assertArrayEquals(userMetadata, other.getUserMetadata());
     }
 
     public String getStreamId() {

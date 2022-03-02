@@ -1,11 +1,10 @@
 package com.eventstore.dbclient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
-import java.util.Map;
 
 public class OfflineMetadataTests {
     @Test
@@ -35,7 +34,7 @@ public class OfflineMetadataTests {
         StreamMetadata actual = StreamMetadata.deserialize(source);
 
 
-        Assert.assertEquals(expected, actual);
+        Assertions.assertEquals(expected, actual);
     }
 
     @Test
@@ -52,6 +51,6 @@ public class OfflineMetadataTests {
         StreamMetadata actual = StreamMetadata.deserialize(source);
 
 
-        Assert.assertEquals(expected, actual);
+        Assertions.assertEquals(expected, actual);
     }
 }

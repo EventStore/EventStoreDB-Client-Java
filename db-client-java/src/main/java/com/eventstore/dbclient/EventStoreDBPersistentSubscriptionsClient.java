@@ -373,7 +373,7 @@ public class EventStoreDBPersistentSubscriptionsClient extends EventStoreDBClien
 
         info.setEventStreamId(node.get("eventStreamId").asText());
         info.setGroupName(node.get("groupName").asText());
-        info.setStatus(PersistentSubscriptionStatus.valueOf(node.get("status").asText()));
+        info.setStatus(node.get("status").asText());
         info.setAverageItemsPerSecond(node.get("averageItemsPerSecond").asDouble());
         info.setTotalItemsProcessed(node.get("totalItemsProcessed").asLong());
         info.setLastKnownEventNumber(node.get("lastKnownEventNumber").asLong());
@@ -419,7 +419,7 @@ public class EventStoreDBPersistentSubscriptionsClient extends EventStoreDBClien
             case 401:
                 throw new RuntimeException("Access denied");
             case 404:
-                throw new RuntimeException("Not found");
+                throw new ResourceNotFoundException();
             default:
                 if (code >= 200 && code < 300)
                     return;

@@ -1,19 +1,15 @@
 package com.eventstore.dbclient;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import testcontainers.module.EventStoreTestDBContainer;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import testcontainers.module.ESDBTests;
 
 import java.util.HashMap;
 
-public class MetadataTests {
-    @Rule
-    public final EventStoreTestDBContainer server = new EventStoreTestDBContainer(true);
-
+public class MetadataTests extends ESDBTests {
     @Test
     public void testSetStreamMetadata() throws Throwable {
-        EventStoreDBClient client = server.getClient();
+        EventStoreDBClient client = getEmptyServer().getClient();
 
         StreamMetadata metadata = new StreamMetadata();
 
@@ -33,22 +29,24 @@ public class MetadataTests {
 
         HashMap<String, Object> payload = new HashMap<>();
 
-        client.appendToStream("foo-stream", EventDataBuilder.json("foo", payload).build()).get();
-        client.setStreamMetadata("foo-stream", metadata).get();
+        String streamName = generateName();
 
-        StreamMetadata got = client.getStreamMetadata("foo-stream").get();
+        client.appendToStream(streamName, EventDataBuilder.json("foo", payload).build()).get();
+        client.setStreamMetadata(streamName, metadata).get();
 
-        Assert.assertEquals(metadata, got);
+        StreamMetadata got = client.getStreamMetadata(streamName).get();
+
+        Assertions.assertEquals(metadata, got);
     }
 
     @Test
     public void testReadNoExistingMetadata() throws Throwable {
-        EventStoreDBClient client = server.getClient();
+        EventStoreDBClient client = getEmptyServer().getClient();
+        String streamName = generateName();
+        client.appendToStream(streamName, EventDataBuilder.json("bar", new HashMap<String, Object>()).build()).get();
 
-        client.appendToStream("bar", EventDataBuilder.json("bar", new HashMap<String, Object>()).build()).get();
+        StreamMetadata got = client.getStreamMetadata(streamName).get();
 
-        StreamMetadata got = client.getStreamMetadata("bar").get();
-
-        Assert.assertEquals(new StreamMetadata(), got);
+        Assertions.assertEquals(new StreamMetadata(), got);
     }
 }

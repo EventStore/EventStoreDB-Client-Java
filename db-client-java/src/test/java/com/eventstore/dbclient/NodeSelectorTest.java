@@ -1,7 +1,7 @@
 package com.eventstore.dbclient;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 import java.util.Set;
@@ -23,7 +23,7 @@ public class NodeSelectorTest {
 
     private ClusterInfo clusterInfo;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         leader = new ClusterInfo.Member(randomUUID(), true, ClusterInfo.MemberState.LEADER, null);
         follower1 = new ClusterInfo.Member(randomUUID(), true, ClusterInfo.MemberState.FOLLOWER, null);

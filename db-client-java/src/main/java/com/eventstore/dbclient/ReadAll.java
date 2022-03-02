@@ -16,16 +16,28 @@ public class ReadAll extends AbstractRead {
 
     @Override
     public StreamsOuterClass.ReadReq.Options.Builder createOptions() {
-        return defaultReadOptions.clone()
-                .setAll(StreamsOuterClass.ReadReq.Options.AllOptions.newBuilder()
-                        .setPosition(StreamsOuterClass.ReadReq.Options.Position.newBuilder()
-                                .setCommitPosition(this.options.getPosition().getCommitUnsigned())
-                                .setPreparePosition(this.options.getPosition().getPrepareUnsigned())))
+        StreamsOuterClass.ReadReq.Options.AllOptions.Builder optionsOrBuilder =
+                StreamsOuterClass.ReadReq.Options.AllOptions.newBuilder();
+
+        if (this.options.getPosition().equals(Position.END)) {
+               optionsOrBuilder.setEnd(Shared.Empty.getDefaultInstance());
+        } else if (this.options.getPosition().equals(Position.START)) {
+               optionsOrBuilder.setStart(Shared.Empty.getDefaultInstance());
+        } else {
+               optionsOrBuilder.setPosition(StreamsOuterClass.ReadReq.Options.Position.newBuilder()
+                       .setCommitPosition(this.options.getPosition().getCommitUnsigned())
+                       .setPreparePosition(this.options.getPosition().getPrepareUnsigned()));
+        }
+
+        StreamsOuterClass.ReadReq.Options.Builder builder = defaultReadOptions.clone()
+                .setAll(optionsOrBuilder)
                 .setResolveLinks(this.options.shouldResolveLinkTos())
                 .setCount(this.maxCount)
                 .setNoFilter(Shared.Empty.getDefaultInstance())
                 .setReadDirection(this.options.getDirection() == Direction.Forwards ?
                         StreamsOuterClass.ReadReq.Options.ReadDirection.Forwards :
                         StreamsOuterClass.ReadReq.Options.ReadDirection.Backwards);
+
+        return builder;
     }
 }

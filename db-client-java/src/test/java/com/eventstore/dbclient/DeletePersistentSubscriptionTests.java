@@ -1,23 +1,40 @@
 package com.eventstore.dbclient;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import testcontainers.module.ESDBTests;
+import testcontainers.module.EventStoreDB;
 
-public class DeletePersistentSubscriptionTests extends PersistentSubscriptionTestsBase {
+import java.util.concurrent.ExecutionException;
+
+public class DeletePersistentSubscriptionTests extends ESDBTests {
     @Test
     public void testDeletePersistentSub() throws Throwable {
-        client.create("aStream", "aGroupUpd")
+        EventStoreDBPersistentSubscriptionsClient client = getEmptyServer().getPersistentSubscriptionsClient();
+        String streamName = generateName();
+        String groupName = generateName();
+
+        client.create(streamName, groupName)
                 .get();
 
-        client.delete("aStream", "aGroupUpd")
+        client.delete(streamName, groupName)
                 .get();
     }
 
     @Test
     public void testDeletePersistentSubToAll() throws Throwable {
-        client.createToAll("aGroupUpd")
-                .get();
+        EventStoreDBPersistentSubscriptionsClient client = getEmptyServer().getPersistentSubscriptionsClient();
+        String groupName = generateName();
 
-        client.deleteToAll("aGroupUpd")
-                .get();
+        try {
+            client.createToAll(groupName)
+                    .get();
+
+            client.deleteToAll(groupName)
+                    .get();
+        } catch (ExecutionException e) {
+            if (e.getCause() instanceof UnsupportedFeature && !EventStoreDB.isTestedAgainstVersion20()) {
+                throw e;
+            }
+        }
     }
 }

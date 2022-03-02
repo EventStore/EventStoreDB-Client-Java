@@ -2,34 +2,18 @@ package com.eventstore.dbclient.samples.projection_management;
 
 import com.eventstore.dbclient.*;
 import org.junit.*;
-import testcontainers.module.EventStoreTestDBContainer;
+import testcontainers.module.ESDBTests;
 
 import java.util.concurrent.ExecutionException;
 
-public class ProjectionManagement {
-
-    @Rule
-    public final EventStoreTestDBContainer server = new EventStoreTestDBContainer(false, true);
+public class ProjectionManagement extends ESDBTests {
 
     private EventStoreDBProjectionManagementClient client;
 
-    @After
-    public void teardown() throws InterruptedException {
-        if (client == null) {
-            return;
-        }
-        try {
-            client.shutdown();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
-    }
 
-    @Test
     public void testProjectionManagementSamples() throws Throwable {
 
-        client = createClient(server.getConnectionString());
-
+        client = getEmptyServer().getProjectionClient();
         disable(client);
         disableNotFound(client);
         enable(client);

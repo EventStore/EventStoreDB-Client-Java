@@ -1,21 +1,17 @@
 package com.eventstore.dbclient;
 
-import org.junit.Rule;
-import org.junit.Test;
-import testcontainers.module.EventStoreTestDBContainer;
+import org.junit.jupiter.api.Test;
+import testcontainers.module.ESDBTests;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class SubscribeToAllTests {
-    @Rule
-    public final EventStoreTestDBContainer client = new EventStoreTestDBContainer(false);
-
+public class SubscribeToAllTests extends ESDBTests {
     @Test
     public void testAllSubscriptionDeliversAllowsCancellationDuringStream() throws InterruptedException, ExecutionException {
-        EventStoreDBClient streams = client.getClient();
+        EventStoreDBClient streams = getPopulatedServer().getClient();
 
         final CountDownLatch receivedEvents = new CountDownLatch(1000);
         final CountDownLatch cancellation = new CountDownLatch(1);
@@ -93,7 +89,7 @@ public class SubscribeToAllTests {
                 .fromStart()
                 .filter(filter);
 
-        Subscription result = client.getClient()
+        Subscription result = getPopulatedServer().getClient()
                 .subscribeToAll(listener, options)
                 .get();
 

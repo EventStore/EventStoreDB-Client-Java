@@ -1,39 +1,27 @@
 package com.eventstore.dbclient;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import testcontainers.module.EventStoreTestDBContainer;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import testcontainers.module.ESDBTests;
+import testcontainers.module.EventStoreDB;
 
-import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.Assert.*;
-
-public class PersistentSubscriptionToAllWithFilterTests {
-    @Rule
-    public final EventStoreTestDBContainer server = new EventStoreTestDBContainer(true);
-    private EventStoreDBPersistentSubscriptionsClient client;
-    private EventStoreDBClient dbClient;
-
-    @Before
-    public void before() throws Throwable {
-        client = server.getPersistentSubscriptionsClient();
-        dbClient = server.getClient();
-    }
-
+public class PersistentSubscriptionToAllWithFilterTests extends ESDBTests {
     @Test
     public void testPersistentSubscriptionToAllWithFilter() throws Throwable {
+        EventStoreDBPersistentSubscriptionsClient client = getEmptyServer().getPersistentSubscriptionsClient();
+        EventStoreDBClient streamsClient = getEmptyServer().getClient();
+        String groupName = generateName();
         int filteredEventTypeCount = 10;
         String filteredEventType = "filtered-event-type";
         String otherEventType = UUID.randomUUID().toString();
 
-        AddEvents("some-stream-a", GenerateEvents(5, otherEventType));
-        AddEvents("some-stream-b", GenerateEvents(filteredEventTypeCount, filteredEventType));
-        AddEvents("some-stream-c", GenerateEvents(10, otherEventType));
+        streamsClient.appendToStream(generateName(), generateEvents(5, otherEventType).iterator()).get();
+        streamsClient.appendToStream(generateName(), generateEvents(filteredEventTypeCount, filteredEventType).iterator()).get();
+        streamsClient.appendToStream(generateName(), generateEvents(10, otherEventType).iterator()).get();
 
         final CountDownLatch receivedEvents = new CountDownLatch(filteredEventTypeCount);
         final CountDownLatch cancellation = new CountDownLatch(1);
@@ -45,7 +33,7 @@ public class PersistentSubscriptionToAllWithFilterTests {
             public void onEvent(PersistentSubscription subscription, ResolvedEvent event) {
                 RecordedEvent record = event.getEvent();
 
-                assertEquals(filteredEventType, record.getEventType());
+                Assertions.assertEquals(filteredEventType, record.getEventType());
 
                 receivedEvents.countDown();
                 current++;
@@ -58,7 +46,7 @@ public class PersistentSubscriptionToAllWithFilterTests {
 
             @Override
             public void onError(PersistentSubscription subscription, Throwable throwable) {
-                fail(throwable.getMessage());
+                Assertions.fail(throwable.getMessage());
             }
         };
 
@@ -66,45 +54,28 @@ public class PersistentSubscriptionToAllWithFilterTests {
             .withEventTypePrefix(filteredEventType)
             .build();
 
-        client.createToAll("filtered-group", PersistentSubscriptionToAllSettings.builder()
-            .fromStart()
-            .filter(filter)
-            .build())
+        try {
+            client.createToAll(groupName, PersistentSubscriptionToAllSettings.builder()
+                            .fromStart()
+                            .filter(filter)
+                            .build())
+                    .get();
+        } catch (ExecutionException e) {
+            if (e.getCause() instanceof UnsupportedFeature && !EventStoreDB.isTestedAgainstVersion20()) {
+                throw e;
+            }
+
+            return;
+        }
+
+        PersistentSubscription result = client.subscribeToAll(groupName, listener)
             .get();
 
-        PersistentSubscription result = client.subscribeToAll("filtered-group", listener)
-            .get();
-
-        assertNotNull(result.getSubscriptionId());
-        assertNotEquals("", result.getSubscriptionId());
+        Assertions.assertNotNull(result.getSubscriptionId());
+        Assertions.assertNotEquals("", result.getSubscriptionId());
 
         receivedEvents.await();
         result.stop();
         cancellation.await();
-    }
-
-    @After
-    public void after() {
-        if(client == null)
-            return;
-
-        try {
-            client.shutdown();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private ArrayList<EventData> GenerateEvents(int amount, String eventType) {
-        ArrayList<EventData> events = new ArrayList<>();
-        for (int i = 0; i < amount; i++) {
-            events.add(EventDataBuilder.json(UUID.randomUUID(), eventType, new byte[]{}).build());
-        }
-
-        return events;
-    }
-
-    private void AddEvents(String stream, ArrayList<EventData> events) {
-        dbClient.appendToStream(stream, events.iterator());
     }
 }

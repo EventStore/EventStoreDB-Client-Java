@@ -3,7 +3,7 @@ package com.eventstore.dbclient;
 public class PersistentSubscriptionInfo {
     private String eventStreamId;
     private String groupName;
-    private PersistentSubscriptionStatus status;
+    private String status;
     private double averageItemsPerSecond;
     private long totalItemsProcessed;
     private long lastKnownEventNumber;
@@ -27,11 +27,11 @@ public class PersistentSubscriptionInfo {
         this.groupName = groupName;
     }
 
-    public PersistentSubscriptionStatus getStatus() {
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(PersistentSubscriptionStatus status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 

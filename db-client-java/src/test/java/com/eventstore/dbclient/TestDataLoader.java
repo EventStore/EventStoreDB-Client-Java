@@ -2,11 +2,9 @@ package com.eventstore.dbclient;
 
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.testcontainers.shaded.com.fasterxml.jackson.core.type.TypeReference;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 
 class TestDataLoader {
     static TestResolvedEvent[] loadSerializedResolvedEvents(String filenameStem) {

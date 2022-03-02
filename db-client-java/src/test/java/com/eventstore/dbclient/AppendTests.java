@@ -1,16 +1,12 @@
 package com.eventstore.dbclient;
 
-import org.junit.Rule;
-import org.junit.Test;
-import testcontainers.module.EventStoreTestDBContainer;
-import testcontainers.module.EventStoreStreamsClient;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import testcontainers.module.ESDBTests;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
 
 class Foo {
     @Override
@@ -37,18 +33,12 @@ class Foo {
     }
 }
 
-public class AppendTests {
-    @Rule
-    public final EventStoreTestDBContainer server = new EventStoreTestDBContainer(true);
-
-    @Rule
-    public final EventStoreStreamsClient client = new EventStoreStreamsClient(server);
-
+public class AppendTests extends ESDBTests {
     @Test
     public void testAppendSingleEventNoStream() throws Throwable {
-        EventStoreDBClient client = server.getClient();
+        EventStoreDBClient client = getEmptyServer().getClient();
 
-        final String streamName = "testIntegrationAppendSingleEventNoStream";
+        final String streamName = generateName();
         final String eventType = "TestEvent";
         final String eventId = "38fffbc2-339e-11ea-8c7b-784f43837872";
         final byte[] eventMetaData = new byte[]{0xd, 0xe, 0xa, 0xd};
@@ -64,7 +54,7 @@ public class AppendTests {
         WriteResult appendResult = client.appendToStream(streamName, appendOptions, event)
                 .get();
 
-        assertEquals(new StreamRevision(0), appendResult.getNextExpectedRevision());
+        Assertions.assertEquals(new StreamRevision(0), appendResult.getNextExpectedRevision());
 
         ReadStreamOptions readStreamOptions = ReadStreamOptions.get()
                 .fromEnd()
@@ -75,13 +65,13 @@ public class AppendTests {
                 .get();
 
         List<ResolvedEvent> readEvents = readResult.getEvents();
-        assertEquals(1, readEvents.size());
+        Assertions.assertEquals(1, readEvents.size());
         RecordedEvent first = readEvents.get(0).getEvent();
 
-        assertEquals(streamName, first.getStreamId());
-        assertEquals(eventType, first.getEventType());
-        assertEquals(eventId, first.getEventId().toString());
-        assertArrayEquals(eventMetaData, first.getUserMetadata());
-        assertEquals(new Foo(), first.getEventDataAs(Foo.class));
+        Assertions.assertEquals(streamName, first.getStreamId());
+        Assertions.assertEquals(eventType, first.getEventType());
+        Assertions.assertEquals(eventId, first.getEventId().toString());
+        Assertions.assertArrayEquals(eventMetaData, first.getUserMetadata());
+        Assertions.assertEquals(new Foo(), first.getEventDataAs(Foo.class));
     }
 }

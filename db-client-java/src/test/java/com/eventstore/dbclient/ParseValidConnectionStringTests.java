@@ -1,137 +1,129 @@
 package com.eventstore.dbclient;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-@RunWith(Parameterized.class)
 public class ParseValidConnectionStringTests {
     private final JsonMapper mapper = new JsonMapper();
 
 
-    @Parameterized.Parameters
-    public static Collection validConnectionStrings() {
-        return Arrays.asList(new Object[][]{
-                {
+    public static Stream<Arguments> validConnectionStrings() {
+        return Stream.of(
+                Arguments.of(
                         "esdb://localhost",
                         "{\"dnsDiscover\":false,\"maxDiscoverAttempts\":3,\"discoveryInterval\":500,\"gossipTimeout\":3000,\"nodePreference\":\"leader\",\"tls\":true,\"tlsVerifyCert\":true,\"throwOnAppendFailure\":true,\"hosts\":[{\"address\":\"localhost\",\"port\":2113}]}"
-                },
-                {
+                ),
+                Arguments.of(
                         "esdb://localhost:2114",
                         "{\"dnsDiscover\":false,\"maxDiscoverAttempts\":3,\"discoveryInterval\":500,\"gossipTimeout\":3000,\"nodePreference\":\"leader\",\"tls\":true,\"tlsVerifyCert\":true,\"throwOnAppendFailure\":true,\"hosts\":[{\"address\":\"localhost\",\"port\":2114}]}"
-                },
-                {
+                ),
+                Arguments.of(
                         "esdb://user:pass@localhost:2114",
                         "{\"dnsDiscover\":false,\"maxDiscoverAttempts\":3,\"discoveryInterval\":500,\"gossipTimeout\":3000,\"nodePreference\":\"leader\",\"tls\":true,\"tlsVerifyCert\":true,\"throwOnAppendFailure\":true,\"defaultCredentials\":{\"login\":\"user\",\"password\":\"pass\"},\"hosts\":[{\"address\":\"localhost\",\"port\":2114}]}"
-                },
-                {
+                ),
+                Arguments.of(
                         "esdb://user:pass@localhost:2114/",
                         "{\"dnsDiscover\":false,\"maxDiscoverAttempts\":3,\"discoveryInterval\":500,\"gossipTimeout\":3000,\"nodePreference\":\"leader\",\"tls\":true,\"tlsVerifyCert\":true,\"throwOnAppendFailure\":true,\"defaultCredentials\":{\"login\":\"user\",\"password\":\"pass\"},\"hosts\":[{\"address\":\"localhost\",\"port\":2114}]}"
-                },
-                {
+                ),
+                Arguments.of(
                         "esdb://user:pass@localhost:2114/?tlsVerifyCert=false",
                         "{\"dnsDiscover\":false,\"maxDiscoverAttempts\":3,\"discoveryInterval\":500,\"gossipTimeout\":3000,\"nodePreference\":\"leader\",\"tls\":true,\"tlsVerifyCert\":false,\"throwOnAppendFailure\":true,\"defaultCredentials\":{\"login\":\"user\",\"password\":\"pass\"},\"hosts\":[{\"address\":\"localhost\",\"port\":2114}]}"
-                },
-                {
+                ),
+                Arguments.of(
                         "esdb://user:pass@localhost:2114?tlsVerifyCert=false",
                         "{\"dnsDiscover\":false,\"maxDiscoverAttempts\":3,\"discoveryInterval\":500,\"gossipTimeout\":3000,\"nodePreference\":\"leader\",\"tls\":true,\"tlsVerifyCert\":false,\"throwOnAppendFailure\":true,\"defaultCredentials\":{\"login\":\"user\",\"password\":\"pass\"},\"hosts\":[{\"address\":\"localhost\",\"port\":2114}]}"
-                },
-                {
+                ),
+                Arguments.of(
                         "esdb://user:pass@localhost:2114?tls=false",
                         "{\"dnsDiscover\":false,\"maxDiscoverAttempts\":3,\"discoveryInterval\":500,\"gossipTimeout\":3000,\"nodePreference\":\"leader\",\"tls\":false,\"tlsVerifyCert\":true,\"throwOnAppendFailure\":true,\"defaultCredentials\":{\"login\":\"user\",\"password\":\"pass\"},\"hosts\":[{\"address\":\"localhost\",\"port\":2114}]}"
-                },
-                {
+                ),
+                Arguments.of(
                         "esdb://host1,host2,host3",
                         "{\"dnsDiscover\":false,\"maxDiscoverAttempts\":3,\"discoveryInterval\":500,\"gossipTimeout\":3000,\"nodePreference\":\"leader\",\"tls\":true,\"tlsVerifyCert\":true,\"throwOnAppendFailure\":true,\"hosts\":[{\"address\":\"host1\",\"port\":2113},{\"address\":\"host2\",\"port\":2113},{\"address\":\"host3\",\"port\":2113}]}"
-                },
-                {
+                ),
+                Arguments.of(
                         "esdb://host1:1234,host2:4321,host3:3231",
                         "{\"dnsDiscover\":false,\"maxDiscoverAttempts\":3,\"discoveryInterval\":500,\"gossipTimeout\":3000,\"nodePreference\":\"leader\",\"tls\":true,\"tlsVerifyCert\":true,\"throwOnAppendFailure\":true,\"hosts\":[{\"address\":\"host1\",\"port\":1234},{\"address\":\"host2\",\"port\":4321},{\"address\":\"host3\",\"port\":3231}]}"
-                },
-                {
+                ),
+                Arguments.of(
                         "esdb://bubaqp2rh41uf5akmj0g-0.mesdb.eventstore.cloud:2113,bubaqp2rh41uf5akmj0g-1.mesdb.eventstore.cloud:2113,bubaqp2rh41uf5akmj0g-2.mesdb.eventstore.cloud:2113",
                         "{\"dnsDiscover\":false,\"maxDiscoverAttempts\":3,\"discoveryInterval\":500,\"gossipTimeout\":3000,\"nodePreference\":\"leader\",\"tls\":true,\"tlsVerifyCert\":true,\"throwOnAppendFailure\":true,\"hosts\":[{\"address\":\"bubaqp2rh41uf5akmj0g-0.mesdb.eventstore.cloud\",\"port\":2113},{\"address\":\"bubaqp2rh41uf5akmj0g-1.mesdb.eventstore.cloud\",\"port\":2113},{\"address\":\"bubaqp2rh41uf5akmj0g-2.mesdb.eventstore.cloud\",\"port\":2113}]}"
-                },
-                {
+                ),
+                Arguments.of(
                         "esdb://user:pass@host1:1234,host2:4321,host3:3231?nodePreference=follower",
                         "{\"dnsDiscover\":false,\"maxDiscoverAttempts\":3,\"discoveryInterval\":500,\"gossipTimeout\":3000,\"nodePreference\":\"follower\",\"tls\":true,\"tlsVerifyCert\":true,\"throwOnAppendFailure\":true,\"defaultCredentials\":{\"login\":\"user\",\"password\":\"pass\"},\"hosts\":[{\"address\":\"host1\",\"port\":1234},{\"address\":\"host2\",\"port\":4321},{\"address\":\"host3\",\"port\":3231}]}"
-                },
-                {
+                ),
+                Arguments.of(
                         "esdb://host1,host2,host3?tls=false",
                         "{\"dnsDiscover\":false,\"maxDiscoverAttempts\":3,\"discoveryInterval\":500,\"gossipTimeout\":3000,\"nodePreference\":\"leader\",\"tls\":false,\"tlsVerifyCert\":true,\"throwOnAppendFailure\":true,\"hosts\":[{\"address\":\"host1\",\"port\":2113},{\"address\":\"host2\",\"port\":2113},{\"address\":\"host3\",\"port\":2113}]}"
-                },
-                {
+                ),
+                Arguments.of(
                         "esdb://127.0.0.1:21573?tls=false",
                         "{\"dnsDiscover\":false,\"maxDiscoverAttempts\":3,\"discoveryInterval\":500,\"gossipTimeout\":3000,\"nodePreference\":\"leader\",\"tls\":false,\"tlsVerifyCert\":true,\"throwOnAppendFailure\":true,\"hosts\":[{\"address\":\"127.0.0.1\",\"port\":21573}]}"
-                },
-                {
+                ),
+                Arguments.of(
                         "esdb://host1,host2,host3?tlsVerifyCert=false",
                         "{\"dnsDiscover\":false,\"maxDiscoverAttempts\":3,\"discoveryInterval\":500,\"gossipTimeout\":3000,\"nodePreference\":\"leader\",\"tls\":true,\"tlsVerifyCert\":false,\"throwOnAppendFailure\":true,\"hosts\":[{\"address\":\"host1\",\"port\":2113},{\"address\":\"host2\",\"port\":2113},{\"address\":\"host3\",\"port\":2113}]}"
-                },
-                {
+                ),
+                Arguments.of(
                         "esdb+discover://user:pass@host?nodePreference=follower&tlsVerifyCert=false",
                         "{\"dnsDiscover\":true,\"maxDiscoverAttempts\":3,\"discoveryInterval\":500,\"gossipTimeout\":3000,\"nodePreference\":\"follower\",\"tls\":true,\"tlsVerifyCert\":false,\"throwOnAppendFailure\":true,\"defaultCredentials\":{\"login\":\"user\",\"password\":\"pass\"},\"hosts\":[{\"address\":\"host\",\"port\":2113}]}"
-                },
-                {
+                ),
+                Arguments.of(
                         "esdb://my%3Agreat%40username:UyeXx8%24%5EPsOo4jG88FlCauR1Coz25q@host?nodePreference=follower&tlsVerifyCert=false",
                         "{\"dnsDiscover\":false,\"maxDiscoverAttempts\":3,\"discoveryInterval\":500,\"gossipTimeout\":3000,\"nodePreference\":\"follower\",\"tls\":true,\"tlsVerifyCert\":false,\"throwOnAppendFailure\":true,\"defaultCredentials\":{\"login\":\"my:great@username\",\"password\":\"UyeXx8$^PsOo4jG88FlCauR1Coz25q\"},\"hosts\":[{\"address\":\"host\",\"port\":2113}]}"
-                },
-                {
+                ),
+                Arguments.of(
                         "esdb://host?maxDiscoverAttempts=200&discoveryInterval=1000&gossipTimeout=1&nodePreference=leader&tls=false&tlsVerifyCert=false&throwOnAppendFailure=false",
                         "{\"dnsDiscover\":false,\"maxDiscoverAttempts\":200,\"discoveryInterval\":1000,\"gossipTimeout\":1,\"nodePreference\":\"leader\",\"tls\":false,\"tlsVerifyCert\":false,\"throwOnAppendFailure\":false,\"hosts\":[{\"address\":\"host\",\"port\":2113}]}"
-                },
-                {
+                ),
+                Arguments.of(
                         "esdb://host?MaxDiscoverAttempts=200&discoveryinterval=1000&GOSSIPTIMEOUT=1&nOdEpReFeReNcE=leader&TLS=false&TlsVerifyCert=false&THROWOnAppendFailure=false",
                         "{\"dnsDiscover\":false,\"maxDiscoverAttempts\":200,\"discoveryInterval\":1000,\"gossipTimeout\":1,\"nodePreference\":\"leader\",\"tls\":false,\"tlsVerifyCert\":false,\"throwOnAppendFailure\":false,\"hosts\":[{\"address\":\"host\",\"port\":2113}]}"
-                },
-                {
+                ),
+                Arguments.of(
                         "esdb://localhost?keepAliveTimeout=20&keepAliveInterval=10",
                         "{\"dnsDiscover\":false,\"maxDiscoverAttempts\":3,\"discoveryInterval\":500,\"gossipTimeout\":3000,\"nodePreference\":\"leader\",\"tls\":true,\"tlsVerifyCert\":true,\"throwOnAppendFailure\":true,\"hosts\":[{\"address\":\"localhost\",\"port\":2113}], \"keepAliveTimeout\": \"20\", \"keepAliveInterval\": \"10\"}"
-                },
-                {
+                ),
+                Arguments.of(
                         "esdb://localhost?keepAliveTimeout=20&keepAliveInterval=10&nodePreference=readOnlyReplica",
                         "{\"dnsDiscover\":false,\"maxDiscoverAttempts\":3,\"discoveryInterval\":500,\"gossipTimeout\":3000,\"nodePreference\":\"readOnlyReplica\",\"tls\":true,\"tlsVerifyCert\":true,\"throwOnAppendFailure\":true,\"hosts\":[{\"address\":\"localhost\",\"port\":2113}], \"keepAliveTimeout\": \"20\", \"keepAliveInterval\": \"10\"}"
-                },
-        });
+                )
+        );
     }
 
     public void assertEquals(EventStoreDBClientSettings settings, EventStoreDBClientSettings other) {
-        Assert.assertEquals(settings.isDnsDiscover(), other.isDnsDiscover());
-        Assert.assertEquals(settings.getMaxDiscoverAttempts(), other.getMaxDiscoverAttempts());
-        Assert.assertEquals(settings.getDiscoveryInterval(), other.getDiscoveryInterval());
-        Assert.assertEquals(settings.getGossipTimeout(), other.getGossipTimeout());
-        Assert.assertEquals(settings.getNodePreference(), other.getNodePreference());
-        Assert.assertEquals(settings.isTls(), other.isTls());
-        Assert.assertEquals(settings.isTlsVerifyCert(), other.isTlsVerifyCert());
-        Assert.assertEquals(settings.isThrowOnAppendFailure(), other.isThrowOnAppendFailure());
-        Assert.assertEquals(settings.getKeepAliveTimeout(), other.getKeepAliveTimeout());
-        Assert.assertEquals(settings.getKeepAliveInterval(), other.getKeepAliveInterval());
+        Assertions.assertEquals(settings.isDnsDiscover(), other.isDnsDiscover());
+        Assertions.assertEquals(settings.getMaxDiscoverAttempts(), other.getMaxDiscoverAttempts());
+        Assertions.assertEquals(settings.getDiscoveryInterval(), other.getDiscoveryInterval());
+        Assertions.assertEquals(settings.getGossipTimeout(), other.getGossipTimeout());
+        Assertions.assertEquals(settings.getNodePreference(), other.getNodePreference());
+        Assertions.assertEquals(settings.isTls(), other.isTls());
+        Assertions.assertEquals(settings.isTlsVerifyCert(), other.isTlsVerifyCert());
+        Assertions.assertEquals(settings.isThrowOnAppendFailure(), other.isThrowOnAppendFailure());
+        Assertions.assertEquals(settings.getKeepAliveTimeout(), other.getKeepAliveTimeout());
+        Assertions.assertEquals(settings.getKeepAliveInterval(), other.getKeepAliveInterval());
 
-        Assert.assertEquals(settings.getHosts().length, other.getHosts().length);
+        Assertions.assertEquals(settings.getHosts().length, other.getHosts().length);
         IntStream.range(0, settings.getHosts().length).forEach((i) -> {
-            Assert.assertEquals(settings.getHosts()[i].getHostname(), other.getHosts()[i].getHostname());
-            Assert.assertEquals(settings.getHosts()[i].getPort(), other.getHosts()[i].getPort());
+            Assertions.assertEquals(settings.getHosts()[i].getHostname(), other.getHosts()[i].getHostname());
+            Assertions.assertEquals(settings.getHosts()[i].getPort(), other.getHosts()[i].getPort());
         });
     }
 
-    @Parameterized.Parameter
-    public String connectionString;
+    @ParameterizedTest
+    @MethodSource("validConnectionStrings")
+    public void test(String connectionString, String json) throws ParseError, JsonProcessingException {
 
-    @Parameterized.Parameter(1)
-    public String jsonSettings;
-
-    @Test
-    public void test() throws ParseError, JsonProcessingException {
-
-        EventStoreDBClientSettings expectedSettings = this.parseJson(jsonSettings);
+        EventStoreDBClientSettings expectedSettings = this.parseJson(json);
         EventStoreDBClientSettings parsedSettings = EventStoreDBConnectionString.parse(connectionString);
 
         this.assertEquals(expectedSettings, parsedSettings);

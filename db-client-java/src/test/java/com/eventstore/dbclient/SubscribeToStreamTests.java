@@ -1,24 +1,18 @@
 package com.eventstore.dbclient;
 
-import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
-import org.junit.Rule;
-import org.junit.Test;
-import testcontainers.module.EventStoreTestDBContainer;
+import org.junit.jupiter.api.Test;
+import testcontainers.module.ESDBTests;
 
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class SubscribeToStreamTests {
-    @Rule
-    public final EventStoreTestDBContainer server = new EventStoreTestDBContainer(false);
-
+public class SubscribeToStreamTests extends ESDBTests {
     @Test
     public void testStreamSubscriptionDeliversAllowsCancellationDuringStream() throws InterruptedException, ExecutionException {
-        EventStoreDBClient client = server.getClient();
+        EventStoreDBClient client = getPopulatedServer().getClient();
 
         final CountDownLatch receivedEvents = new CountDownLatch(1000);
         final CountDownLatch cancellation = new CountDownLatch(1);
@@ -50,7 +44,7 @@ public class SubscribeToStreamTests {
 
     @Test
     public void testStreamSubscriptionDeliversAllEventsInStream() throws InterruptedException, ExecutionException {
-        EventStoreDBClient client = server.getClient();
+        EventStoreDBClient client = getPopulatedServer().getClient();
 
         final CountDownLatch receivedEvents = new CountDownLatch(6000);
         final CountDownLatch cancellation = new CountDownLatch(1);
@@ -88,7 +82,7 @@ public class SubscribeToStreamTests {
 
     @Test
     public void testStreamSubscriptionDeliversAllEventsInStreamAndListensForNewEvents() throws Throwable {
-        EventStoreDBClient client = server.getClient();
+        EventStoreDBClient client = getPopulatedServer().getClient();
 
         final CountDownLatch receivedEvents = new CountDownLatch(6000);
         final CountDownLatch appendedEvents = new CountDownLatch(1);
@@ -164,21 +158,5 @@ public class SubscribeToStreamTests {
         // Clean up subscription
         subscription.stop();
         cancellation.await();
-    }
-
-    @Test
-    public void testSubscriptionFutureReturnsExecutionExceptionOnErrorDuringSubscribe() throws InterruptedException {
-        EventStoreDBClient client = server.getClient();
-        server.stop();
-
-        try {
-            client.subscribeToAll(new SubscriptionListener() {}).get();
-            fail("Expected execution exception!");
-        } catch (ExecutionException ex) {
-            Throwable cause = ex.getCause();
-            assertTrue(cause instanceof StatusRuntimeException);
-            StatusRuntimeException statusRuntimeException = (StatusRuntimeException) cause;
-            assertEquals(Status.UNAVAILABLE.getCode(), statusRuntimeException.getStatus().getCode());
-        }
     }
 }

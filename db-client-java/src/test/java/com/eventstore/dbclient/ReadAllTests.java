@@ -1,19 +1,15 @@
 package com.eventstore.dbclient;
 
-import org.junit.Rule;
-import org.junit.Test;
-import testcontainers.module.EventStoreTestDBContainer;
+import org.junit.jupiter.api.Test;
+import testcontainers.module.ESDBTests;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-public class ReadAllTests {
-    @Rule
-    public final EventStoreTestDBContainer server = new EventStoreTestDBContainer(false);
-
+public class ReadAllTests extends ESDBTests {
     @Test
     public void testReadAllEventsForwardFromZeroPosition() throws ExecutionException, InterruptedException {
-        EventStoreDBClient client = server.getClient();
+        EventStoreDBClient client = getPopulatedServer().getClient();
 
         ReadAllOptions options = ReadAllOptions.get()
                 .forwards()
@@ -28,7 +24,7 @@ public class ReadAllTests {
 
     @Test
     public void testReadAllEventsForwardFromNonZeroPosition() throws ExecutionException, InterruptedException {
-        EventStoreDBClient client = server.getClient();
+        EventStoreDBClient client = getPopulatedServer().getClient();
 
         ReadAllOptions options = ReadAllOptions.get()
                 .forwards()
@@ -42,23 +38,8 @@ public class ReadAllTests {
     }
 
     @Test
-    public void testReadAllEventsBackwardsFromZeroPosition() throws ExecutionException, InterruptedException {
-        EventStoreDBClient client = server.getClient();
-
-        ReadAllOptions options = ReadAllOptions.get()
-                .backwards()
-                .fromEnd()
-                .notResolveLinkTos();
-
-        ReadResult result = client.readAll(10, options)
-                .get();
-
-        verifyAgainstTestData(result.getEvents(), "all-back-e0-e10");
-    }
-
-    @Test
     public void testReadAllEventsBackwardsFromNonZeroPosition() throws ExecutionException, InterruptedException {
-        EventStoreDBClient client = server.getClient();
+        EventStoreDBClient client = getPopulatedServer().getClient();
 
         ReadAllOptions options = ReadAllOptions.get()
                 .backwards()
