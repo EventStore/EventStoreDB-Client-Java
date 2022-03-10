@@ -1,7 +1,8 @@
 package com.eventstore.dbclient;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
+import org.junit.jupiter.api.*;
 import testcontainers.module.ESDBTests;
 import testcontainers.module.EventStoreDB;
 
@@ -11,8 +12,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class PersistentSubscriptionManagementTests extends ESDBTests {
     @Test
+    @Order(1)
     public void testListPersistentSubscriptions() throws Throwable {
         EventStoreDBPersistentSubscriptionsClient client = getEmptyServer().getPersistentSubscriptionsClient();
         String groupName = generateName();
@@ -38,6 +41,7 @@ public class PersistentSubscriptionManagementTests extends ESDBTests {
     }
 
     @Test
+    @Order(2)
     public void testListPersistentSubscriptionsForStream() throws Throwable {
         EventStoreDBPersistentSubscriptionsClient client = getEmptyServer().getPersistentSubscriptionsClient();
         String streamName = generateName();
@@ -54,6 +58,18 @@ public class PersistentSubscriptionManagementTests extends ESDBTests {
             } catch (ResourceNotFoundException e) {
                 Thread.sleep(500);
                 continue;
+            } catch (ExecutionException e) {
+                if (e.getCause() instanceof StatusRuntimeException) {
+                    StatusRuntimeException status = (StatusRuntimeException) e.getCause();
+                    if (status.getStatus().getCode() == Status.Code.INTERNAL) {
+                        // Some weird use-case when running in Github Action, it's usually a retryable error from the gRPC
+                        // implementation: "Abrupt GOAWAY closed sent stream. HTTP/2 error code: STREAM_CLOSED"
+                        Thread.sleep(500);
+                        continue;
+                    }
+                }
+
+                throw e;
             }
 
             Assertions.assertEquals(subs.size(), 1);
@@ -63,6 +79,7 @@ public class PersistentSubscriptionManagementTests extends ESDBTests {
     }
 
     @Test
+    @Order(3)
     public void testListPersistentSubscriptionsToAll() throws Throwable {
         EventStoreDBPersistentSubscriptionsClient client = getEmptyServer().getPersistentSubscriptionsClient();
         String groupName = generateName();
@@ -94,6 +111,7 @@ public class PersistentSubscriptionManagementTests extends ESDBTests {
     }
 
     @Test
+    @Order(4)
     public void testGetPersistentSubscriptionInfo() throws Throwable {
         EventStoreDBPersistentSubscriptionsClient client = getEmptyServer().getPersistentSubscriptionsClient();
         String streamName = generateName();
@@ -104,7 +122,7 @@ public class PersistentSubscriptionManagementTests extends ESDBTests {
         for (int i = 0; i < 10; i++) {
             result = client.getInfo(streamName, groupName).get();
             if (!result.isPresent()) {
-                Thread.sleep(500);
+                Thread.sleep(1000);
                 continue;
             }
 
@@ -116,6 +134,7 @@ public class PersistentSubscriptionManagementTests extends ESDBTests {
     }
 
     @Test
+    @Order(5)
     public void testGetPersistentSubscriptionInfoToAll() throws Throwable {
         EventStoreDBPersistentSubscriptionsClient client = getEmptyServer().getPersistentSubscriptionsClient();
         String groupName = generateName();
@@ -138,6 +157,7 @@ public class PersistentSubscriptionManagementTests extends ESDBTests {
     }
 
     @Test
+    @Order(6)
     public void testGetPersistentSubscriptionInfoNotExisting() throws Throwable {
         EventStoreDBPersistentSubscriptionsClient client = getEmptyServer().getPersistentSubscriptionsClient();
         Optional<PersistentSubscriptionInfo> result = client.getInfo(generateName(), generateName()).get();
@@ -146,6 +166,7 @@ public class PersistentSubscriptionManagementTests extends ESDBTests {
     }
 
     @Test
+    @Order(7)
     public void testReplayParkedMessages() throws Throwable {
         EventStoreDBPersistentSubscriptionsClient client = getEmptyServer().getPersistentSubscriptionsClient();
         final EventStoreDBClient streamClient = getEmptyServer().getClient();
@@ -198,6 +219,7 @@ public class PersistentSubscriptionManagementTests extends ESDBTests {
     }
 
     @Test
+    @Order(8)
     public void testReplayParkedMessagesToAll() throws Throwable {
         EventStoreDBPersistentSubscriptionsClient client = getEmptyServer().getPersistentSubscriptionsClient();
         String streamName = generateName();
@@ -260,13 +282,24 @@ public class PersistentSubscriptionManagementTests extends ESDBTests {
     }
 
     @Test
+    @Order(9)
     public void testEncoding() throws Throwable {
         EventStoreDBPersistentSubscriptionsClient client = getEmptyServer().getPersistentSubscriptionsClient();
         String streamName = String.format("/foo/%s/stream", generateName());
         String groupName = String.format("/foo/%s/group", generateName());
 
         client.create(streamName, groupName).get();
-        Optional<PersistentSubscriptionInfo> info = client.getInfo(streamName, groupName).get();
+        Optional<PersistentSubscriptionInfo> info = Optional.empty();
+        for (int i = 0; i < 10; i++) {
+            info = client.getInfo(streamName, groupName).get();
+
+            if (!info.isPresent()) {
+                Thread.sleep(500);
+                continue;
+            }
+
+            break;
+        }
 
        Assertions.assertTrue(info.isPresent());
        Assertions.assertEquals(info.get().getEventStreamId(), streamName);
@@ -274,6 +307,7 @@ public class PersistentSubscriptionManagementTests extends ESDBTests {
     }
 
     @Test
+    @Order(10)
     public void testRestartSubsystem() throws Throwable {
         EventStoreDBPersistentSubscriptionsClient client = getEmptyServer().getPersistentSubscriptionsClient();
         client.restartSubsystem().get();

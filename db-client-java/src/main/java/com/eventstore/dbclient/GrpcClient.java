@@ -8,6 +8,8 @@ import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
@@ -345,6 +347,26 @@ public abstract class GrpcClient {
             }
 
             return false;
+        }
+
+        public <A> HttpURLConnection getHttpConnection(OptionsBase<A> options, EventStoreDBClientSettings settings, String path) {
+            try {
+                HttpURLConnection conn = (HttpURLConnection) this.endpoint.getURL(settings.isTls(), path).openConnection();
+                conn.setRequestProperty("Accept", "application/json");
+                String creds = options.getUserCredentials();
+
+                if (creds == null && settings.getDefaultCredentials() != null) {
+                    creds = settings.getDefaultCredentials().toUserCredentials().basicAuthHeader();
+                }
+
+                if (creds != null) {
+                    conn.setRequestProperty("Authorization", creds);
+                }
+
+                return conn;
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 

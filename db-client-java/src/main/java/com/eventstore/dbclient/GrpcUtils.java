@@ -12,8 +12,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 public final class GrpcUtils {
-
-
     static public <ReqT, RespT> ClientResponseObserver<ReqT, RespT> convertSingleResponse(
             CompletableFuture<RespT> dest) {
 
