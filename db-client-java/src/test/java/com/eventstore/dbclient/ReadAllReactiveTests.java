@@ -1,22 +1,18 @@
 package com.eventstore.dbclient;
 
 import io.reactivex.rxjava3.core.Flowable;
-import org.junit.Rule;
-import org.junit.Test;
-import testcontainers.module.EventStoreTestDBContainer;
+import org.junit.jupiter.api.Test;
+import testcontainers.module.ESDBTests;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static java.util.stream.Collectors.toList;
 
-public class ReadAllReactiveTests {
-    @Rule
-    public final EventStoreTestDBContainer server = new EventStoreTestDBContainer(false);
-
+public class ReadAllReactiveTests extends ESDBTests {
     @Test
     public void testReadAllEventsReactiveForwardFromZeroPosition() throws ExecutionException, InterruptedException {
-        EventStoreDBClient client = server.getClient();
+        EventStoreDBClient client = getPopulatedServer().getClient();
 
         ReadAllOptions options = ReadAllOptions.get()
                 .forwards()
@@ -32,7 +28,7 @@ public class ReadAllReactiveTests {
 
     @Test
     public void testReadAllEventsReactiveForwardFromNonZeroPosition() throws ExecutionException, InterruptedException {
-        EventStoreDBClient client = server.getClient();
+        EventStoreDBClient client = getPopulatedServer().getClient();
 
         ReadAllOptions options = ReadAllOptions.get()
                 .forwards()
@@ -47,24 +43,8 @@ public class ReadAllReactiveTests {
     }
 
     @Test
-    public void testReadAllEventsReactiveBackwardsFromZeroPosition() throws ExecutionException, InterruptedException {
-        EventStoreDBClient client = server.getClient();
-
-        ReadAllOptions options = ReadAllOptions.get()
-                .backwards()
-                .fromEnd()
-                .notResolveLinkTos();
-
-        List<ResolvedEvent> events = Flowable.fromPublisher(client.readAllReactive(10, options))
-                .collect(toList())
-                .blockingGet();
-
-        verifyAgainstTestData(events, "all-back-e0-e10");
-    }
-
-    @Test
     public void testReadAllEventsReactiveBackwardsFromNonZeroPosition() throws ExecutionException, InterruptedException {
-        EventStoreDBClient client = server.getClient();
+        EventStoreDBClient client = getPopulatedServer().getClient();
 
         ReadAllOptions options = ReadAllOptions.get()
                 .backwards()

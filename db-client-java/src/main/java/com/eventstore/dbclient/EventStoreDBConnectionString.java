@@ -206,8 +206,8 @@ public class EventStoreDBConnectionString {
             logger.warn("{} is not currently supported by this client, and will have no effect.", key);
         }
 
-        switch (key) {
-            case "nodePreference": {
+        switch (key.toLowerCase()) {
+            case "nodepreference": {
                 Optional<NodePreference> preference = parseNodePreference(value);
                 if (preference.isPresent()) {
                     this.settings.nodePreference(preference.get());
@@ -217,7 +217,7 @@ public class EventStoreDBConnectionString {
                 }
                 break;
             }
-            case "maxDiscoverAttempts": {
+            case "maxdiscoverattempts": {
                 try {
                     int parsedValue = parseInt(value);
                     this.settings.maxDiscoverAttempts(parsedValue);
@@ -231,7 +231,7 @@ public class EventStoreDBConnectionString {
                 }
                 break;
             }
-            case "discoveryInterval": {
+            case "discoveryinterval": {
                 try {
                     int parsedValue = parseInt(value);
                     this.settings.discoveryInterval(parsedValue);
@@ -245,7 +245,7 @@ public class EventStoreDBConnectionString {
                 }
                 break;
             }
-            case "gossipTimeout": {
+            case "gossiptimeout": {
                 try {
                     int parsedValue = parseInt(value);
                     this.settings.gossipTimeout(parsedValue);
@@ -259,7 +259,7 @@ public class EventStoreDBConnectionString {
                 }
                 break;
             }
-            case "dnsDiscover": {
+            case "dnsdiscover": {
                 if (!value.equals("true") && !value.equals("false")) {
                     throw new ParseError(this.connectionString, keyPosition, this.nextPosition, "true or false");
                 }
@@ -273,21 +273,21 @@ public class EventStoreDBConnectionString {
                 this.settings.tls(value.equals("true"));
                 break;
             }
-            case "tlsVerifyCert": {
+            case "tlsverifycert": {
                 if (!value.equals("true") && !value.equals("false")) {
                     throw new ParseError(this.connectionString, keyPosition, this.nextPosition, "true or false");
                 }
                 this.settings.tlsVerifyCert(value.equals("true"));
                 break;
             }
-            case "throwOnAppendFailure": {
+            case "throwonappendfailure": {
                 if (!value.equals("true") && !value.equals("false")) {
                     throw new ParseError(this.connectionString, keyPosition, this.nextPosition, "true or false");
                 }
                 this.settings.throwOnAppendFailure(value.equals("true"));
                 break;
             }
-            case "keepAliveTimeout": {
+            case "keepalivetimeout": {
                 try {
                     long parsedValue = parseLong(value);
                     if (parsedValue >= 0 && parsedValue < Consts.DEFAULT_KEEP_ALIVE_TIMEOUT_IN_MS) {
@@ -319,7 +319,7 @@ public class EventStoreDBConnectionString {
                 }
                 break;
             }
-            case "keepAliveInterval": {
+            case "keepaliveinterval": {
                 try {
                     long parsedValue = parseLong(value);
                     if (parsedValue >= 0 && parsedValue < Consts.DEFAULT_KEEP_ALIVE_INTERVAL_IN_MS) {

@@ -1,7 +1,10 @@
 package com.eventstore.dbclient;
 
-import org.junit.*;
-import testcontainers.module.EventStoreTestDBContainer;
+import org.junit.jupiter.api.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import testcontainers.module.ESDBTests;
+import testcontainers.module.EventStoreDB;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,30 +13,28 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
-public class ProjectionManagementTests {
-
-    @Rule
-    public final EventStoreTestDBContainer server = new EventStoreTestDBContainer(false, true);
-
-    private static final String PROJECTION_NAME = "projection";
-
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+public class ProjectionManagementTests extends ESDBTests {
     private static final String COUNT_EVENTS_PROJECTION_FILENAME = "count-events-projection.js";
     private static final String COUNT_EVENTS_PARTITIONED_PROJECTION_FILENAME = "count-events-partitioned-projection.js";
     private static final String UNKNOWN_KEYNAMES_PROJECTION_FILENAME = "state-with-unknown-keynames.js";
 
     private static final int EXPECTED_EVENT_COUNT = 2000;
+    private final Logger logger = LoggerFactory.getLogger(ProjectionManagementTests.class);
 
     private static String COUNT_EVENTS_PROJECTION;
     private static String COUNT_EVENTS_PARTITIONED_PROJECTION;
     private static String UNKNOWN_KEYNAMES_PROJECTION;
-    private static final String EMPTY_PROJECTION = "{}";
 
     private EventStoreDBProjectionManagementClient projectionClient;
 
-    @BeforeClass
+    @BeforeAll
     public static void loadProjectionJs() throws IOException {
 
         COUNT_EVENTS_PROJECTION = loadResourceAsString(COUNT_EVENTS_PROJECTION_FILENAME);
@@ -50,317 +51,339 @@ public class ProjectionManagementTests {
         }
     }
 
-    @Before
+    @BeforeEach
     public void init() {
-        server.waitForInitialization();
-        projectionClient = server.getProjectionManagementClient();
-    }
-
-    @After
-    public void teardown() throws InterruptedException {
-        if (projectionClient == null) {
-            return;
-        }
-        try {
-            projectionClient.shutdown();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
+        projectionClient = getEmptyServer().getProjectionClient();
     }
 
     @Test
+    @Order(1)
     public void testCreateAndGetContinuousProjection() throws ExecutionException, InterruptedException {
-
+        String name = generateName();
         projectionClient
-            .create(PROJECTION_NAME, COUNT_EVENTS_PROJECTION)
+            .create(name, COUNT_EVENTS_PROJECTION)
             .get();
 
-        CountResult result = server.getProjectionManagementClient()
-            .getResult(PROJECTION_NAME, CountResult.class)
+        waitUntilProjectionStatusIs(name, "Running");
+
+        CountResult result = projectionClient
+            .getResult(name, CountResult.class)
             .get();
 
         assertCountingProjectionResultAsExpected(result);
     }
 
     @Test
+    @Order(2)
     public void testDeserializingBasedOnJavaType() throws ExecutionException, InterruptedException {
-
+        String name = generateName();
         projectionClient
-            .create(PROJECTION_NAME, UNKNOWN_KEYNAMES_PROJECTION)
+            .create(name, UNKNOWN_KEYNAMES_PROJECTION)
             .get();
 
-        Map<String, Item> result = getResultOfUnknownKeyNamesProjection();
+        waitUntilProjectionStatusIs(name, "Running");
+
+        Map<String, Item> result = getResultOfUnknownKeyNamesProjection(name);
 
         assertDeserializedIntoMap(result);
     }
 
     @Test
+    @Order(3)
     public void testEnablingProjection() throws ExecutionException, InterruptedException {
-
+        String name = generateName();
         projectionClient
-            .create(PROJECTION_NAME, COUNT_EVENTS_PROJECTION)
+            .create(name, COUNT_EVENTS_PROJECTION)
             .get();
 
+        waitUntilProjectionStatusIs(name, "Running");
+
         projectionClient
-            .enable(PROJECTION_NAME).get();
+            .enable(name).get();
 
-        ProjectionDetails status = projectionClient
-            .getStatus(PROJECTION_NAME).get();
-
-        Assert.assertEquals("Running", status.getStatus());
+        waitUntilProjectionStatusIs(name, "Running");
     }
 
     @Test
+    @Order(4)
     public void testDisablingProjection() throws ExecutionException, InterruptedException {
-
+        String name = generateName();
         projectionClient
-            .create(PROJECTION_NAME, COUNT_EVENTS_PROJECTION)
+            .create(name, COUNT_EVENTS_PROJECTION)
             .get();
 
-        projectionClient
-            .enable(PROJECTION_NAME).get();
+        waitUntilProjectionStatusIs(name, "Running");
 
         projectionClient
-            .disable(PROJECTION_NAME).get();
+            .enable(name).get();
 
-        ProjectionDetails status = projectionClient
-                .getStatus(PROJECTION_NAME).get();
+        waitUntilProjectionStatusIs(name, "Running");
 
-        Assert.assertEquals("Stopped", status.getStatus());
+        projectionClient
+            .disable(name).get();
+
+        waitUntilProjectionStatusIs(name, "Stopped");
     }
 
     @Test
+    @Order(5)
     public void testAbortingProjection() throws ExecutionException, InterruptedException {
-
+        String name = generateName();
         projectionClient
-            .create(PROJECTION_NAME, COUNT_EVENTS_PROJECTION)
+            .create(name, COUNT_EVENTS_PROJECTION)
             .get();
 
-        projectionClient.abort(PROJECTION_NAME).get();
+        waitUntilProjectionStatusIs(name, "Running");
 
-        ProjectionDetails status = projectionClient
-                .getStatus(PROJECTION_NAME).get();
+        projectionClient.abort(name).get();
 
-        Assert.assertEquals("Aborted/Stopped", status.getStatus());
+        waitUntilProjectionStatusIs(name, "Aborted", "Stopped");
     }
 
     @Test
+    @Order(6)
     public void testResettingProjection() throws ExecutionException, InterruptedException {
-
+        String name = generateName();
         projectionClient
-            .create(PROJECTION_NAME, COUNT_EVENTS_PROJECTION)
+            .create(name, COUNT_EVENTS_PROJECTION)
             .get();
 
-        CountResult before = server.getProjectionManagementClient()
-                .getResult(PROJECTION_NAME, CountResult.class)
+        waitUntilProjectionStatusIs(name, "Running");
+
+        CountResult before = projectionClient
+                .getResult(name, CountResult.class)
                 .get();
 
         // stop counting
-        projectionClient.disable(PROJECTION_NAME).get();
-        projectionClient.reset(PROJECTION_NAME).get();
+        projectionClient.disable(name).get();
+        projectionClient.reset(name).get();
 
-        CountResult after = server.getProjectionManagementClient()
-                .getResult(PROJECTION_NAME, CountResult.class)
+        CountResult after = projectionClient
+                .getResult(name, CountResult.class)
                 .get();
 
-        Assert.assertTrue(before.getCount() > 0);
-        Assert.assertEquals(0, after.getCount());
+        Assertions.assertTrue(before.getCount() > 0);
+        Assertions.assertEquals(0, after.getCount());
     }
 
-    @Test
-    public void testRestartingProjectionSubsystem() throws ExecutionException, InterruptedException {
-
-        projectionClient.restartSubsystem().get();
-    }
 
     @Test
-    public void testDeletingProjection() throws ExecutionException, InterruptedException {
-
+    @Order(7)
+    public void testDeletingProjection() throws ExecutionException, InterruptedException, TimeoutException {
+        String name = generateName();
         projectionClient
-            .create(PROJECTION_NAME, COUNT_EVENTS_PROJECTION)
+            .create(name, COUNT_EVENTS_PROJECTION)
             .get();
 
-        DeleteProjectionOptions options = DeleteProjectionOptions.get()
-            .deleteCheckpointStream()
-            .deleteStateStream()
-            .deleteEmittedStreams(false);
+        waitUntilProjectionStatusIs(name, "Running");
 
-        projectionClient.disable(PROJECTION_NAME).get();
+        if (EventStoreDB.isTestedAgainstVersion20()) {
+            projectionClient.abort(name).get();
+        } else {
+            projectionClient.disable(name).get();
+        }
 
-        projectionClient.delete(PROJECTION_NAME, options).get();
+        waitUntilProjectionStatusIs(name, "Stopped");
 
-        // wait a bit for projection to be deleted
-        Thread.sleep(100);
-
-        Assert.assertThrows(ExecutionException.class, () -> {
-            projectionClient.getStatus(PROJECTION_NAME).get();
-        });
+        CompletableFuture.runAsync(() -> {
+            int count = 1;
+            for (;;) {
+                try {
+                    projectionClient.delete(name).get();
+                    break;
+                } catch (Exception e) {
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException ex) {
+                        logger.error(String.format("Exception when deleting projection '%s', count %d", name, count), e);
+                        count++;
+                    }
+                }
+            }
+        }).get(60, TimeUnit.SECONDS);
     }
 
     @Test
+    @Order(8)
     public void testGetProjectionStatistics() throws ExecutionException, InterruptedException {
-
+        String name = generateName();
         projectionClient
-            .create(PROJECTION_NAME, COUNT_EVENTS_PROJECTION)
+            .create(name, COUNT_EVENTS_PROJECTION)
             .get();
 
-        ProjectionDetails statistics = projectionClient.getStatistics(PROJECTION_NAME).get();
+        waitUntilProjectionStatusIs(name, "Running");
 
-        Assert.assertNotNull(statistics);
-        Assert.assertEquals(PROJECTION_NAME, statistics.getName());
-        Assert.assertEquals(PROJECTION_NAME, statistics.getEffectiveName());
-        Assert.assertEquals("Running", statistics.getStatus());
-        Assert.assertEquals("Continuous", statistics.getMode());
-        Assert.assertNotNull(statistics.getPosition());
-        Assert.assertNotNull(statistics.getLastCheckpoint());
+        ProjectionDetails statistics = projectionClient.getStatistics(name).get();
+
+        Assertions.assertNotNull(statistics);
+        Assertions.assertEquals(name, statistics.getName());
+        Assertions.assertEquals(name, statistics.getEffectiveName());
+        Assertions.assertEquals("Running", statistics.getStatus());
+        Assertions.assertEquals("Continuous", statistics.getMode());
+        Assertions.assertNotNull(statistics.getPosition());
+        Assertions.assertNotNull(statistics.getLastCheckpoint());
     }
 
     @Test
+    @Order(9)
     public void testUpdateProjection() throws ExecutionException, InterruptedException {
-
+        String name = generateName();
         projectionClient
-            .create(PROJECTION_NAME, COUNT_EVENTS_PROJECTION)
+            .create(name, COUNT_EVENTS_PROJECTION)
             .get();
+
+        waitUntilProjectionStatusIs(name, "Running");
 
         UpdateProjectionOptions options = UpdateProjectionOptions.get().emitEnabled(true);
 
-        projectionClient.update(PROJECTION_NAME, EMPTY_PROJECTION, options).get();
-        projectionClient.update(PROJECTION_NAME, COUNT_EVENTS_PROJECTION).get();
-        projectionClient.update(PROJECTION_NAME, EMPTY_PROJECTION).get();
+        projectionClient.update(name, COUNT_EVENTS_PARTITIONED_PROJECTION, options).get();
+
+        ProjectionDetails details = projectionClient.getStatus(name).get();
+
+        Assertions.assertEquals(details.getVersion(), 1);
     }
 
     @Test
+    @Order(10)
     public void testGetProjectionState() throws ExecutionException, InterruptedException {
-
+        String name = generateName();
         projectionClient
-            .create(PROJECTION_NAME, COUNT_EVENTS_PROJECTION)
+            .create(name, COUNT_EVENTS_PROJECTION)
             .get();
 
+        waitUntilProjectionStatusIs(name, "Running");
+
         CountResult state = projectionClient
-            .getState(PROJECTION_NAME, CountResult.class)
+            .getState(name, CountResult.class)
             .get();
 
         assertCountingProjectionResultAsExpected(state);
     }
 
     @Test
+    @Order(11)
     public void testGetProjectionResultByPartition() throws ExecutionException, InterruptedException {
-
+        String name = generateName();
         projectionClient
-            .create(PROJECTION_NAME, COUNT_EVENTS_PARTITIONED_PROJECTION)
+            .create(name, COUNT_EVENTS_PARTITIONED_PROJECTION)
             .get();
 
+        waitUntilProjectionStatusIs(name, "Running");
+
+        Thread.sleep(5000);
+
         CountResult oddState = projectionClient
-            .getResult(PROJECTION_NAME, "odd", CountResult.class)
+            .getResult(name, "odd", CountResult.class)
             .get();
 
         CountResult evenState = projectionClient
-            .getState(PROJECTION_NAME, "even", CountResult.class)
+            .getState(name, "even", CountResult.class)
             .get();
 
         assertCountingProjectionResultAsExpected(oddState);
         assertCountingProjectionResultAsExpected(evenState);
 
         CountResult invalidState = projectionClient
-            .getState(PROJECTION_NAME, "non-existing-partition", CountResult.class)
+            .getState(name, "non-existing-partition", CountResult.class)
             .get();
 
-        Assert.assertEquals(0, invalidState.count);
+        Assertions.assertEquals(0, invalidState.count);
     }
 
     @Test
+    @Order(12)
     public void testGetProjectionStateByPartition() throws ExecutionException, InterruptedException {
-
+        String name = generateName();
         projectionClient
-            .create(PROJECTION_NAME, COUNT_EVENTS_PARTITIONED_PROJECTION)
+            .create(name, COUNT_EVENTS_PARTITIONED_PROJECTION)
             .get();
 
+        waitUntilProjectionStatusIs(name, "Running");
+
         CountResult oddState = projectionClient
-            .getState(PROJECTION_NAME, "odd", CountResult.class)
+            .getState(name, "odd", CountResult.class)
             .get();
 
         CountResult evenState = projectionClient
-            .getState(PROJECTION_NAME, "even", CountResult.class)
+            .getState(name, "even", CountResult.class)
             .get();
 
         assertCountingProjectionResultAsExpected(oddState);
         assertCountingProjectionResultAsExpected(evenState);
 
         CountResult invalidState = projectionClient
-            .getState(PROJECTION_NAME, "non-existing-partition", CountResult.class)
+            .getState(name, "non-existing-partition", CountResult.class)
             .get();
 
-        Assert.assertEquals(0, invalidState.count);
+        Assertions.assertEquals(0, invalidState.count);
     }
 
     @Test
+    @Order(13)
     public void testGetProjectionStatus() throws ExecutionException, InterruptedException {
-
+        String name = generateName();
         projectionClient
-            .create(PROJECTION_NAME, COUNT_EVENTS_PROJECTION)
+            .create(name, COUNT_EVENTS_PROJECTION)
             .get();
+
+        waitUntilProjectionStatusIs(name, "Running");
 
         ProjectionDetails status = projectionClient
-            .getStatus(PROJECTION_NAME)
+            .getStatus(name)
             .get();
 
-        Assert.assertNotNull(status);
-        Assert.assertEquals(PROJECTION_NAME, status.getName());
-        Assert.assertEquals(PROJECTION_NAME, status.getEffectiveName());
-        Assert.assertEquals("Running", status.getStatus());
-        Assert.assertEquals("Continuous", status.getMode());
-        Assert.assertNotNull(status.getPosition());
-        Assert.assertNotNull(status.getLastCheckpoint());
+        Assertions.assertNotNull(status);
+        Assertions.assertEquals(name, status.getName());
+        Assertions.assertEquals(name, status.getEffectiveName());
+        Assertions.assertEquals("Running", status.getStatus());
+        Assertions.assertEquals("Continuous", status.getMode());
+        Assertions.assertNotNull(status.getPosition());
+        Assertions.assertNotNull(status.getLastCheckpoint());
     }
 
     @Test
+    @Order(14)
     public void testListProjections() throws ExecutionException, InterruptedException {
 
         ListProjectionsResult result = projectionClient.list().get();
-        Assert.assertNotNull(result);
+        Assertions.assertNotNull(result);
 
         List<ProjectionDetails> projections = result.getProjections();
-        Assert.assertEquals(5, projections.size());
-
-        String[] systemProjections = new String[] {
-            "$by_category",
-            "$by_correlation_id",
-            "$by_event_type",
-            "$stream_by_category",
-            "$streams"
-        };
-
-        Assert.assertArrayEquals(
-            Arrays.stream(systemProjections).sorted().toArray(),
-            projections.stream().map(ProjectionDetails::getName).sorted().toArray());
+        Assertions.assertTrue(projections.size() > 1);
     }
 
     private void assertDeserializedIntoMap(final Map<String, Item> result) {
 
-        Assert.assertNotNull(result);
-        Assert.assertFalse(result.entrySet().isEmpty());
+        Assertions.assertNotNull(result);
+        Assertions.assertFalse(result.entrySet().isEmpty());
         Map.Entry<String, Item> firstEntry = result.entrySet().stream().findFirst().get();
-        Assert.assertNotNull(firstEntry.getKey());
+        Assertions.assertNotNull(firstEntry.getKey());
         Item firstItem = firstEntry.getValue();
-        Assert.assertNotNull(firstItem);
-        Assert.assertNotNull(firstItem.getTimeArrivedMillis());
+        Assertions.assertNotNull(firstItem);
+        Assertions.assertNotNull(firstItem.getTimeArrivedMillis());
     }
 
-    private Map<String, Item> getResultOfUnknownKeyNamesProjection() throws ExecutionException, InterruptedException {
+    @Test
+    @Order(15)
+    public void testRestartingProjectionSubsystem() throws ExecutionException, InterruptedException {
+        projectionClient.restartSubsystem().get();
+    }
 
-        return server.getProjectionManagementClient()
-            .<Map<String, Item>>getResult(PROJECTION_NAME, factory -> factory.constructMapType(HashMap.class, String.class, Item.class))
+    private Map<String, Item> getResultOfUnknownKeyNamesProjection(String name) throws ExecutionException, InterruptedException {
+
+        return projectionClient
+            .<Map<String, Item>>getResult(name, factory -> factory.constructMapType(HashMap.class, String.class, Item.class))
             .get();
     }
 
     private void assertCountingProjectionResultAsExpected(final CountResult result) {
 
-        Assert.assertNotNull(result);
+        Assertions.assertNotNull(result);
         //The projection may not have completed so may not yet equal EXPECTED_EVENT_COUNT
         //that's okay we're not testing the server, just that the projection has been
         //created correctly and is running
-        Assert.assertTrue(result.getCount() > 0);
-        Assert.assertTrue(result.getCount() <= EXPECTED_EVENT_COUNT);
+        Assertions.assertTrue(result.getCount() > 0);
+        Assertions.assertTrue(result.getCount() <= EXPECTED_EVENT_COUNT);
     }
 
     public static class CountResult {
@@ -387,5 +410,31 @@ public class ProjectionManagementTests {
         public void setTimeArrivedMillis(final Long timeArrivedMillis) {
             this.timeArrivedMillis = timeArrivedMillis;
         }
+    }
+
+    private void waitUntilProjectionStatusIs(String name, String... statuses) throws ExecutionException, InterruptedException {
+        CompletableFuture.runAsync(() -> {
+            String last = "";
+            for (int i = 0; i < 6; i++) {
+                try {
+                    ProjectionDetails details = projectionClient.getStatus(name).get(5, TimeUnit.SECONDS);
+
+                    for (String status : statuses) {
+                        if (details.getStatus().contains(status)) {
+                            return;
+                        }
+                    }
+
+                    last = details.getStatus();
+                    Thread.sleep(100);
+                } catch (InterruptedException | TimeoutException | ExecutionException e) {
+                    if (e instanceof ExecutionException) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+
+            throw new RuntimeException("Projection '" + name + "' doesn't reach the expected status. Got " + last + ", Expected " + Arrays.toString(statuses));
+        }).get();
     }
 }

@@ -1,6 +1,7 @@
 package com.eventstore.dbclient;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.Assert.*;
 
@@ -8,19 +9,25 @@ public class PositionTests {
     static final String largeUnsignedGreater = "9223372036854776000";
     static final String largeUnsignedLess = "9223372036854775000";
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testConstructionWithCommitLessThanPrepareLong() {
-        new Position(1000, 12345);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            new Position(1000, 12345);
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testConstructionWithCommitLessThanPrepareString() {
-        new Position("12345", "1000");
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            new Position("12345", "1000");
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testConstructionWithCommitLessThanPrepareLargeUnsigned() {
-        new Position(largeUnsignedGreater, largeUnsignedLess);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            new Position(largeUnsignedGreater, largeUnsignedLess);
+        });
     }
 
     @Test

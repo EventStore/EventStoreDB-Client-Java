@@ -38,10 +38,10 @@ public abstract class AbstractSubscribePersistentSubscription {
     protected abstract Persistent.ReadReq.Options.Builder createOptions();
 
     public CompletableFuture<PersistentSubscription> execute() {
-        return this.connection.run(channel -> {
+        return this.connection.runWithArgs(args -> {
             Metadata headers = this.options.getMetadata();
             PersistentSubscriptionsGrpc.PersistentSubscriptionsStub client = MetadataUtils
-                    .attachHeaders(PersistentSubscriptionsGrpc.newStub(channel), headers);
+                    .attachHeaders(PersistentSubscriptionsGrpc.newStub(args.getChannel()), headers);
 
             final CompletableFuture<PersistentSubscription> result = new CompletableFuture<>();
 
@@ -53,74 +53,79 @@ public abstract class AbstractSubscribePersistentSubscription {
                             .setGroupName(group))
                     .build();
 
-            ClientResponseObserver<Persistent.ReadReq, Persistent.ReadResp> observer = new ClientResponseObserver<Persistent.ReadReq, Persistent.ReadResp>() {
-                private boolean _confirmed;
-                private PersistentSubscription _subscription;
-                private ClientCallStreamObserver<Persistent.ReadReq> _requestStream;
+            if (req.getOptions().hasAll() && !args.supportFeature(FeatureFlags.PERSISTENT_SUBSCRIPTION_TO_ALL)) {
+                result.completeExceptionally(new UnsupportedFeature());
+            } else {
 
-                @Override
-                public void beforeStart(ClientCallStreamObserver<Persistent.ReadReq> requestStream) {
-                    this._requestStream = requestStream;
-                }
+                ClientResponseObserver<Persistent.ReadReq, Persistent.ReadResp> observer = new ClientResponseObserver<Persistent.ReadReq, Persistent.ReadResp>() {
+                    private boolean _confirmed;
+                    private PersistentSubscription _subscription;
+                    private ClientCallStreamObserver<Persistent.ReadReq> _requestStream;
 
-                @Override
-                public void onNext(Persistent.ReadResp readResp) {
-                    if (!_confirmed && readResp.hasSubscriptionConfirmation()) {
-                        this._confirmed = true;
-                        this._subscription = new PersistentSubscription(this._requestStream,
-                                readResp.getSubscriptionConfirmation().getSubscriptionId());
-                        result.complete(this._subscription);
-                        return;
+                    @Override
+                    public void beforeStart(ClientCallStreamObserver<Persistent.ReadReq> requestStream) {
+                        this._requestStream = requestStream;
                     }
 
-                    if (!_confirmed && readResp.hasEvent()) {
-                        onError(new IllegalStateException("Unconfirmed persistent subscription received event"));
-                        return;
-                    }
-
-                    if (_confirmed && !readResp.hasEvent()) {
-                        onError(new IllegalStateException(
-                                String.format("Confirmed persistent subscription %s received non-{event,checkpoint} variant",
-                                        _subscription.getSubscriptionId())));
-                        return;
-                    }
-
-                    listener.onEvent(this._subscription, ResolvedEvent.fromWire(readResp.getEvent()));
-                }
-
-                @Override
-                public void onError(Throwable throwable) {
-                    if (!_confirmed) {
-                        result.completeExceptionally(throwable);
-                    }
-
-                    Throwable error = throwable;
-                    if (error instanceof StatusRuntimeException) {
-                        StatusRuntimeException sre = (StatusRuntimeException) error;
-                        if (sre.getStatus().getCode() == Status.Code.CANCELLED) {
-                            listener.onCancelled(this._subscription);
+                    @Override
+                    public void onNext(Persistent.ReadResp readResp) {
+                        if (!_confirmed && readResp.hasSubscriptionConfirmation()) {
+                            this._confirmed = true;
+                            this._subscription = new PersistentSubscription(this._requestStream,
+                                    readResp.getSubscriptionConfirmation().getSubscriptionId());
+                            result.complete(this._subscription);
                             return;
                         }
 
-                        String leaderHost = sre.getTrailers().get(Metadata.Key.of("leader-endpoint-host", Metadata.ASCII_STRING_MARSHALLER));
-                        String leaderPort = sre.getTrailers().get(Metadata.Key.of("leader-endpoint-port", Metadata.ASCII_STRING_MARSHALLER));
-
-                        if (leaderHost != null && leaderPort != null) {
-                            error = new NotLeaderException(leaderHost, Integer.valueOf(leaderPort));
+                        if (!_confirmed && readResp.hasEvent()) {
+                            onError(new IllegalStateException("Unconfirmed persistent subscription received event"));
+                            return;
                         }
+
+                        if (_confirmed && !readResp.hasEvent()) {
+                            onError(new IllegalStateException(
+                                    String.format("Confirmed persistent subscription %s received non-{event,checkpoint} variant",
+                                            _subscription.getSubscriptionId())));
+                            return;
+                        }
+
+                        listener.onEvent(this._subscription, ResolvedEvent.fromWire(readResp.getEvent()));
                     }
 
-                    listener.onError(this._subscription, error);
-                }
+                    @Override
+                    public void onError(Throwable throwable) {
+                        if (!_confirmed) {
+                            result.completeExceptionally(throwable);
+                        }
 
-                @Override
-                public void onCompleted() {
-                    // Subscriptions should only complete on error.
-                }
-            };
+                        Throwable error = throwable;
+                        if (error instanceof StatusRuntimeException) {
+                            StatusRuntimeException sre = (StatusRuntimeException) error;
+                            if (sre.getStatus().getCode() == Status.Code.CANCELLED) {
+                                listener.onCancelled(this._subscription);
+                                return;
+                            }
 
-            StreamObserver<Persistent.ReadReq> wireStream = client.read(observer);
-            wireStream.onNext(req);
+                            String leaderHost = sre.getTrailers().get(Metadata.Key.of("leader-endpoint-host", Metadata.ASCII_STRING_MARSHALLER));
+                            String leaderPort = sre.getTrailers().get(Metadata.Key.of("leader-endpoint-port", Metadata.ASCII_STRING_MARSHALLER));
+
+                            if (leaderHost != null && leaderPort != null) {
+                                error = new NotLeaderException(leaderHost, Integer.valueOf(leaderPort));
+                            }
+                        }
+
+                        listener.onError(this._subscription, error);
+                    }
+
+                    @Override
+                    public void onCompleted() {
+                        // Subscriptions should only complete on error.
+                    }
+                };
+
+                StreamObserver<Persistent.ReadReq> wireStream = client.read(observer);
+                wireStream.onNext(req);
+            }
 
             return result;
         });

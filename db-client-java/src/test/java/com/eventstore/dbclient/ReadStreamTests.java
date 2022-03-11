@@ -1,19 +1,15 @@
 package com.eventstore.dbclient;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import testcontainers.module.EventStoreTestDBContainer;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import testcontainers.module.ESDBTests;
 
 import java.util.List;
 
-public class ReadStreamTests {
-    @Rule
-    public final EventStoreTestDBContainer server = new EventStoreTestDBContainer(false);
-
+public class ReadStreamTests extends ESDBTests {
     @Test
     public void testReadStreamForward10EventsFromPositionStart() throws Throwable {
-        EventStoreDBClient client = server.getClient();
+        EventStoreDBClient client = getPopulatedServer().getClient();
 
         ReadStreamOptions options = ReadStreamOptions.get()
                 .forwards()
@@ -28,7 +24,7 @@ public class ReadStreamTests {
 
     @Test
     public void testReadStreamBackward10EventsFromPositionEnd() throws Throwable {
-        EventStoreDBClient client = server.getClient();
+        EventStoreDBClient client = getPopulatedServer().getClient();
 
         ReadStreamOptions options = ReadStreamOptions.get()
                 .backwards()
@@ -43,7 +39,7 @@ public class ReadStreamTests {
 
     @Test
     public void testReadStreamOptionsAreNotIgnoredInOverloadedMethod() throws Throwable {
-        EventStoreDBClient client = server.getClient();
+        EventStoreDBClient client = getPopulatedServer().getClient();
 
         ReadStreamOptions options = ReadStreamOptions.get()
                 .backwards()
@@ -59,8 +55,8 @@ public class ReadStreamTests {
         RecordedEvent firstEvent1 = result1.getEvents().get(0).getOriginalEvent();
         RecordedEvent firstEvent2 = result2.getEvents().get(0).getOriginalEvent();
 
-        Assert.assertEquals(result1.getEvents().size(), result2.getEvents().size());
-        Assert.assertEquals(firstEvent1.getEventId(), firstEvent2.getEventId());
+        Assertions.assertEquals(result1.getEvents().size(), result2.getEvents().size());
+        Assertions.assertEquals(firstEvent1.getEventId(), firstEvent2.getEventId());
     }
 
     private void verifyAgainstTestData(List<ResolvedEvent> actualEvents, String filenameStem) {

@@ -20,15 +20,16 @@ public class DeleteProjection {
 
     public CompletableFuture execute() {
         return this.client.run(channel -> {
-            Projectionmanagement.DeleteReq.Options.Builder optionsBuilder =
+            Projectionmanagement.DeleteReq.Options reqOptions =
                     Projectionmanagement.DeleteReq.Options.newBuilder()
                             .setName(this.projectionName)
                             .setDeleteCheckpointStream(options.getDeleteCheckpointStream())
                             .setDeleteEmittedStreams(options.getDeleteEmittedStreams())
-                            .setDeleteStateStream(options.getDeleteStateStream());
+                            .setDeleteStateStream(options.getDeleteStateStream())
+                            .build();
 
             Projectionmanagement.DeleteReq request = Projectionmanagement.DeleteReq.newBuilder()
-                    .setOptions(optionsBuilder)
+                    .setOptions(reqOptions)
                     .build();
 
             ProjectionsGrpc.ProjectionsStub client = MetadataUtils

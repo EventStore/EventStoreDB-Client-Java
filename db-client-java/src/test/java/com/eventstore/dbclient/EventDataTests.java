@@ -1,7 +1,7 @@
 package com.eventstore.dbclient;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 
@@ -12,7 +12,7 @@ public class EventDataTests {
 
         EventData data = EventDataBuilder.binary(id, "type", new byte[]{}).build();
 
-        Assert.assertEquals(id, data.getEventId());
+        Assertions.assertEquals(id, data.getEventId());
     }
 
     @Test
@@ -21,6 +21,6 @@ public class EventDataTests {
 
         EventData data = EventDataBuilder.json(id, "type", new byte[]{}).build();
 
-        Assert.assertEquals(id, data.getEventId());
+        Assertions.assertEquals(id, data.getEventId());
     }
 }
