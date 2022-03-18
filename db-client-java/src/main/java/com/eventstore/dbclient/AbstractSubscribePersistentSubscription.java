@@ -13,7 +13,7 @@ import io.grpc.stub.StreamObserver;
 
 import java.util.concurrent.CompletableFuture;
 
-public abstract class AbstractSubscribePersistentSubscription {
+abstract class AbstractSubscribePersistentSubscription {
     protected static final Persistent.ReadReq.Options.Builder defaultReadOptions;
     private final GrpcClient connection;
     private final String group;

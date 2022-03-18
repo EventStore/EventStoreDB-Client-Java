@@ -1,6 +1,6 @@
 package com.eventstore.dbclient;
 
-public class ServerInfo {
+class ServerInfo {
     private final ServerVersion version;
     private final int features;
 

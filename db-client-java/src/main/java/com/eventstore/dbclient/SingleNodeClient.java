@@ -2,7 +2,7 @@ package com.eventstore.dbclient;
 
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext;
 
-public class SingleNodeClient extends GrpcClient {
+class SingleNodeClient extends GrpcClient {
     private final String host;
     private final int port;
 

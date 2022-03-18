@@ -9,18 +9,17 @@ import java.util.concurrent.ExecutionException;
 public class PersistentSubscriptions {
     public static void createPersistentSubscription(EventStoreDBPersistentSubscriptionsClient client) {
         // region create-persistent-subscription-to-stream
-        client.create(
+        client.createToStream(
             "test-stream",
             "subscription-group",
-            PersistentSubscriptionSettings.builder()
-                .fromStart()
-                .build());
+            CreatePersistentSubscriptionToStreamOptions.get()
+                .fromStart());
         // endregion create-persistent-subscription-to-stream
     }
 
     public static void connectToPersistentSubscriptionToStream(EventStoreDBPersistentSubscriptionsClient client) {
         // region subscribe-to-persistent-subscription-to-stream
-        client.subscribe(
+        client.subscribeToStream(
             "test-stream",
             "subscription-group",
             new PersistentSubscriptionListener() {
@@ -48,7 +47,7 @@ public class PersistentSubscriptions {
 
     public static void connectToPersistentSubscriptionToStreamWithManualAcks(EventStoreDBPersistentSubscriptionsClient client) {
         // region subscribe-to-persistent-subscription-with-manual-acks
-        client.subscribe(
+        client.subscribeToStream(
                 "test-stream",
                 "subscription-group",
                 new PersistentSubscriptionListener() {
@@ -72,9 +71,8 @@ public class PersistentSubscriptions {
         // region create-persistent-subscription-to-all
         client.createToAll(
             "subscription-group",
-            PersistentSubscriptionToAllSettings.builder()
-                .fromStart()
-                .build());
+            CreatePersistentSubscriptionToAllOptions.get()
+                .fromStart());
         // endregion create-persistent-subscription-to-all
     }
 
@@ -111,19 +109,18 @@ public class PersistentSubscriptions {
 
     public static void updatePersistentSubscription(EventStoreDBPersistentSubscriptionsClient client) {
         // region update-persistent-subscription
-        client.update(
+        client.updateToStream(
             "test-stream",
             "subscription-group",
-            PersistentSubscriptionSettings.builder()
+            UpdatePersistentSubscriptionToStreamOptions.get()
                 .resolveLinkTos()
-                .checkPointLowerBound(20)
-                .build());
+                .checkpointLowerBound(20));
         // endregion update-persistent-subscription
     }
 
     public static void deletePersistentSubscription(EventStoreDBPersistentSubscriptionsClient client) {
         // region delete-persistent-subscription
-        client.delete(
+        client.deleteToStream(
             "test-stream",
             "subscription-group");
         // endregion delete-persistent-subscription
@@ -131,11 +128,11 @@ public class PersistentSubscriptions {
 
     public static void getPersistentSubscriptionToStreamInfo(EventStoreDBPersistentSubscriptionsClient client) throws ExecutionException, InterruptedException {
         // #region get-persistent-subscription-to-stream-info
-        Optional<PersistentSubscriptionInfo> result = client.getInfo("test-stream", "subscription-group").get();
+        Optional<PersistentSubscriptionInfo> result = client.getInfoToStream("test-stream", "subscription-group").get();
         if (result.isPresent()) {
             PersistentSubscriptionInfo info = result.get();
 
-           System.out.println("GroupName: " + info.getGroupName() + ", EventStreamId: " + info.getEventStreamId() + ", Status " + info.getStatus());
+           System.out.println("GroupName: " + info.getGroupName() + ", EventStreamId: " + info.getEventSource() + ", Status " + info.getStatus());
         }
         // #endregion get-persistent-subscription-to-stream-info
     }
@@ -146,7 +143,7 @@ public class PersistentSubscriptions {
         if (result.isPresent()) {
             PersistentSubscriptionInfo info = result.get();
 
-            System.out.println("GroupName: " + info.getGroupName() + ", EventStreamId: " + info.getEventStreamId() + ", Status " + info.getStatus());
+            System.out.println("GroupName: " + info.getGroupName() + ", EventStreamId: " + info.getEventSource() + ", Status " + info.getStatus());
         }
         // #endregion get-persistent-subscription-to-all-info
     }
@@ -154,7 +151,7 @@ public class PersistentSubscriptions {
     public static void replayParkedToStream(EventStoreDBPersistentSubscriptionsClient client) throws ExecutionException, InterruptedException {
         // #region replay-parked-of-persistent-subscription-to-stream
         ReplayParkedMessagesOptions options = ReplayParkedMessagesOptions.get().stopAt(10);
-        client.replayParkedMessages("test-stream", "subscription-group", options).get();
+        client.replayParkedMessagesToStream("test-stream", "subscription-group", options).get();
         // #endregion replay-parked-of-persistent-subscription-to-stream
     }
 
@@ -167,20 +164,20 @@ public class PersistentSubscriptions {
 
     public static void listPersistentSubscriptionToStream(EventStoreDBPersistentSubscriptionsClient client) throws ExecutionException, InterruptedException {
         // #region list-persistent-subscriptions-to-stream
-        List<PersistentSubscriptionInfo> subscriptions = client.listForStream("test-stream").get();
+        List<PersistentSubscriptionToStreamInfo> subscriptions = client.listToStream("test-stream").get();
 
         for (PersistentSubscriptionInfo info : subscriptions) {
-            System.out.println("GroupName: " + info.getGroupName() + ", EventStreamId: " + info.getEventStreamId() + ", Status " + info.getStatus());
+            System.out.println("GroupName: " + info.getGroupName() + ", EventStreamId: " + info.getEventSource() + ", Status " + info.getStatus());
         }
         // #endregion list-persistent-subscriptions-to-stream
     }
 
     public static void listPersistentSubscriptionToAll(EventStoreDBPersistentSubscriptionsClient client) throws ExecutionException, InterruptedException {
         // #region list-persistent-subscriptions-to-all
-        List<PersistentSubscriptionInfo> subscriptions = client.listToAll().get();
+        List<PersistentSubscriptionToAllInfo> subscriptions = client.listToAll().get();
 
         for (PersistentSubscriptionInfo info : subscriptions) {
-            System.out.println("GroupName: " + info.getGroupName() + ", EventStreamId: " + info.getEventStreamId() + ", Status " + info.getStatus());
+            System.out.println("GroupName: " + info.getGroupName() + ", EventStreamId: " + info.getEventSource() + ", Status " + info.getStatus());
         }
         // #endregion list-persistent-subscriptions-to-all
     }

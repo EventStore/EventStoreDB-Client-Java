@@ -12,13 +12,14 @@ import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 import static com.eventstore.dbclient.HttpUtils.*;
 
-public final class ListPersistentSubscriptions {
-    public static CompletableFuture<List<PersistentSubscriptionInfo>> execute(GrpcClient client, ListPersistentSubscriptionsOptions options, String stream) {
+final class ListPersistentSubscriptions {
+    public static <A> CompletableFuture<List<A>> execute(GrpcClient client, ListPersistentSubscriptionsOptions options, String stream, Function<PersistentSubscriptionInfo, A> func) {
         return client.runWithArgs(args -> {
-            CompletableFuture<List<PersistentSubscriptionInfo>> result = new CompletableFuture<>();
+            CompletableFuture<List<A>> result = new CompletableFuture<>();
 
             if (stream.equals("$all") && !args.supportFeature(FeatureFlags.PERSISTENT_SUBSCRIPTION_TO_ALL)) {
                 result.completeExceptionally(new UnsupportedFeature());
@@ -44,10 +45,10 @@ public final class ListPersistentSubscriptions {
                         .attachHeaders(PersistentSubscriptionsGrpc.newStub(args.getChannel()), options.getMetadata());
 
                 stub.list(req, GrpcUtils.convertSingleResponse(result, resp -> {
-                    List<PersistentSubscriptionInfo> infos = new ArrayList<>();
+                    List<A> infos = new ArrayList<>();
 
                     for (Persistent.SubscriptionInfo wire : resp.getSubscriptionsList()) {
-                        infos.add(parseInfoFromWire(wire));
+                        infos.add(func.apply(parseInfoFromWire(wire)));
                     }
 
                     return infos;
@@ -68,10 +69,10 @@ public final class ListPersistentSubscriptions {
                         result.completeExceptionally(error);
                     } else {
                         String content = readContent(http);
-                        List<PersistentSubscriptionInfo> ps = new ArrayList<>();
+                        List<A> ps = new ArrayList<>();
 
                         for (JsonNode node : getObjectMapper().readTree(content)) {
-                            ps.add(parseSubscriptionInfo(node));
+                            ps.add(func.apply(parseSubscriptionInfo(node)));
                         }
                         result.complete(ps);
                     }

@@ -10,7 +10,7 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-public class SubscribePersistentSubscriptionTests extends ESDBTests {
+public class SubscribePersistentSubscriptionToStreamTests extends ESDBTests {
     private EventStoreDBClient streamsClient;
     private EventStoreDBPersistentSubscriptionsClient client;
 
@@ -25,7 +25,7 @@ public class SubscribePersistentSubscriptionTests extends ESDBTests {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            SubscribePersistentSubscriptionTests.Foo foo1 = (SubscribePersistentSubscriptionTests.Foo) o;
+            SubscribePersistentSubscriptionToStreamTests.Foo foo1 = (SubscribePersistentSubscriptionToStreamTests.Foo) o;
             return foo == foo1.foo;
         }
 
@@ -49,10 +49,10 @@ public class SubscribePersistentSubscriptionTests extends ESDBTests {
     public void testSubscribePersistentSub() throws Throwable {
         String streamName = generateName();
 
-        client.create(streamName, "aGroup")
+        client.createToStream(streamName, "aGroup")
                 .get();
 
-        EventDataBuilder builder = EventData.builderAsJson("foobar", new SubscribePersistentSubscriptionTests.Foo());
+        EventDataBuilder builder = EventData.builderAsJson("foobar", new SubscribePersistentSubscriptionToStreamTests.Foo());
 
         streamsClient.appendToStream(streamName, builder.build(), builder.build(), builder.build())
                 .get();
@@ -62,7 +62,7 @@ public class SubscribePersistentSubscriptionTests extends ESDBTests {
         SubscribePersistentSubscriptionOptions connectOptions = SubscribePersistentSubscriptionOptions.get()
                 .setBufferSize(32);
 
-        client.subscribe(streamName, "aGroup", connectOptions, new PersistentSubscriptionListener() {
+        client.subscribeToStream(streamName, "aGroup", connectOptions, new PersistentSubscriptionListener() {
             private int count = 0;
 
             @Override
@@ -109,7 +109,7 @@ public class SubscribePersistentSubscriptionTests extends ESDBTests {
             return;
         }
 
-        EventDataBuilder builder = EventData.builderAsJson("foobar", new SubscribePersistentSubscriptionTests.Foo());
+        EventDataBuilder builder = EventData.builderAsJson("foobar", new SubscribePersistentSubscriptionToStreamTests.Foo());
 
         streamsClient.appendToStream(streamName, builder.build(), builder.build(), builder.build())
                 .get();

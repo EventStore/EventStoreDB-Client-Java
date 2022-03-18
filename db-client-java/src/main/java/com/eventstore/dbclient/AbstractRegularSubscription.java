@@ -13,7 +13,7 @@ import io.grpc.stub.MetadataUtils;
 import javax.validation.constraints.NotNull;
 import java.util.concurrent.CompletableFuture;
 
-public abstract class AbstractRegularSubscription {
+abstract class AbstractRegularSubscription {
     protected static final StreamsOuterClass.ReadReq.Options.Builder defaultReadOptions;
     protected static final StreamsOuterClass.ReadReq.Options.Builder defaultSubscribeOptions;
 

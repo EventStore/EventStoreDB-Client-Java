@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public abstract class GrpcClient {
+abstract class GrpcClient {
     protected final EventStoreDBClientSettings settings;
     protected final SslContext sslContext;
     private final Logger logger = LoggerFactory.getLogger(GrpcClient.class);

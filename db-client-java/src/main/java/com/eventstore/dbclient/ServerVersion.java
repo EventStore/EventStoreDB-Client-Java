@@ -1,5 +1,5 @@
 package com.eventstore.dbclient;
-public class ServerVersion {
+class ServerVersion {
     private final int major;
     private final int minor;
     private final int patch;

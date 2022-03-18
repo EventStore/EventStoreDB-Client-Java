@@ -3,7 +3,7 @@ package com.eventstore.dbclient;
 import com.eventstore.dbclient.proto.shared.Shared;
 import com.eventstore.dbclient.proto.streams.StreamsOuterClass;
 
-public class SubscribeToAll extends AbstractRegularSubscription {
+class SubscribeToAll extends AbstractRegularSubscription {
     private final SubscribeToAllOptions options;
 
     public SubscribeToAll(GrpcClient client, SubscriptionListener listener, SubscribeToAllOptions options) {

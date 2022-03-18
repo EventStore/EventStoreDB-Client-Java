@@ -4,12 +4,12 @@ import com.eventstore.dbclient.proto.persistentsubscriptions.Persistent;
 import com.eventstore.dbclient.proto.shared.Shared;
 import com.google.protobuf.ByteString;
 
-public class SubscribePersistentSubscription extends AbstractSubscribePersistentSubscription {
+class SubscribePersistentSubscriptionToStream extends AbstractSubscribePersistentSubscription {
     private final String stream;
 
-    public SubscribePersistentSubscription(GrpcClient connection, String stream, String group,
-                                           SubscribePersistentSubscriptionOptions options,
-                                           PersistentSubscriptionListener listener) {
+    public SubscribePersistentSubscriptionToStream(GrpcClient connection, String stream, String group,
+                                                   SubscribePersistentSubscriptionOptions options,
+                                                   PersistentSubscriptionListener listener) {
         super(connection, group, options, listener);
 
         this.stream = stream;

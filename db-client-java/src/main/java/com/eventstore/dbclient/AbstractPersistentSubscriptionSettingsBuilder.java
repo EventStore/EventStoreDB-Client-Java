@@ -2,48 +2,11 @@ package com.eventstore.dbclient;
 
 import java.time.Duration;
 
-public class AbstractPersistentSubscriptionSettingsBuilder<T> {
-    protected int checkpointAfterMs;
-    protected boolean extraStatistics;
-    protected boolean resolveLinkTos;
-    protected int historyBufferSize;
-    protected int liveBufferSize;
-    protected int checkPointUpperBound;
-    protected int maxRetryCount;
-    protected int maxSubscriberCount;
-    protected int messageTimeoutMs;
-    protected int checkPointLowerBound;
-    protected int readBatchSize;
-    protected String consumerStrategyName;
+public class AbstractPersistentSubscriptionSettingsBuilder<T, TSettings extends PersistentSubscriptionSettings> extends OptionsBase<T> {
+    protected TSettings settings;
 
-    public AbstractPersistentSubscriptionSettingsBuilder() {
-        checkpointAfterMs = 2_000;
-        resolveLinkTos = false;
-        extraStatistics = false;
-        messageTimeoutMs = 30_000;
-        maxRetryCount = 10;
-        checkPointLowerBound = 10;
-        checkPointUpperBound = 1_000;
-        maxSubscriberCount = 0;
-        liveBufferSize = 500;
-        readBatchSize = 20;
-        historyBufferSize = 500;
-        consumerStrategyName = NamedConsumerStrategy.ROUND_ROBIN;
-    }
-
-    public AbstractPersistentSubscriptionSettingsBuilder(AbstractPersistentSubscriptionSettings settings) {
-        checkpointAfterMs = settings.getCheckpointAfterMs();
-        resolveLinkTos = settings.shouldResolveLinkTos();
-        extraStatistics = settings.isExtraStatistics();
-        messageTimeoutMs = settings.getMessageTimeoutMs();
-        maxRetryCount = settings.getMaxRetryCount();
-        checkPointLowerBound = settings.getCheckPointLowerBound();
-        checkPointUpperBound = settings.getCheckPointUpperBound();
-        maxSubscriberCount = settings.getMaxSubscriberCount();
-        liveBufferSize = settings.getLiveBufferSize();
-        readBatchSize = settings.getReadBatchSize();
-        historyBufferSize = settings.getHistoryBufferSize();
-        consumerStrategyName = settings.getConsumerStrategyName();
+    public AbstractPersistentSubscriptionSettingsBuilder(TSettings settings) {
+        this.settings = settings;
     }
 
     /**
@@ -74,7 +37,7 @@ public class AbstractPersistentSubscriptionSettingsBuilder<T> {
      * Whether the subscription should resolve linkTo events to their linked events. Default: false.
      */
     public T resolveLinkTos(boolean value) {
-        this.resolveLinkTos = value;
+        settings.setResolveLinkTos(value);
         return (T) this;
     }
 
@@ -110,7 +73,7 @@ public class AbstractPersistentSubscriptionSettingsBuilder<T> {
      * Whether to track latency statistics on this subscription. Default: false.
      */
     public T extraStatistics(boolean value) {
-        this.extraStatistics = value;
+        settings.setExtraStatistics(value);
         return (T) this;
     }
 
@@ -126,7 +89,7 @@ public class AbstractPersistentSubscriptionSettingsBuilder<T> {
      * The amount of time in milliseconds to try to checkpoint after. Default: 2 seconds.
      */
     public T checkpointAfterInMs(int value) {
-        this.checkpointAfterMs = value;
+        settings.setCheckpointAfter(value);
         return (T) this;
     }
 
@@ -134,7 +97,7 @@ public class AbstractPersistentSubscriptionSettingsBuilder<T> {
      * The number of events to cache when catching up. Default: 500.
      */
     public T historyBufferSize(int value) {
-        this.historyBufferSize = value;
+        settings.setHistoryBufferSize(value);
         return (T) this;
     }
 
@@ -142,39 +105,39 @@ public class AbstractPersistentSubscriptionSettingsBuilder<T> {
      * The size of the buffer (in-memory) listening to live messages as they happen before paging occurs. Default: 500.
      */
     public T liveBufferSize(int value) {
-        this.liveBufferSize = value;
+        settings.setLiveBufferSize(value);
         return (T) this;
     }
 
     /**
-     * @deprecated prefer {@link #checkPointUpperBound(int)}
+     * @deprecated prefer {@link #checkpointUpperBound}
      */
     @Deprecated
     public T maxCheckpointCount(int value) {
-        return checkPointUpperBound(value);
+        return checkpointUpperBound(value);
     }
 
     /**
      * The maximum number of messages not checkpointed before forcing a checkpoint. Default: 1000.
      */
-    public T checkPointUpperBound(int value) {
-        this.checkPointUpperBound = value;
+    public T checkpointUpperBound(int value) {
+        settings.setCheckpointUpperBound(value);
         return (T) this;
     }
 
     /**
-     * @deprecated prefer {@link #checkPointLowerBound(int)}
+     * @deprecated prefer {@link #checkpointLowerBound}
      */
     @Deprecated
     public T minCheckpointCount(int value) {
-        return this.checkPointLowerBound(checkPointLowerBound);
+        return this.checkpointLowerBound(value);
     }
 
     /**
      * The minimum number of messages to process before a checkpoint may be written. Default: 10.
      */
-    public T checkPointLowerBound(int value) {
-        this.checkPointLowerBound = value;
+    public T checkpointLowerBound(int value) {
+        settings.setCheckpointLowerBound(value);
         return (T) this;
     }
 
@@ -182,7 +145,7 @@ public class AbstractPersistentSubscriptionSettingsBuilder<T> {
      * The maximum number of subscribers allowed. Default: 0 (Unbounded).
      */
     public T maxSubscriberCount(int value) {
-        this.maxSubscriberCount = value;
+        settings.setMaxSubscriberCount(value);
         return (T) this;
     }
 
@@ -190,7 +153,7 @@ public class AbstractPersistentSubscriptionSettingsBuilder<T> {
      * The maximum number of retries (due to timeout) before a message is considered to be parked. Default: 10.
      */
     public T maxRetryCount(int value) {
-        this.maxRetryCount = value;
+        settings.setMaxRetryCount(value);
         return (T) this;
     }
 
@@ -205,7 +168,7 @@ public class AbstractPersistentSubscriptionSettingsBuilder<T> {
      * The amount of time in milliseconds after which to consider a message as timed out and retried. Default: 30 seconds.
      */
     public T messageTimeoutInMs(int value) {
-        this.messageTimeoutMs = value;
+        settings.setMessageTimeoutMs(value);
         return (T) this;
     }
 
@@ -213,7 +176,7 @@ public class AbstractPersistentSubscriptionSettingsBuilder<T> {
      * The number of events read at a time when catching up. Default: 20.
      */
     public T readBatchSize(int value) {
-        this.readBatchSize = value;
+        settings.setReadBatchSize(value);
         return (T) this;
     }
 
@@ -221,7 +184,7 @@ public class AbstractPersistentSubscriptionSettingsBuilder<T> {
      * The strategy to use for distributing events to client consumers.
      */
     public T consumerStrategy(ConsumerStrategy strategy) {
-        this.consumerStrategyName = NamedConsumerStrategy.from(strategy);
+        settings.setConsumerStrategyName(NamedConsumerStrategy.from(strategy));
         return (T) this;
     }
 
@@ -229,7 +192,11 @@ public class AbstractPersistentSubscriptionSettingsBuilder<T> {
      * The strategy to use for distributing events to client consumers.
      */
     public T namedConsumerStrategy(String value) {
-        this.consumerStrategyName = value;
+        settings.setConsumerStrategyName(value);
         return (T) this;
+    }
+
+    public TSettings getSettings() {
+        return settings;
     }
 }

@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 
-public class ServerFeatures {
+class ServerFeatures {
     public static Optional<ServerInfo> getSupportedFeatures(EventStoreDBClientSettings settings, ManagedChannel channel) {
         final ServerFeaturesGrpc.ServerFeaturesStub stub = ServerFeaturesGrpc.newStub(channel);
         try {

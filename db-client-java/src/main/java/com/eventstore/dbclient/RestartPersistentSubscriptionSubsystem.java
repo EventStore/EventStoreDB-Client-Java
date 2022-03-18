@@ -10,7 +10,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static com.eventstore.dbclient.HttpUtils.checkForError;
 
-public class RestartPersistentSubscriptionSubsystem {
+class RestartPersistentSubscriptionSubsystem {
     public static CompletableFuture execute(GrpcClient client, RestartPersistentSubscriptionSubsystemOptions options) {
         return client.runWithArgs(args -> {
             CompletableFuture result = new CompletableFuture();

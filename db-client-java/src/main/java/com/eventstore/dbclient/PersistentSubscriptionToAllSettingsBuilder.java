@@ -1,32 +1,29 @@
 package com.eventstore.dbclient;
 
 public class PersistentSubscriptionToAllSettingsBuilder
-        extends AbstractPersistentSubscriptionSettingsBuilder<PersistentSubscriptionToAllSettingsBuilder> {
-    private Position position;
+        extends AbstractPersistentSubscriptionSettingsBuilder<PersistentSubscriptionToAllSettingsBuilder, PersistentSubscriptionToAllSettings> {
     private SubscriptionFilter filter;
 
     public PersistentSubscriptionToAllSettingsBuilder() {
-        position = Position.END;
+        super(PersistentSubscriptionSettings.defaultToAll());
     }
 
     public PersistentSubscriptionToAllSettingsBuilder(PersistentSubscriptionToAllSettings settings) {
         super(settings);
-
-        position = settings.getPosition();
     }
 
-    public PersistentSubscriptionToAllSettings build() {
-        return new PersistentSubscriptionToAllSettings(checkpointAfterMs, extraStatistics, resolveLinkTos, historyBufferSize,
-                liveBufferSize, checkPointUpperBound, maxRetryCount, maxSubscriberCount, messageTimeoutMs,
-                checkPointLowerBound, readBatchSize, consumerStrategyName, position, filter);
+    public PersistentSubscriptionSettings build() {
+        return settings;
     }
 
     public PersistentSubscriptionToAllSettingsBuilder fromStart() {
-        return this.startFrom(Position.START);
+        settings.setStartFrom(StreamPosition.start());
+        return this;
     }
 
     public PersistentSubscriptionToAllSettingsBuilder fromEnd() {
-        return this.startFrom(Position.END);
+        settings.setStartFrom(StreamPosition.end());
+        return this;
     }
 
     /**
@@ -40,7 +37,7 @@ public class PersistentSubscriptionToAllSettingsBuilder
      * The exclusive position in the stream or transaction file the subscription should start from. Default: End of stream.
      */
     public PersistentSubscriptionToAllSettingsBuilder startFrom(Position value) {
-        this.position = value;
+        settings.setStartFrom(StreamPosition.position(value));
         return this;
     }
 

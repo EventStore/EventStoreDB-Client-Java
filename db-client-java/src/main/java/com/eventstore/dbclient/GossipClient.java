@@ -15,7 +15,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
-public class GossipClient {
+class GossipClient {
     private final ManagedChannel _channel;
     private final GossipGrpc.GossipStub _stub;
 

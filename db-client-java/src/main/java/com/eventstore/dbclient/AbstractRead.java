@@ -13,7 +13,7 @@ import org.reactivestreams.Subscriber;
 
 import java.util.concurrent.CompletableFuture;
 
-public abstract class AbstractRead implements Publisher<ResolvedEvent> {
+abstract class AbstractRead implements Publisher<ResolvedEvent> {
     protected static final StreamsOuterClass.ReadReq.Options.Builder defaultReadOptions;
 
     private final GrpcClient client;

@@ -1,45 +1,40 @@
 package com.eventstore.dbclient;
 
 public class PersistentSubscriptionSettingsBuilder
-        extends AbstractPersistentSubscriptionSettingsBuilder<PersistentSubscriptionSettingsBuilder> {
-    protected StreamRevision revision;
+        extends AbstractPersistentSubscriptionSettingsBuilder<PersistentSubscriptionSettingsBuilder, PersistentSubscriptionToStreamSettings> {
 
     public PersistentSubscriptionSettingsBuilder() {
-        revision = StreamRevision.END;
+        super(PersistentSubscriptionSettings.defaultRegular());
     }
 
-    public PersistentSubscriptionSettingsBuilder(PersistentSubscriptionSettings settings) {
+    public PersistentSubscriptionSettingsBuilder(PersistentSubscriptionToStreamSettings settings) {
         super(settings);
-
-        revision = settings.getStreamRevision();
     }
 
     public PersistentSubscriptionSettings build() {
-        return new PersistentSubscriptionSettings(checkpointAfterMs, extraStatistics, resolveLinkTos, historyBufferSize,
-                liveBufferSize, checkPointUpperBound, maxRetryCount, maxSubscriberCount, messageTimeoutMs,
-                checkPointLowerBound, readBatchSize, revision, consumerStrategyName);
+        return settings;
     }
 
     public PersistentSubscriptionSettingsBuilder fromStart() {
-        return this.startFrom(StreamRevision.START);
+        return this.startFrom(StreamPosition.start());
     }
 
     public PersistentSubscriptionSettingsBuilder fromEnd() {
-        return this.startFrom(StreamRevision.END);
+        return this.startFrom(StreamPosition.end());
     }
 
     /**
      * The exclusive position in the stream or transaction file the subscription should start from. Default: End of stream.
      */
     public PersistentSubscriptionSettingsBuilder startFrom(long value) {
-        return this.startFrom(new StreamRevision(value));
+        return this.startFrom(StreamPosition.position(value));
     }
 
     /**
      * The exclusive position in the stream or transaction file the subscription should start from. Default: End of stream.
      */
-    public PersistentSubscriptionSettingsBuilder startFrom(StreamRevision value) {
-        this.revision = value;
+    public PersistentSubscriptionSettingsBuilder startFrom(StreamPosition<Long> value) {
+        settings.setStartFrom(value);
         return this;
     }
 
