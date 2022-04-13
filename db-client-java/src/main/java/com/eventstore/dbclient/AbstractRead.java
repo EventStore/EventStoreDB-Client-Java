@@ -17,11 +17,11 @@ abstract class AbstractRead implements Publisher<ResolvedEvent> {
     protected static final StreamsOuterClass.ReadReq.Options.Builder defaultReadOptions;
 
     private final GrpcClient client;
-    protected final Metadata metadata;
+    private final OptionsBase options;
 
-    protected AbstractRead(GrpcClient client, Metadata metadata) {
+    protected AbstractRead(GrpcClient client, OptionsBase options) {
         this.client = client;
-        this.metadata = metadata;
+        this.options = options;
     }
 
     static {
@@ -42,8 +42,7 @@ abstract class AbstractRead implements Publisher<ResolvedEvent> {
                     .setOptions(createOptions())
                     .build();
 
-            Metadata headers = this.metadata;
-            StreamsGrpc.StreamsStub client = MetadataUtils.attachHeaders(StreamsGrpc.newStub(channel), headers);
+            StreamsGrpc.StreamsStub client = GrpcUtils.configureStub(StreamsGrpc.newStub(channel), this.client.getSettings(), this.options);
 
             client.read(request, new ClientResponseObserver<StreamsOuterClass.ReadReq, StreamsOuterClass.ReadResp>() {
                 @Override

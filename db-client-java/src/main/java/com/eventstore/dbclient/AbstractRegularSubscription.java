@@ -17,14 +17,14 @@ abstract class AbstractRegularSubscription {
     protected static final StreamsOuterClass.ReadReq.Options.Builder defaultReadOptions;
     protected static final StreamsOuterClass.ReadReq.Options.Builder defaultSubscribeOptions;
 
-    protected Metadata metadata;
     protected SubscriptionListener listener;
     protected Checkpointer checkpointer = null;
     private final GrpcClient client;
+    private final OptionsBase options;
 
-    protected AbstractRegularSubscription(GrpcClient client, Metadata metadata) {
+    protected AbstractRegularSubscription(GrpcClient client, OptionsBase options) {
         this.client = client;
-        this.metadata = metadata;
+        this.options = options;
     }
 
     static {
@@ -44,7 +44,7 @@ abstract class AbstractRegularSubscription {
                     .setOptions(createOptions())
                     .build();
 
-            StreamsGrpc.StreamsStub client = MetadataUtils.attachHeaders(StreamsGrpc.newStub(channel), this.metadata);
+            StreamsGrpc.StreamsStub client = GrpcUtils.configureStub(StreamsGrpc.newStub(channel), this.client.getSettings(), this.options);
 
             CompletableFuture<Subscription> future = new CompletableFuture<>();
             ClientResponseObserver<StreamsOuterClass.ReadReq, StreamsOuterClass.ReadResp> observer = new ClientResponseObserver<StreamsOuterClass.ReadReq, StreamsOuterClass.ReadResp>() {

@@ -16,8 +16,8 @@ class RestartPersistentSubscriptionSubsystem {
             CompletableFuture result = new CompletableFuture();
 
             if (args.supportFeature(FeatureFlags.PERSISTENT_SUBSCRIPTION_MANAGEMENT)) {
-                PersistentSubscriptionsGrpc.PersistentSubscriptionsStub stub = MetadataUtils
-                        .attachHeaders(PersistentSubscriptionsGrpc.newStub(args.getChannel()), options.getMetadata());
+                PersistentSubscriptionsGrpc.PersistentSubscriptionsStub stub =
+                        GrpcUtils.configureStub(PersistentSubscriptionsGrpc.newStub(args.getChannel()), client.getSettings(), options);
 
                 stub.restartSubsystem(Shared.Empty.getDefaultInstance(), GrpcUtils.convertSingleResponse(result, resp -> 42));
             } else {

@@ -9,8 +9,8 @@ class UpdatePersistentSubscriptionToStream extends AbstractUpdatePersistentSubsc
     private final String stream;
 
     public UpdatePersistentSubscriptionToStream(GrpcClient connection, String stream, String group,
-                                                UpdatePersistentSubscriptionToStreamOptions options) {
-        super(connection, group, options.getSettings(), options.getMetadata());
+                                        UpdatePersistentSubscriptionToStreamOptions options) {
+        super(connection, group, options.getSettings(), options);
 
         this.stream = stream;
         this.settings = options.getSettings();

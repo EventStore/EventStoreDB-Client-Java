@@ -7,7 +7,7 @@ public class UpdatePersistentSubscriptionToAll extends AbstractUpdatePersistentS
     private final UpdatePersistentSubscriptionToAllOptions options;
     public UpdatePersistentSubscriptionToAll(GrpcClient connection, String group,
                                              UpdatePersistentSubscriptionToAllOptions options) {
-        super(connection, group, options.getSettings(), options.getMetadata());
+        super(connection, group, options.getSettings(), options);
 
         this.options = options;
     }

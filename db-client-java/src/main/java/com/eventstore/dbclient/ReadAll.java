@@ -8,7 +8,7 @@ class ReadAll extends AbstractRead {
     private final long maxCount;
 
     public ReadAll(GrpcClient client, long maxCount, ReadAllOptions options) {
-        super(client, options.getMetadata());
+        super(client, options);
 
         this.maxCount = maxCount;
         this.options = options;

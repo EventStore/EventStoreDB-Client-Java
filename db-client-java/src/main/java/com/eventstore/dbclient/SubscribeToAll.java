@@ -7,7 +7,7 @@ class SubscribeToAll extends AbstractRegularSubscription {
     private final SubscribeToAllOptions options;
 
     public SubscribeToAll(GrpcClient client, SubscriptionListener listener, SubscribeToAllOptions options) {
-        super(client, options.getMetadata());
+        super(client, options);
 
         this.options = options;
         this.listener = listener;

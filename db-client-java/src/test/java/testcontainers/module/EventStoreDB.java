@@ -73,7 +73,7 @@ public class EventStoreDB extends GenericContainer<EventStoreDB> {
         final String address = getContainerIpAddress();
         final int port = getMappedPort(DB_HTTP_PORT);
 
-        return String.format("esdb://%s:%d?tls=false", address, port);
+        return String.format("esdb://%s:%d?tls=false&defaultdeadline=60000", address, port);
     }
 
     public EventStoreDBClientSettings getSettings() {
@@ -82,6 +82,14 @@ public class EventStoreDB extends GenericContainer<EventStoreDB> {
 
     public EventStoreDBClient getClient() {
         return client;
+    }
+
+    public EventStoreDBClient getClientWithSettings(String args) {
+        final String address = getContainerIpAddress();
+        final int port = getMappedPort(DB_HTTP_PORT);
+
+        String connStr =  String.format("esdb://%s:%d?%s", address, port, args);
+        return EventStoreDBClient.create(EventStoreDBConnectionString.parseOrThrow(connStr));
     }
 
     public EventStoreDBPersistentSubscriptionsClient getPersistentSubscriptionsClient() {

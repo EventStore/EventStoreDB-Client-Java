@@ -3,20 +3,15 @@ package com.eventstore.dbclient;
 import io.grpc.Metadata;
 
 class OptionsBase<T> {
-    protected Timeouts timeouts;
     protected final ConnectionMetadata metadata;
+    protected Long deadline;
+    protected OperationKind kind;
+    private UserCredentials credentials;
+    private boolean requiresLeader;
 
     protected OptionsBase() {
-        this.timeouts = Timeouts.DEFAULT;
         this.metadata = new ConnectionMetadata();
-    }
-    public Timeouts getTimeouts() {
-        return this.timeouts;
-    }
-
-    public T timeouts(Timeouts timeouts) {
-        this.timeouts = timeouts;
-        return (T)this;
+        this.kind = OperationKind.Regular;
     }
 
     public Metadata getMetadata() {
@@ -32,10 +27,7 @@ class OptionsBase<T> {
     }
 
     public T authenticated(UserCredentials credentials) {
-        if(credentials == null)
-            return (T)this;
-
-        this.metadata.authenticated(credentials);
+        this.credentials = credentials;
         return (T)this;
     }
 
@@ -48,10 +40,29 @@ class OptionsBase<T> {
     }
 
     public T requiresLeader(boolean value) {
-        if (value) {
-            this.metadata.requiresLeader();
-        }
+        this.requiresLeader = value;
+        return (T)this;
+    }
+
+    public T deadline(long durationInMs) {
+        deadline = durationInMs;
 
         return (T)this;
+    }
+
+    public Long getDeadline() {
+        return deadline;
+    }
+
+    public OperationKind getKind() {
+        return kind;
+    }
+
+    public boolean isLeaderRequired() {
+        return this.requiresLeader;
+    }
+
+    public UserCredentials getCredentials() {
+        return this.credentials;
     }
 }

@@ -13,7 +13,7 @@ class UpdateProjection {
     private final String projectionName;
     private final String query;
     private final Boolean emitEnabled;
-    private final Metadata metadata;
+    private final UpdateProjectionOptions options;
 
     public UpdateProjection(final GrpcClient client, final String projectionName, final String query,
                             final UpdateProjectionOptions options) {
@@ -21,7 +21,7 @@ class UpdateProjection {
         this.projectionName = projectionName;
         this.query = query;
         this.emitEnabled = options.isEmitEnabled();
-        this.metadata = options.getMetadata();
+        this.options = options;
     }
 
     public CompletableFuture execute() {
@@ -41,8 +41,8 @@ class UpdateProjection {
                 .setOptions(optionsBuilder)
                 .build();
 
-            ProjectionsGrpc.ProjectionsStub client = MetadataUtils
-                    .attachHeaders(ProjectionsGrpc.newStub(channel), this.metadata);
+            ProjectionsGrpc.ProjectionsStub client =
+                    GrpcUtils.configureStub(ProjectionsGrpc.newStub(channel), this.client.getSettings(), this.options);
 
             CompletableFuture<Projectionmanagement.UpdateResp> result = new CompletableFuture<>();
 

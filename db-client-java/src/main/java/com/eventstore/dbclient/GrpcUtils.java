@@ -5,10 +5,10 @@ import com.eventstore.dbclient.proto.streams.StreamsOuterClass;
 import com.google.protobuf.ByteString;
 import io.grpc.Metadata;
 import io.grpc.StatusRuntimeException;
-import io.grpc.stub.ClientCallStreamObserver;
-import io.grpc.stub.ClientResponseObserver;
+import io.grpc.stub.*;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 public final class GrpcUtils {
@@ -77,5 +77,40 @@ public final class GrpcUtils {
 
         return builder.setRevision(revision.getValueUnsigned())
                 .build();
+    }
+
+    static public <S extends AbstractAsyncStub<S>, O> S configureStub(S stub, EventStoreDBClientSettings settings, OptionsBase<O> options) {
+        S finalStub = stub;
+        ConnectionMetadata metadata = new ConnectionMetadata();
+
+        if (options.getKind() != OperationKind.Streaming) {
+            long deadlineInMs = 10_000;
+
+            if (options.getDeadline() != null) {
+                deadlineInMs = options.getDeadline();
+            } else if (settings.getDefaultDeadline() != null) {
+                deadlineInMs = settings.getDefaultDeadline();
+            }
+
+            finalStub = finalStub.withDeadlineAfter(deadlineInMs, TimeUnit.MILLISECONDS);
+        }
+
+        UserCredentials credentials = null;
+
+        if (options.hasUserCredentials()) {
+            credentials = options.getCredentials();
+        } else if (settings.getDefaultCredentials() != null) {
+            credentials = settings.getDefaultCredentials().toUserCredentials();
+        }
+
+        if (credentials != null) {
+            metadata.authenticated(credentials);
+        }
+
+        if (options.isLeaderRequired()) {
+            metadata.requiresLeader();
+        }
+
+        return finalStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata.build()));
     }
 }

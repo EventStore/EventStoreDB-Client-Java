@@ -96,6 +96,10 @@ public class ParseValidConnectionStringTests {
                 Arguments.of(
                         "esdb://localhost?keepAliveTimeout=20&keepAliveInterval=10&nodePreference=readOnlyReplica",
                         "{\"dnsDiscover\":false,\"maxDiscoverAttempts\":3,\"discoveryInterval\":500,\"gossipTimeout\":3000,\"nodePreference\":\"readOnlyReplica\",\"tls\":true,\"tlsVerifyCert\":true,\"throwOnAppendFailure\":true,\"hosts\":[{\"address\":\"localhost\",\"port\":2113}], \"keepAliveTimeout\": \"20\", \"keepAliveInterval\": \"10\"}"
+                ),
+                Arguments.of(
+                        "esdb://127.0.0.1:21573?defaultDeadline=60000",
+                        "{\"dnsDiscover\":false,\"maxDiscoverAttempts\":3,\"discoveryInterval\":500,\"gossipTimeout\":3000,\"nodePreference\":\"leader\",\"tls\":true,\"tlsVerifyCert\":true,\"throwOnAppendFailure\":true,\"hosts\":[{\"address\":\"127.0.0.1\",\"port\":21573}], \"defaultDeadline\": 60000}"
                 )
         );
     }
@@ -111,6 +115,7 @@ public class ParseValidConnectionStringTests {
         Assertions.assertEquals(settings.isThrowOnAppendFailure(), other.isThrowOnAppendFailure());
         Assertions.assertEquals(settings.getKeepAliveTimeout(), other.getKeepAliveTimeout());
         Assertions.assertEquals(settings.getKeepAliveInterval(), other.getKeepAliveInterval());
+        Assertions.assertEquals(settings.getDefaultDeadline(), other.getDefaultDeadline());
 
         Assertions.assertEquals(settings.getHosts().length, other.getHosts().length);
         IntStream.range(0, settings.getHosts().length).forEach((i) -> {
@@ -162,6 +167,10 @@ public class ParseValidConnectionStringTests {
 
         if (tree.get("nodePreference") != null)
             builder.nodePreference(EventStoreDBConnectionString.parseNodePreference(tree.get("nodePreference").asText()).get());
+
+        if (tree.get("defaultDeadline") != null) {
+            builder.defaultDeadline(tree.get("defaultDeadline").asLong());
+        }
 
         tree.get("hosts").elements().forEachRemaining((host) -> {
             builder.addHost(new Endpoint(host.get("address").asText(), host.get("port").asInt()));

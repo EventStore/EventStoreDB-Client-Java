@@ -32,8 +32,8 @@ class DeleteProjection {
                     .setOptions(reqOptions)
                     .build();
 
-            ProjectionsGrpc.ProjectionsStub client = MetadataUtils
-                    .attachHeaders(ProjectionsGrpc.newStub(channel), options.getMetadata());
+            ProjectionsGrpc.ProjectionsStub client =
+                    GrpcUtils.configureStub(ProjectionsGrpc.newStub(channel), this.client.getSettings(), this.options);
 
             CompletableFuture<Projectionmanagement.DeleteResp> result = new CompletableFuture<>();
 

@@ -32,13 +32,12 @@ class AppendToStream {
 
     public CompletableFuture<WriteResult> execute() {
         return this.client.run(channel -> {
-            Metadata headers = this.options.getMetadata();
             CompletableFuture<WriteResult> result = new CompletableFuture<>();
             StreamsOuterClass.AppendReq.Options.Builder options = this.options.getExpectedRevision().applyOnWire(StreamsOuterClass.AppendReq.Options.newBuilder()
                     .setStreamIdentifier(Shared.StreamIdentifier.newBuilder()
                             .setStreamName(ByteString.copyFromUtf8(streamName))
                             .build()));
-            StreamsGrpc.StreamsStub client = MetadataUtils.attachHeaders(StreamsGrpc.newStub(channel), headers);
+            StreamsGrpc.StreamsStub client = GrpcUtils.configureStub(StreamsGrpc.newStub(channel), this.client.getSettings(), this.options);
 
             StreamObserver<StreamsOuterClass.AppendReq> requestStream = client.append(GrpcUtils.convertSingleResponse(result, resp -> {
                 if (resp.hasSuccess()) {

@@ -17,60 +17,27 @@ class GetProjectionResult<TResult> {
 
     private final GrpcClient client;
     private final String projectionName;
-    private final String partition;
 
-    private final ConnectionMetadata metadata;
+    private final GetProjectionResultOptions options;
 
     private ThrowingBiFunction<JsonMapper, String, TResult, JsonProcessingException> deserializationStrategy;
 
-    GetProjectionResult(final GrpcClient client, final UserCredentials credentials,
-                        final String projectionName, Class<TResult> resultType) {
+    GetProjectionResult(final GrpcClient client, final String projectionName, GetProjectionResultOptions options, Class<TResult> resultType) {
 
-        this(client, credentials, projectionName, null, resultType);
+        this(client, projectionName, options, (jsonMapper, json) -> jsonMapper.readValue(json, resultType));
     }
 
-    GetProjectionResult(final GrpcClient client, final UserCredentials credentials, final String projectionName,
-                        final String partition, Class<TResult> resultType) {
+    GetProjectionResult(final GrpcClient client, final String projectionName, GetProjectionResultOptions options, Function<TypeFactory, JavaType> javaTypeFunction) {
 
-        this(client, credentials, projectionName, partition);
-        deserializationStrategy = ((jsonMapper, json) -> jsonMapper.readValue(json, resultType));
+        this(client, projectionName, options, (jsonMapper, json) -> jsonMapper.readValue(json, javaTypeFunction.apply(jsonMapper.getTypeFactory())));
     }
 
-    GetProjectionResult(final GrpcClient client, final UserCredentials credentials, final String projectionName,
-                        Function<TypeFactory, JavaType> javaTypeFunction) {
-
-        this(client, credentials, projectionName, null, javaTypeFunction);
-    }
-
-    GetProjectionResult(final GrpcClient client, final UserCredentials credentials, final String projectionName,
-                        final String partition, Function<TypeFactory, JavaType> javaTypeFunction) {
-
-        this(client, credentials, projectionName, partition);
-        deserializationStrategy = ((jsonMapper, json)
-                -> jsonMapper.readValue(json, javaTypeFunction.apply(jsonMapper.getTypeFactory())));
-    }
-
-    private GetProjectionResult(final GrpcClient client, final UserCredentials credentials,
-                               final String projectionName, final String partition) {
+    public GetProjectionResult(final GrpcClient client, final String projectionName, GetProjectionResultOptions options, ThrowingBiFunction<JsonMapper, String, TResult, JsonProcessingException> deserializationStrategy) {
 
         this.client = client;
         this.projectionName = projectionName;
-        this.partition = partition;
-
-        this.metadata = new ConnectionMetadata();
-
-        if (credentials != null) {
-            this.metadata.authenticated(credentials);
-        }
-    }
-
-
-    public GetProjectionResult authenticated(UserCredentials credentials) {
-        if(credentials == null)
-            return this;
-
-        this.metadata.authenticated(credentials);
-        return this;
+        this.options = options;
+        this.deserializationStrategy = deserializationStrategy;
     }
 
     public CompletableFuture<TResult> execute() {
@@ -81,17 +48,15 @@ class GetProjectionResult<TResult> {
                 Projectionmanagement.ResultReq.Options.newBuilder()
                     .setName(projectionName);
 
-            if(partition != null && !partition.isEmpty()) {
-                optionsBuilder.setPartition(partition);
+            if(!options.getPartition().isEmpty()) {
+                optionsBuilder.setPartition(options.getPartition());
             }
 
             Projectionmanagement.ResultReq request = Projectionmanagement.ResultReq.newBuilder()
                 .setOptions(optionsBuilder)
                 .build();
 
-            Metadata headers = this.metadata.build();
-
-            ProjectionsGrpc.ProjectionsStub client = MetadataUtils.attachHeaders(ProjectionsGrpc.newStub(channel), headers);
+            ProjectionsGrpc.ProjectionsStub client = GrpcUtils.configureStub(ProjectionsGrpc.newStub(channel), this.client.getSettings(), this.options);
 
             CompletableFuture<TResult> result = new CompletableFuture<>();
 

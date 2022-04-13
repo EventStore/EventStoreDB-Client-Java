@@ -41,8 +41,8 @@ final class ListPersistentSubscriptions {
                         .setOptions(optionsBuilder)
                         .build();
 
-                PersistentSubscriptionsGrpc.PersistentSubscriptionsStub stub = MetadataUtils
-                        .attachHeaders(PersistentSubscriptionsGrpc.newStub(args.getChannel()), options.getMetadata());
+                PersistentSubscriptionsGrpc.PersistentSubscriptionsStub stub =
+                        GrpcUtils.configureStub(PersistentSubscriptionsGrpc.newStub(args.getChannel()), client.getSettings(), options);
 
                 stub.list(req, GrpcUtils.convertSingleResponse(result, resp -> {
                     List<A> infos = new ArrayList<>();

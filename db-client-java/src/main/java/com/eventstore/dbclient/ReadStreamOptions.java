@@ -5,6 +5,7 @@ public class ReadStreamOptions extends OptionsWithStartRevisionAndResolveLinkTos
 
     private ReadStreamOptions() {
         this.direction = Direction.Forwards;
+        this.kind = OperationKind.Streaming;
     }
 
     public static ReadStreamOptions get() {

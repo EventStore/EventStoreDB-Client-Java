@@ -23,9 +23,8 @@ abstract class AbstractDeletePersistentSubscription {
     public CompletableFuture execute() {
         return this.client.runWithArgs(args -> {
             CompletableFuture result = new CompletableFuture();
-            Metadata headers = this.options.getMetadata();
-            PersistentSubscriptionsGrpc.PersistentSubscriptionsStub client = MetadataUtils
-                    .attachHeaders(PersistentSubscriptionsGrpc.newStub(args.getChannel()), headers);
+            PersistentSubscriptionsGrpc.PersistentSubscriptionsStub client =
+                    GrpcUtils.configureStub(PersistentSubscriptionsGrpc.newStub(args.getChannel()), this.client.getSettings(), this.options);
 
             Persistent.DeleteReq req = Persistent.DeleteReq.newBuilder()
                     .setOptions(createOptions()

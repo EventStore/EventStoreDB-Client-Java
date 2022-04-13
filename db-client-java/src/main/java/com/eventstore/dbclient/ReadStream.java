@@ -13,7 +13,7 @@ class ReadStream extends AbstractRead {
     private final long maxCount;
 
     public ReadStream(GrpcClient client, String streamName, long maxCount, ReadStreamOptions options) {
-        super(client, options.getMetadata());
+        super(client, options);
 
         this.streamName = streamName;
         this.maxCount = maxCount;

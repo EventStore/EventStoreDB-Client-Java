@@ -14,7 +14,7 @@ class CreateProjection {
     private final String query;
     private final boolean trackEmittedStreams;
     private final boolean emitEnabled;
-    private final Metadata metadata;
+    private final CreateProjectionOptions options;
 
     public CreateProjection(final GrpcClient client, final String projectionName, final String query,
                             final CreateProjectionOptions options) {
@@ -24,7 +24,7 @@ class CreateProjection {
         this.query = query;
         this.trackEmittedStreams = options.isTrackingEmittedStreams();
         this.emitEnabled = options.isEmitEnabled();
-        this.metadata = options.getMetadata();
+        this.options = options;
     }
 
     public CompletableFuture execute() {
@@ -43,7 +43,7 @@ class CreateProjection {
                     .setOptions(optionsBuilder)
                     .build();
 
-            ProjectionsGrpc.ProjectionsStub client = MetadataUtils.attachHeaders(ProjectionsGrpc.newStub(channel), this.metadata);
+            ProjectionsGrpc.ProjectionsStub client = GrpcUtils.configureStub(ProjectionsGrpc.newStub(channel), this.client.getSettings(), this.options);
 
             CompletableFuture<Projectionmanagement.CreateResp> result = new CompletableFuture<>();
 

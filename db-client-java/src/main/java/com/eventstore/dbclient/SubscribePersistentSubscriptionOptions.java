@@ -5,6 +5,7 @@ public class SubscribePersistentSubscriptionOptions extends OptionsBase<Subscrib
 
     private SubscribePersistentSubscriptionOptions() {
         this.bufferSize = 10;
+        this.kind = OperationKind.Streaming;
     }
 
     public static SubscribePersistentSubscriptionOptions get() {

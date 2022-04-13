@@ -11,12 +11,12 @@ import java.util.concurrent.CompletableFuture;
 class GetProjectionStatus {
     private final GrpcClient client;
     private final String projectionName;
-    private final Metadata metadata;
+    private final GetProjectionStatusOptions options;
 
     public GetProjectionStatus(final GrpcClient client, final String projectionName, final GetProjectionStatusOptions options) {
         this.client = client;
         this.projectionName = projectionName;
-        this.metadata = options.getMetadata();
+        this.options = options;
     }
 
     public CompletableFuture<ProjectionDetails> execute() {
@@ -29,8 +29,8 @@ class GetProjectionStatus {
                     .setOptions(optionsBuilder)
                     .build();
 
-            ProjectionsGrpc.ProjectionsStub client = MetadataUtils
-                    .attachHeaders(ProjectionsGrpc.newStub(channel), this.metadata);
+            ProjectionsGrpc.ProjectionsStub client =
+                    GrpcUtils.configureStub(ProjectionsGrpc.newStub(channel), this.client.getSettings(), this.options);
 
             CompletableFuture<ProjectionDetails> result = new CompletableFuture<>();
 

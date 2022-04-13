@@ -9,17 +9,17 @@ import java.util.concurrent.CompletableFuture;
 
 class RestartProjectionSubsystem {
     private final GrpcClient client;
-    private final Metadata metadata;
+    private final RestartProjectionSubsystemOptions options;
 
     public RestartProjectionSubsystem(final GrpcClient client, final RestartProjectionSubsystemOptions options) {
         this.client = client;
-        this.metadata = options.getMetadata();
+        this.options = options;
     }
 
     public CompletableFuture execute() {
         return this.client.run(channel -> {
-            ProjectionsGrpc.ProjectionsStub client = MetadataUtils
-                    .attachHeaders(ProjectionsGrpc.newStub(channel), this.metadata);
+            ProjectionsGrpc.ProjectionsStub client =
+                    GrpcUtils.configureStub(ProjectionsGrpc.newStub(channel), this.client.getSettings(), this.options);
 
             CompletableFuture<Shared.Empty> result = new CompletableFuture<>();
 

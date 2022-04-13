@@ -42,8 +42,8 @@ final class GetPersistentSubscriptionInfo {
                         .setOptions(optionsBuilder)
                         .build();
 
-                PersistentSubscriptionsGrpc.PersistentSubscriptionsStub stub = MetadataUtils
-                        .attachHeaders(PersistentSubscriptionsGrpc.newStub(args.getChannel()), options.getMetadata());
+                PersistentSubscriptionsGrpc.PersistentSubscriptionsStub stub =
+                        GrpcUtils.configureStub(PersistentSubscriptionsGrpc.newStub(args.getChannel()), client.getSettings(), options);
 
                 CompletableFuture<Optional<PersistentSubscriptionInfo>> tmp = new CompletableFuture<>();
                 stub.getInfo(req, GrpcUtils.convertSingleResponse(tmp, resp ->

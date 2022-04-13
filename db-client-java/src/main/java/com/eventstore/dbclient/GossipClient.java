@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 class GossipClient {
@@ -25,7 +26,7 @@ class GossipClient {
     }
 
     public void shutdown() throws InterruptedException {
-        _channel.shutdown().awaitTermination(Timeouts.DEFAULT.shutdownTimeout, Timeouts.DEFAULT.shutdownTimeoutUnit);
+        _channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
     }
 
     public CompletableFuture<ClusterInfo> read() {

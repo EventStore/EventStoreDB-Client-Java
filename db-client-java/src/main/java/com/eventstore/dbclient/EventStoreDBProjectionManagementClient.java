@@ -121,18 +121,17 @@ public class EventStoreDBProjectionManagementClient extends EventStoreDBClientBa
      * @param <TResult> The result type to return.
      */
     public <TResult> CompletableFuture<TResult>  getResult(final String projectionName, Class<TResult> type) {
-        return new GetProjectionResult<>(this.client, this.credentials, projectionName, type).execute();
+        return getResult(projectionName, type, GetProjectionResultOptions.get());
     }
 
     /**
      * Gets the projection's result.
      * @param projectionName Name of the projection.
-     * @param partition Name of the partition to return.
      * @param type Type of the class to construct for the result.
      * @param <TResult> The result type to return.
      */
-    public <TResult> CompletableFuture<TResult>  getResult(final String projectionName, final String partition, Class<TResult> type) {
-        return new GetProjectionResult<>(this.client, this.credentials, projectionName, partition, type).execute();
+    public <TResult> CompletableFuture<TResult>  getResult(final String projectionName, Class<TResult> type, GetProjectionResultOptions options) {
+        return new GetProjectionResult<>(this.client, projectionName, options, type).execute();
     }
 
     /**
@@ -143,7 +142,18 @@ public class EventStoreDBProjectionManagementClient extends EventStoreDBClientBa
      */
     public <TResult> CompletableFuture<TResult> getResult(final String projectionName,
                                                           Function<TypeFactory, JavaType> javaTypeFunction) {
-        return new GetProjectionResult<TResult>(this.client, this.credentials, projectionName, javaTypeFunction).execute();
+        return getResult(projectionName, javaTypeFunction, GetProjectionResultOptions.get());
+    }
+
+    /**
+     * Gets the projection's result.
+     * @param projectionName Name of the projection.
+     * @param javaTypeFunction Factory method for constructing the return type.
+     * @param <TResult> The result type to return.
+     */
+    public <TResult> CompletableFuture<TResult> getResult(final String projectionName,
+                                                          Function<TypeFactory, JavaType> javaTypeFunction, GetProjectionResultOptions options) {
+        return new GetProjectionResult<TResult>(this.client, projectionName, options, javaTypeFunction).execute();
     }
 
     /**
@@ -153,19 +163,17 @@ public class EventStoreDBProjectionManagementClient extends EventStoreDBClientBa
      * @param <TResult> The result type to return.
      */
     public <TResult> CompletableFuture<TResult> getState(final String projectionName, Class<TResult> type) {
-        return new GetProjectionState<>(this.client, this.credentials, projectionName, type).execute();
+        return getState(projectionName, type, GetProjectionStateOptions.get());
     }
 
     /**
-     * Gets the state of the projection for the provided partition.
+     * Gets the state of the projection.
      * @param projectionName Name of the projection.
-     * @param partition Name of the partition to return.
      * @param type Type of the class to construct for the result.
      * @param <TResult> The result type to return.
      */
-    public <TResult> CompletableFuture<TResult> getState(final String projectionName, final String partition,
-                                                         Class<TResult> type) {
-        return new GetProjectionState<>(this.client, this.credentials, projectionName, partition, type).execute();
+    public <TResult> CompletableFuture<TResult> getState(final String projectionName, Class<TResult> type, GetProjectionStateOptions options) {
+        return new GetProjectionState<>(this.client, projectionName, options, type).execute();
     }
 
     /**
@@ -176,19 +184,18 @@ public class EventStoreDBProjectionManagementClient extends EventStoreDBClientBa
      */
     public <TResult> CompletableFuture<TResult> getState(final String projectionName,
                                                          Function<TypeFactory, JavaType> javaTypeFunction) {
-        return new GetProjectionState<TResult>(this.client, this.credentials, projectionName, javaTypeFunction).execute();
+        return getState(projectionName, javaTypeFunction, GetProjectionStateOptions.get());
     }
 
     /**
-     * Gets the state of the projection for the provided partition.
+     * Gets the state of the projection.
      * @param projectionName Name of the projection.
-     * @param partition Name of the partition to return.
      * @param javaTypeFunction Factory method for constructing the return type.
      * @param <TResult> The result type to return.
      */
-    public <TResult> CompletableFuture<TResult> getState(final String projectionName, final String partition,
-                                                         Function<TypeFactory, JavaType> javaTypeFunction) {
-        return new GetProjectionState<TResult>(this.client, this.credentials, projectionName, partition, javaTypeFunction).execute();
+    public <TResult> CompletableFuture<TResult> getState(final String projectionName,
+                                                         Function<TypeFactory, JavaType> javaTypeFunction, GetProjectionStateOptions options) {
+        return new GetProjectionState<TResult>(this.client, projectionName, options, javaTypeFunction).execute();
     }
 
     /**
