@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 
 
-public class ListProjections {
+class ListProjections {
     private final GrpcClient client;
     private final Metadata metadata;
 

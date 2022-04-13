@@ -7,14 +7,14 @@ import io.grpc.stub.MetadataUtils;
 
 import java.util.concurrent.CompletableFuture;
 
-public abstract class AbstractCreatePersistentSubscription {
+abstract class AbstractCreatePersistentSubscription<TPos, TSettings extends PersistentSubscriptionSettings> {
     private final GrpcClient client;
     private final String group;
-    private final AbstractPersistentSubscriptionSettings settings;
+    private final TSettings settings;
     private Metadata metadata;
 
     public AbstractCreatePersistentSubscription(GrpcClient client, String group,
-                                                AbstractPersistentSubscriptionSettings settings, Metadata metadata) {
+                                                TSettings settings, Metadata metadata) {
         this.client = client;
         this.group = group;
         this.settings = settings;
@@ -37,15 +37,15 @@ public abstract class AbstractCreatePersistentSubscription {
             settingsBuilder
                     .setResolveLinks(settings.shouldResolveLinkTos())
                     .setReadBatchSize(settings.getReadBatchSize())
-                    .setMinCheckpointCount(settings.getCheckPointLowerBound())
-                    .setMaxCheckpointCount(settings.getCheckPointUpperBound())
+                    .setMinCheckpointCount(settings.getCheckpointLowerBound())
+                    .setMaxCheckpointCount(settings.getCheckpointUpperBound())
                     .setMessageTimeoutMs(settings.getMessageTimeoutMs())
                     .setMaxSubscriberCount(settings.getMaxSubscriberCount())
                     .setMaxRetryCount(settings.getMaxRetryCount())
                     .setLiveBufferSize(settings.getLiveBufferSize())
                     .setHistoryBufferSize(settings.getHistoryBufferSize())
                     .setExtraStatistics(settings.isExtraStatistics())
-                    .setCheckpointAfterMs(settings.getCheckpointAfterMs());
+                    .setCheckpointAfterMs(settings.getCheckpointAfterInMs());
 
             switch (settings.getConsumerStrategyName()) {
                 case NamedConsumerStrategy.DISPATCH_TO_SINGLE:

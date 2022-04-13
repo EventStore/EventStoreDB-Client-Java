@@ -9,7 +9,7 @@ import io.grpc.stub.MetadataUtils;
 
 import java.util.concurrent.CompletableFuture;
 
-public class DeleteStream {
+class DeleteStream {
     private final GrpcClient client;
     private final String streamName;
 

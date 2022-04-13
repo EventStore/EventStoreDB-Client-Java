@@ -7,7 +7,7 @@ import io.grpc.stub.MetadataUtils;
 
 import java.util.concurrent.CompletableFuture;
 
-public abstract class AbstractDeletePersistentSubscription {
+abstract class AbstractDeletePersistentSubscription {
     private final GrpcClient client;
     private final String group;
     private final DeletePersistentSubscriptionOptions options;

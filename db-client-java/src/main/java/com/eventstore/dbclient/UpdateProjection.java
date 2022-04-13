@@ -8,7 +8,7 @@ import io.grpc.stub.MetadataUtils;
 
 import java.util.concurrent.CompletableFuture;
 
-public class UpdateProjection {
+class UpdateProjection {
     private final GrpcClient client;
     private final String projectionName;
     private final String query;

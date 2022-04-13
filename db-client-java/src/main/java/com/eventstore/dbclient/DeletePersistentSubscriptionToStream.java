@@ -4,11 +4,11 @@ import com.eventstore.dbclient.proto.persistentsubscriptions.Persistent;
 import com.eventstore.dbclient.proto.shared.Shared;
 import com.google.protobuf.ByteString;
 
-public class DeletePersistentSubscription extends AbstractDeletePersistentSubscription {
+class DeletePersistentSubscriptionToStream extends AbstractDeletePersistentSubscription {
     private String stream;
 
-    public DeletePersistentSubscription(GrpcClient client, String stream, String group,
-                                        DeletePersistentSubscriptionOptions options) {
+    public DeletePersistentSubscriptionToStream(GrpcClient client, String stream, String group,
+                                                DeletePersistentSubscriptionOptions options) {
         super(client, group, options);
         this.stream = stream;
     }

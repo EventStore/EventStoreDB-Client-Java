@@ -22,17 +22,17 @@ public class PersistentSubscriptionManagementTests extends ESDBTests {
         String streamA = generateName();
         String streamB = generateName();
 
-        client.create(streamA, groupName)
+        client.createToStream(streamA, groupName)
                 .get();
 
-        client.create(streamB, groupName)
+        client.createToStream(streamB, groupName)
                 .get();
 
         List<PersistentSubscriptionInfo> subs = client.listAll().get();
 
         int count = 0;
         for (PersistentSubscriptionInfo info: subs) {
-            if (info.getEventStreamId().equals(streamA) || info.getEventStreamId().equals(streamB)) {
+            if (info.getEventSource().equals(streamA) || info.getEventSource().equals(streamB)) {
                 count++;
             }
         }
@@ -47,14 +47,14 @@ public class PersistentSubscriptionManagementTests extends ESDBTests {
         String streamName = generateName();
         String groupName = generateName();
 
-        client.create(streamName, groupName)
+        client.createToStream(streamName, groupName)
                 .get();
 
         for (int i = 0; i < 10; i++) {
-            List<PersistentSubscriptionInfo> subs;
+            List<PersistentSubscriptionToStreamInfo> subs;
 
             try {
-                subs = client.listForStream(streamName).get();
+                subs = client.listToStream(streamName).get();
             } catch (ResourceNotFoundException e) {
                 Thread.sleep(500);
                 continue;
@@ -73,7 +73,7 @@ public class PersistentSubscriptionManagementTests extends ESDBTests {
             }
 
             Assertions.assertEquals(subs.size(), 1);
-            Assertions.assertEquals(subs.get(0).getEventStreamId(), streamName);
+            Assertions.assertEquals(subs.get(0).getEventSource(), streamName);
             break;
         }
     }
@@ -94,14 +94,14 @@ public class PersistentSubscriptionManagementTests extends ESDBTests {
             return;
         }
 
-        List<PersistentSubscriptionInfo> subs = client.listToAll().get();
+        List<PersistentSubscriptionToAllInfo> subs = client.listToAll().get();
 
-        Assertions.assertTrue(subs.size() > 1);
+        Assertions.assertTrue(subs.size() >= 1);
 
         boolean found = false;
 
-        for (PersistentSubscriptionInfo info : subs) {
-            if (info.getEventStreamId().equals("$all") && info.getGroupName().equals(groupName)) {
+        for (PersistentSubscriptionToAllInfo info : subs) {
+            if (info.getEventSource().equals("$all") && info.getGroupName().equals(groupName)) {
                 found = true;
                 break;
             }
@@ -116,11 +116,11 @@ public class PersistentSubscriptionManagementTests extends ESDBTests {
         EventStoreDBPersistentSubscriptionsClient client = getEmptyServer().getPersistentSubscriptionsClient();
         String streamName = generateName();
         String groupName = generateName();
-        client.create(streamName, groupName)
+        client.createToStream(streamName, groupName)
                 .get();
         Optional<PersistentSubscriptionInfo> result = Optional.empty();
         for (int i = 0; i < 10; i++) {
-            result = client.getInfo(streamName, groupName).get();
+            result = client.getInfoToStream(streamName, groupName).get();
             if (!result.isPresent()) {
                 Thread.sleep(1000);
                 continue;
@@ -130,7 +130,7 @@ public class PersistentSubscriptionManagementTests extends ESDBTests {
         }
 
         Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(streamName, result.get().getEventStreamId());
+        Assertions.assertEquals(streamName, result.get().getEventSource());
     }
 
     @Test
@@ -152,7 +152,7 @@ public class PersistentSubscriptionManagementTests extends ESDBTests {
         Optional<PersistentSubscriptionInfo> result = client.getInfoToAll(groupName).get();
 
         Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals("$all", result.get().getEventStreamId());
+        Assertions.assertEquals("$all", result.get().getEventSource());
         Assertions.assertEquals(result.get().getGroupName(), groupName);
     }
 
@@ -160,7 +160,7 @@ public class PersistentSubscriptionManagementTests extends ESDBTests {
     @Order(6)
     public void testGetPersistentSubscriptionInfoNotExisting() throws Throwable {
         EventStoreDBPersistentSubscriptionsClient client = getEmptyServer().getPersistentSubscriptionsClient();
-        Optional<PersistentSubscriptionInfo> result = client.getInfo(generateName(), generateName()).get();
+        Optional<PersistentSubscriptionInfo> result = client.getInfoToStream(generateName(), generateName()).get();
 
         Assertions.assertFalse(result.isPresent());
     }
@@ -172,13 +172,13 @@ public class PersistentSubscriptionManagementTests extends ESDBTests {
         final EventStoreDBClient streamClient = getEmptyServer().getClient();
         final String streamName = generateName();
         final String groupName = generateName();
-        client.create(streamName, groupName)
+        client.createToStream(streamName, groupName)
                 .get();
 
         final CompletableFuture allNacked = new CompletableFuture();
         final CompletableFuture allReplayed = new CompletableFuture();
 
-        client.subscribe(streamName, groupName, new PersistentSubscriptionListener() {
+        client.subscribeToStream(streamName, groupName, new PersistentSubscriptionListener() {
             int count = 0;
             @Override
             public void onEvent(PersistentSubscription subscription, ResolvedEvent event) {
@@ -206,15 +206,33 @@ public class PersistentSubscriptionManagementTests extends ESDBTests {
         }
 
         CompletableFuture.runAsync(() -> {
-            try {
-                allNacked.get(10, TimeUnit.SECONDS);
-                // We give the server some time to park those events.
-                Thread.sleep(10000);
-                client.replayParkedMessages(streamName, groupName).get();
-                allReplayed.get(10, TimeUnit.SECONDS);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+            for (int i = 0; i < 10; i++) {
+                try {
+                    Thread.sleep(500);
+                    allNacked.get(10, TimeUnit.SECONDS);
+                    // We give the server some time to park those events.
+                    Thread.sleep(10000);
+                    client.replayParkedMessagesToStream(streamName, groupName).get();
+                    allReplayed.get(10, TimeUnit.SECONDS);
+                    break;
+                } catch (Exception e) {
+                    if (e instanceof ExecutionException) {
+                        ExecutionException ex = (ExecutionException) e;
+                        if (ex.getCause() instanceof StatusRuntimeException) {
+                            StatusRuntimeException grpc = (StatusRuntimeException) ex.getCause();
+                            if (grpc.getStatus().getCode() == Status.Code.INTERNAL) {
+                                continue;
+                            }
+                        }
+
+                        if (ex.getCause() instanceof ResourceNotFoundException) {
+                            continue;
+                        }
+                    }
+                    throw new RuntimeException(e);
+                }
             }
+
         }).get(40, TimeUnit.SECONDS);
     }
 
@@ -269,14 +287,31 @@ public class PersistentSubscriptionManagementTests extends ESDBTests {
         }
 
         CompletableFuture.runAsync(() -> {
-            try {
-                allNacked.get(10, TimeUnit.SECONDS);
-                // We give the server some time to park those events.
-                Thread.sleep(10000);
-                client.replayParkedMessagesToAll(groupName).get();
-                allReplayed.get(10, TimeUnit.SECONDS);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+            for (int i = 0; i < 10; i++) {
+                try {
+                    Thread.sleep(500);
+                    allNacked.get(10, TimeUnit.SECONDS);
+                    // We give the server some time to park those events.
+                    Thread.sleep(10000);
+                    client.replayParkedMessagesToAll(groupName).get();
+                    allReplayed.get(10, TimeUnit.SECONDS);
+                    break;
+                } catch (Exception e) {
+                    if (e instanceof ExecutionException) {
+                        ExecutionException ex = (ExecutionException) e;
+                        if (ex.getCause() instanceof StatusRuntimeException) {
+                            StatusRuntimeException grpc = (StatusRuntimeException) ex.getCause();
+                            if (grpc.getStatus().getCode() == Status.Code.INTERNAL) {
+                                continue;
+                            }
+                        }
+
+                        if (ex.getCause() instanceof ResourceNotFoundException) {
+                            continue;
+                        }
+                    }
+                    throw new RuntimeException(e);
+                }
             }
         }).get(40, TimeUnit.SECONDS);
     }
@@ -288,10 +323,10 @@ public class PersistentSubscriptionManagementTests extends ESDBTests {
         String streamName = String.format("/foo/%s/stream", generateName());
         String groupName = String.format("/foo/%s/group", generateName());
 
-        client.create(streamName, groupName).get();
+        client.createToStream(streamName, groupName).get();
         Optional<PersistentSubscriptionInfo> info = Optional.empty();
         for (int i = 0; i < 10; i++) {
-            info = client.getInfo(streamName, groupName).get();
+            info = client.getInfoToStream(streamName, groupName).get();
 
             if (!info.isPresent()) {
                 Thread.sleep(500);
@@ -302,7 +337,7 @@ public class PersistentSubscriptionManagementTests extends ESDBTests {
         }
 
        Assertions.assertTrue(info.isPresent());
-       Assertions.assertEquals(info.get().getEventStreamId(), streamName);
+       Assertions.assertEquals(info.get().getEventSource(), streamName);
        Assertions.assertEquals(info.get().getGroupName(), groupName);
     }
 

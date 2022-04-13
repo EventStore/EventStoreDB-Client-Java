@@ -4,12 +4,12 @@ import com.eventstore.dbclient.proto.persistentsubscriptions.Persistent;
 import com.eventstore.dbclient.proto.shared.Shared;
 import com.google.protobuf.ByteString;
 
-public class UpdatePersistentSubscription extends AbstractUpdatePersistentSubscription {
-    private final PersistentSubscriptionSettings settings;
-    private String stream;
+class UpdatePersistentSubscriptionToStream extends AbstractUpdatePersistentSubscription {
+    private final PersistentSubscriptionToStreamSettings settings;
+    private final String stream;
 
-    public UpdatePersistentSubscription(GrpcClient connection, String stream, String group,
-                                        UpdatePersistentSubscriptionOptions options) {
+    public UpdatePersistentSubscriptionToStream(GrpcClient connection, String stream, String group,
+                                                UpdatePersistentSubscriptionToStreamOptions options) {
         super(connection, group, options.getSettings(), options.getMetadata());
 
         this.stream = stream;
@@ -18,8 +18,7 @@ public class UpdatePersistentSubscription extends AbstractUpdatePersistentSubscr
 
     @Override
     protected Persistent.UpdateReq.Settings.Builder createSettings() {
-        return Persistent.UpdateReq.Settings.newBuilder()
-                .setRevision(settings.getRevision());
+        return Persistent.UpdateReq.Settings.newBuilder();
     }
 
     @Override
@@ -29,12 +28,14 @@ public class UpdatePersistentSubscription extends AbstractUpdatePersistentSubscr
         Persistent.UpdateReq.StreamOptions.Builder streamOptionsBuilder = Persistent.UpdateReq.StreamOptions
                 .newBuilder();
 
-        if (settings.getStreamRevision() == StreamRevision.START) {
+        StreamPosition<Long> position = settings.getStartFrom();
+        if (position instanceof StreamPosition.Start) {
             streamOptionsBuilder.setStart(Shared.Empty.newBuilder());
-        } else if (settings.getStreamRevision() == StreamRevision.END) {
+        } else if (position instanceof StreamPosition.End) {
             streamOptionsBuilder.setEnd(Shared.Empty.newBuilder());
         } else {
-            streamOptionsBuilder.setRevision(settings.getRevision());
+            long pos = ((StreamPosition.Position<Long>) position).getPosition();
+            streamOptionsBuilder.setRevision(pos);
         }
 
         streamIdentifierBuilder.setStreamName(ByteString.copyFromUtf8(stream));

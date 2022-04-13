@@ -14,7 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public class AppendToStream {
+class AppendToStream {
     private final GrpcClient client;
     private final String streamName;
     private final List<EventData> events;

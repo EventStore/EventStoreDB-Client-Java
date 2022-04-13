@@ -3,7 +3,7 @@ package com.eventstore.dbclient;
 import com.eventstore.dbclient.proto.persistentsubscriptions.Persistent;
 import com.eventstore.dbclient.proto.shared.Shared;
 
-public class SubscribePersistentSubscriptionToAll extends AbstractSubscribePersistentSubscription {
+class SubscribePersistentSubscriptionToAll extends AbstractSubscribePersistentSubscription {
     public SubscribePersistentSubscriptionToAll(GrpcClient connection, String group,
                                                 SubscribePersistentSubscriptionOptions options,
                                                 PersistentSubscriptionListener listener) {

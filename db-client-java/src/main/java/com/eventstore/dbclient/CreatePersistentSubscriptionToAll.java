@@ -3,33 +3,33 @@ package com.eventstore.dbclient;
 import com.eventstore.dbclient.proto.persistentsubscriptions.Persistent;
 import com.eventstore.dbclient.proto.shared.Shared;
 
-public class CreatePersistentSubscriptionToAll extends AbstractCreatePersistentSubscription {
-    private final PersistentSubscriptionToAllSettings settings;
+class CreatePersistentSubscriptionToAll extends AbstractCreatePersistentSubscription<Position, PersistentSubscriptionToAllSettings> {
+    private final CreatePersistentSubscriptionToAllOptions options;
 
     public CreatePersistentSubscriptionToAll(GrpcClient client, String group,
                                              CreatePersistentSubscriptionToAllOptions options) {
         super(client, group, options.getSettings(), options.getMetadata());
-
-        this.settings = options.getSettings();
+        this.options = options;
     }
 
     @Override
     protected Persistent.CreateReq.Options.Builder createOptions() {
         Persistent.CreateReq.Options.Builder optionsBuilder = Persistent.CreateReq.Options.newBuilder();
         Persistent.CreateReq.AllOptions.Builder allOptionsBuilder = Persistent.CreateReq.AllOptions.newBuilder();
+        StreamPosition<Position> position = this.options.getSettings().getStartFrom();
 
-        if (settings.getPosition() == Position.START) {
+        if (position instanceof StreamPosition.Start) {
             allOptionsBuilder.setStart(Shared.Empty.newBuilder());
-        } else if (settings.getPosition() == Position.END) {
+        } else if (position instanceof StreamPosition.End) {
             allOptionsBuilder.setEnd(Shared.Empty.newBuilder());
         } else {
-            Position position = settings.getPosition();
+            Position pos = ((StreamPosition.Position<Position>) position).getPosition();
             allOptionsBuilder.setPosition(Persistent.CreateReq.Position.newBuilder()
-                    .setCommitPosition(position.getCommitUnsigned())
-                    .setPreparePosition(position.getPrepareUnsigned()));
+                    .setCommitPosition(pos.getCommitUnsigned())
+                    .setPreparePosition(pos.getPrepareUnsigned()));
         }
 
-        SubscriptionFilter filter = settings.getFilter();
+        SubscriptionFilter filter = options.getFilter();
         if (filter != null) {
             filter.addToWirePersistentCreateReq(allOptionsBuilder);
         } else {

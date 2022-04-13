@@ -6,17 +6,17 @@ import testcontainers.module.EventStoreDB;
 
 import java.util.concurrent.ExecutionException;
 
-public class DeletePersistentSubscriptionTests extends ESDBTests {
+public class DeletePersistentSubscriptionToStreamTests extends ESDBTests {
     @Test
     public void testDeletePersistentSub() throws Throwable {
         EventStoreDBPersistentSubscriptionsClient client = getEmptyServer().getPersistentSubscriptionsClient();
         String streamName = generateName();
         String groupName = generateName();
 
-        client.create(streamName, groupName)
+        client.createToStream(streamName, groupName)
                 .get();
 
-        client.delete(streamName, groupName)
+        client.deleteToStream(streamName, groupName)
                 .get();
     }
 

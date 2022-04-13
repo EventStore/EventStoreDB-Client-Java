@@ -7,7 +7,7 @@ import testcontainers.module.EventStoreDB;
 
 import java.util.concurrent.ExecutionException;
 
-public class UpdatePersistentSubscriptionTests extends ESDBTests {
+public class UpdatePersistentSubscriptionToStreamTests extends ESDBTests {
     private EventStoreDBPersistentSubscriptionsClient client;
 
     @BeforeEach
@@ -20,18 +20,14 @@ public class UpdatePersistentSubscriptionTests extends ESDBTests {
         String streamName = generateName();
         String groupName = generateName();
 
-        client.create(streamName, groupName)
+        client.createToStream(streamName, groupName)
                 .get();
 
-        PersistentSubscriptionSettings updatedSettings = PersistentSubscriptionSettings.builder()
+        UpdatePersistentSubscriptionToStreamOptions updated = UpdatePersistentSubscriptionToStreamOptions.get()
                 .checkpointAfterInMs(5_000)
-                .startFrom(2)
-                .build();
+                .startFrom(2);
 
-        UpdatePersistentSubscriptionOptions options = UpdatePersistentSubscriptionOptions.get()
-                .settings(updatedSettings);
-
-        client.update(streamName, groupName, options)
+        client.updateToStream(streamName, groupName, updated)
                 .get();
     }
 
@@ -50,15 +46,11 @@ public class UpdatePersistentSubscriptionTests extends ESDBTests {
             return;
         }
 
-        PersistentSubscriptionToAllSettings updatedSettings = PersistentSubscriptionToAllSettings.builder()
+        UpdatePersistentSubscriptionToAllOptions updatedSettings = UpdatePersistentSubscriptionToAllOptions.get()
                 .checkpointAfterInMs(5_000)
-                .startFrom(4,3)
-                .build();
+                .startFrom(3,4);
 
-        UpdatePersistentSubscriptionToAllOptions options = UpdatePersistentSubscriptionToAllOptions.get()
-                .settings(updatedSettings);
-
-        client.updateToAll(groupName, options)
+        client.updateToAll(groupName, updatedSettings)
                 .get();
     }
 }

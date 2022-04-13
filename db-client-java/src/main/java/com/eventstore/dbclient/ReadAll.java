@@ -3,7 +3,7 @@ package com.eventstore.dbclient;
 import com.eventstore.dbclient.proto.shared.Shared;
 import com.eventstore.dbclient.proto.streams.StreamsOuterClass;
 
-public class ReadAll extends AbstractRead {
+class ReadAll extends AbstractRead {
     private final ReadAllOptions options;
     private final long maxCount;
 

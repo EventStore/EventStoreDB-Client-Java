@@ -7,7 +7,7 @@ import io.grpc.stub.MetadataUtils;
 
 import java.util.concurrent.CompletableFuture;
 
-public class AbortProjection {
+class AbortProjection {
     private final GrpcClient client;
     private final String projectionName;
     private final Metadata metadata;

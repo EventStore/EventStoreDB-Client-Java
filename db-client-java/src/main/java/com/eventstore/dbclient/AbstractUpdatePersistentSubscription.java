@@ -10,11 +10,11 @@ import java.util.concurrent.CompletableFuture;
 public abstract class AbstractUpdatePersistentSubscription {
     private final GrpcClient connection;
     private final String group;
-    private final AbstractPersistentSubscriptionSettings settings;
+    private final PersistentSubscriptionSettings settings;
     private Metadata metadata;
 
     public AbstractUpdatePersistentSubscription(GrpcClient connection, String group,
-                                                AbstractPersistentSubscriptionSettings settings, Metadata metadata) {
+                                                PersistentSubscriptionSettings settings, Metadata metadata) {
         this.connection = connection;
         this.group = group;
         this.settings = settings;
@@ -36,16 +36,16 @@ public abstract class AbstractUpdatePersistentSubscription {
 
             settingsBuilder
                     .setResolveLinks(settings.shouldResolveLinkTos())
-                    .setReadBatchSize(settings.getReadBatchSize())
-                    .setMinCheckpointCount(settings.getCheckPointLowerBound())
-                    .setMaxCheckpointCount(settings.getCheckPointUpperBound())
-                    .setMessageTimeoutMs(settings.getMessageTimeoutMs())
-                    .setMaxSubscriberCount(settings.getMaxSubscriberCount())
-                    .setMaxRetryCount(settings.getMaxRetryCount())
-                    .setLiveBufferSize(settings.getLiveBufferSize())
-                    .setHistoryBufferSize(settings.getHistoryBufferSize())
+                    .setReadBatchSize((int)settings.getReadBatchSize())
+                    .setMinCheckpointCount((int)settings.getCheckpointLowerBound())
+                    .setMaxCheckpointCount((int)settings.getCheckpointUpperBound())
+                    .setMessageTimeoutMs((int)settings.getMessageTimeoutMs())
+                    .setMaxSubscriberCount((int)settings.getMaxSubscriberCount())
+                    .setMaxRetryCount((int)settings.getMaxRetryCount())
+                    .setLiveBufferSize((int)settings.getLiveBufferSize())
+                    .setHistoryBufferSize((int)settings.getHistoryBufferSize())
                     .setExtraStatistics(settings.isExtraStatistics())
-                    .setCheckpointAfterMs(settings.getCheckpointAfterMs());
+                    .setCheckpointAfterMs((int)settings.getCheckpointAfterInMs());
 
             switch (settings.getConsumerStrategyName()) {
                 case NamedConsumerStrategy.DISPATCH_TO_SINGLE:

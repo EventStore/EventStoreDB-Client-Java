@@ -61,7 +61,7 @@ public class EventStoreDB extends GenericContainer<EventStoreDB> {
 
         settings = getEventStoreDBClientSettings();
         client = EventStoreDBClient.create(settings);
-        persistentSubscriptionsClient = EventStoreDBPersistentSubscriptionsClient.create(settings);
+        persistentSubscriptionsClient = EventStoreDBPersistentSubscriptionsClient.createToStream(settings);
         projectionClient = EventStoreDBProjectionManagementClient.create(settings);
     }
 

@@ -3,7 +3,7 @@ package com.eventstore.dbclient;
 import com.eventstore.dbclient.proto.persistentsubscriptions.Persistent;
 import com.eventstore.dbclient.proto.shared.Shared;
 
-public class DeletePersistentSubscriptionToAll extends AbstractDeletePersistentSubscription {
+class DeletePersistentSubscriptionToAll extends AbstractDeletePersistentSubscription {
     public DeletePersistentSubscriptionToAll(GrpcClient client, String group,
                                              DeletePersistentSubscriptionOptions options) {
         super(client, group, options);

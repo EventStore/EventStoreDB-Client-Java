@@ -1,16 +1,12 @@
 package com.eventstore.dbclient;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Function;
 
 public class EventStoreDBPersistentSubscriptionsClient extends EventStoreDBClientBase {
     private static final ObjectMapper mapper = new ObjectMapper();
@@ -19,42 +15,28 @@ public class EventStoreDBPersistentSubscriptionsClient extends EventStoreDBClien
         super(settings);
     }
 
-    public static EventStoreDBPersistentSubscriptionsClient create(EventStoreDBClientSettings settings) {
+    public static EventStoreDBPersistentSubscriptionsClient createToStream(EventStoreDBClientSettings settings) {
         return new EventStoreDBPersistentSubscriptionsClient(settings);
     }
 
-    public CompletableFuture create(String stream, String group) {
-        return this.create(stream, group, CreatePersistentSubscriptionOptions.get());
+    public CompletableFuture createToStream(String stream, String group) {
+        return this.createToStream(stream, group, CreatePersistentSubscriptionToStreamOptions.get());
     }
 
     public CompletableFuture createToAll(String group) {
         return this.createToAll(group, CreatePersistentSubscriptionToAllOptions.get());
     }
 
-    public CompletableFuture create(String stream, String group, PersistentSubscriptionSettings settings) {
-        CreatePersistentSubscriptionOptions options = CreatePersistentSubscriptionOptions.get()
-                .settings(settings);
-
-        return this.create(stream, group, options);
-    }
-
-    public CompletableFuture createToAll(String group, PersistentSubscriptionToAllSettings settings) {
-        CreatePersistentSubscriptionToAllOptions options = CreatePersistentSubscriptionToAllOptions.get()
-                .settings(settings);
-
-        return this.createToAll(group, options);
-    }
-
-    public CompletableFuture create(String stream, String group, CreatePersistentSubscriptionOptions options) {
+    public CompletableFuture createToStream(String stream, String group, CreatePersistentSubscriptionToStreamOptions options) {
         if (options == null) {
-            options = CreatePersistentSubscriptionOptions.get();
+            options = CreatePersistentSubscriptionToStreamOptions.get();
         }
 
         if (!options.hasUserCredentials()) {
             options.authenticated(this.credentials);
         }
 
-        return new CreatePersistentSubscription(this.client, stream, group, options).execute();
+        return new CreatePersistentSubscriptionToStream(this.client, stream, group, options).execute();
     }
 
     public CompletableFuture createToAll(String group, CreatePersistentSubscriptionToAllOptions options) {
@@ -69,38 +51,24 @@ public class EventStoreDBPersistentSubscriptionsClient extends EventStoreDBClien
         return new CreatePersistentSubscriptionToAll(this.client, group, options).execute();
     }
 
-    public CompletableFuture update(String stream, String group) {
-        return this.update(stream, group, UpdatePersistentSubscriptionOptions.get());
+    public CompletableFuture updateToStream(String stream, String group) {
+        return this.updateToStream(stream, group, UpdatePersistentSubscriptionToStreamOptions.get());
     }
 
     public CompletableFuture updateToAll(String group) {
         return this.updateToAll(group, UpdatePersistentSubscriptionToAllOptions.get());
     }
 
-    public CompletableFuture update(String stream, String group, PersistentSubscriptionSettings settings) {
-        UpdatePersistentSubscriptionOptions options = UpdatePersistentSubscriptionOptions.get()
-                .settings(settings);
-
-        return this.update(stream, group, options);
-    }
-
-    public CompletableFuture updateToAll(String group, PersistentSubscriptionToAllSettings settings) {
-        UpdatePersistentSubscriptionToAllOptions options = UpdatePersistentSubscriptionToAllOptions.get()
-                .settings(settings);
-
-        return this.updateToAll(group, options);
-    }
-
-    public CompletableFuture update(String stream, String group, UpdatePersistentSubscriptionOptions options) {
+    public CompletableFuture updateToStream(String stream, String group, UpdatePersistentSubscriptionToStreamOptions options) {
         if (options == null) {
-            options = UpdatePersistentSubscriptionOptions.get();
+            options = UpdatePersistentSubscriptionToStreamOptions.get();
         }
 
         if (!options.hasUserCredentials()) {
             options.authenticated(this.credentials);
         }
 
-        return new UpdatePersistentSubscription(this.client, stream, group, options).execute();
+        return new UpdatePersistentSubscriptionToStream(this.client, stream, group, options).execute();
     }
 
     public CompletableFuture updateToAll(String group, UpdatePersistentSubscriptionToAllOptions options) {
@@ -115,15 +83,15 @@ public class EventStoreDBPersistentSubscriptionsClient extends EventStoreDBClien
         return new UpdatePersistentSubscriptionToAll(this.client, group, options).execute();
     }
 
-    public CompletableFuture delete(String stream, String group) {
-        return this.delete(stream, group, DeletePersistentSubscriptionOptions.get());
+    public CompletableFuture deleteToStream(String stream, String group) {
+        return this.deleteToStream(stream, group, DeletePersistentSubscriptionOptions.get());
     }
 
     public CompletableFuture deleteToAll(String group) {
         return this.deleteToAll(group, DeletePersistentSubscriptionOptions.get());
     }
 
-    public CompletableFuture delete(String stream, String group, DeletePersistentSubscriptionOptions options) {
+    public CompletableFuture deleteToStream(String stream, String group, DeletePersistentSubscriptionOptions options) {
         if (options == null) {
             options = DeletePersistentSubscriptionOptions.get();
         }
@@ -132,7 +100,7 @@ public class EventStoreDBPersistentSubscriptionsClient extends EventStoreDBClien
             options.authenticated(this.credentials);
         }
 
-        return new DeletePersistentSubscription(this.client, stream, group, options).execute();    }
+        return new DeletePersistentSubscriptionToStream(this.client, stream, group, options).execute();    }
 
     public CompletableFuture deleteToAll(String group, DeletePersistentSubscriptionOptions options) {
         if (options == null) {
@@ -146,15 +114,15 @@ public class EventStoreDBPersistentSubscriptionsClient extends EventStoreDBClien
         return new DeletePersistentSubscriptionToAll(this.client, group, options).execute();
     }
 
-    public CompletableFuture<PersistentSubscription> subscribe(String stream, String group, PersistentSubscriptionListener listener) {
-        return this.subscribe(stream, group, SubscribePersistentSubscriptionOptions.get(), listener);
+    public CompletableFuture<PersistentSubscription> subscribeToStream(String stream, String group, PersistentSubscriptionListener listener) {
+        return this.subscribeToStream(stream, group, SubscribePersistentSubscriptionOptions.get(), listener);
     }
 
     public CompletableFuture<PersistentSubscription> subscribeToAll(String group, PersistentSubscriptionListener listener) {
         return this.subscribeToAll(group, SubscribePersistentSubscriptionOptions.get(), listener);
     }
 
-    public CompletableFuture<PersistentSubscription> subscribe(String stream, String group, SubscribePersistentSubscriptionOptions options, PersistentSubscriptionListener listener) {
+    public CompletableFuture<PersistentSubscription> subscribeToStream(String stream, String group, SubscribePersistentSubscriptionOptions options, PersistentSubscriptionListener listener) {
         if (options == null) {
             options = SubscribePersistentSubscriptionOptions.get();
         }
@@ -163,7 +131,7 @@ public class EventStoreDBPersistentSubscriptionsClient extends EventStoreDBClien
             options.authenticated(this.credentials);
         }
 
-        return new SubscribePersistentSubscription(this.client, stream, group, options, listener).execute();    }
+        return new SubscribePersistentSubscriptionToStream(this.client, stream, group, options, listener).execute();    }
 
     public CompletableFuture<PersistentSubscription> subscribeToAll(String group, SubscribePersistentSubscriptionOptions options, PersistentSubscriptionListener listener) {
         if (options == null) {
@@ -178,55 +146,55 @@ public class EventStoreDBPersistentSubscriptionsClient extends EventStoreDBClien
     }
 
     public CompletableFuture<List<PersistentSubscriptionInfo>> listAll(ListPersistentSubscriptionsOptions options) {
-        return ListPersistentSubscriptions.execute(this.client, options, "");
+        return ListPersistentSubscriptions.execute(this.client, options, "", Function.identity());
     }
 
     public CompletableFuture<List<PersistentSubscriptionInfo>> listAll() {
         return listAll(ListPersistentSubscriptionsOptions.get());
     }
 
-    public CompletableFuture<List<PersistentSubscriptionInfo>> listForStream(String stream, ListPersistentSubscriptionsOptions options) {
-        return ListPersistentSubscriptions.execute(this.client, options, stream);
+    public CompletableFuture<List<PersistentSubscriptionToStreamInfo>> listToStream(String stream, ListPersistentSubscriptionsOptions options) {
+        return ListPersistentSubscriptions.execute(this.client, options, stream, info -> (PersistentSubscriptionToStreamInfo) info);
     }
 
-    public CompletableFuture<List<PersistentSubscriptionInfo>> listForStream(String stream) {
-        return listForStream(stream, ListPersistentSubscriptionsOptions.get());
+    public CompletableFuture<List<PersistentSubscriptionToStreamInfo>> listToStream(String stream) {
+        return listToStream(stream, ListPersistentSubscriptionsOptions.get());
     }
 
-    public CompletableFuture<List<PersistentSubscriptionInfo>> listToAll() {
+    public CompletableFuture<List<PersistentSubscriptionToAllInfo>> listToAll() {
         return listToAll(ListPersistentSubscriptionsOptions.get());
     }
 
-    public CompletableFuture<List<PersistentSubscriptionInfo>> listToAll(ListPersistentSubscriptionsOptions options) {
-        return listForStream("$all", options);
+    public CompletableFuture<List<PersistentSubscriptionToAllInfo>> listToAll(ListPersistentSubscriptionsOptions options) {
+        return ListPersistentSubscriptions.execute(this.client, options, "$all", info -> (PersistentSubscriptionToAllInfo) info);
     }
 
-    public CompletableFuture<Optional<PersistentSubscriptionInfo>> getInfo(String stream, String groupName, GetPersistentSubscriptionInfoOptions options) {
+    public CompletableFuture<Optional<PersistentSubscriptionInfo>> getInfoToStream(String stream, String groupName, GetPersistentSubscriptionInfoOptions options) {
         return GetPersistentSubscriptionInfo.execute(this.client, options, stream, groupName);
     }
 
-    public CompletableFuture<Optional<PersistentSubscriptionInfo>> getInfo(String stream, String groupName) {
-        return getInfo(stream, groupName, GetPersistentSubscriptionInfoOptions.get());
+    public CompletableFuture<Optional<PersistentSubscriptionInfo>> getInfoToStream(String stream, String groupName) {
+        return getInfoToStream(stream, groupName, GetPersistentSubscriptionInfoOptions.get());
     }
 
     public CompletableFuture<Optional<PersistentSubscriptionInfo>> getInfoToAll(String groupName, GetPersistentSubscriptionInfoOptions options) {
-        return getInfo("$all", groupName, options);
+        return getInfoToStream("$all", groupName, options);
     }
 
     public CompletableFuture<Optional<PersistentSubscriptionInfo>> getInfoToAll(String groupName) {
         return getInfoToAll(groupName, GetPersistentSubscriptionInfoOptions.get());
     }
 
-    public CompletableFuture replayParkedMessages(String stream, String groupName, ReplayParkedMessagesOptions options) {
+    public CompletableFuture replayParkedMessagesToStream(String stream, String groupName, ReplayParkedMessagesOptions options) {
         return ReplayParkedMessages.execute(this.client, options, stream, groupName);
     }
 
-    public CompletableFuture replayParkedMessages(String stream, String groupName) {
-        return replayParkedMessages(stream, groupName, ReplayParkedMessagesOptions.get());
+    public CompletableFuture replayParkedMessagesToStream(String stream, String groupName) {
+        return replayParkedMessagesToStream(stream, groupName, ReplayParkedMessagesOptions.get());
     }
 
     public CompletableFuture replayParkedMessagesToAll(String groupName, ReplayParkedMessagesOptions options) {
-        return replayParkedMessages("$all", groupName, options);
+        return replayParkedMessagesToStream("$all", groupName, options);
     }
 
     public CompletableFuture replayParkedMessagesToAll(String groupName) throws ExecutionException, InterruptedException {

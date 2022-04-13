@@ -55,10 +55,9 @@ public class PersistentSubscriptionToAllWithFilterTests extends ESDBTests {
             .build();
 
         try {
-            client.createToAll(groupName, PersistentSubscriptionToAllSettings.builder()
+            client.createToAll(groupName, CreatePersistentSubscriptionToAllOptions.get()
                             .fromStart()
-                            .filter(filter)
-                            .build())
+                            .filter(filter))
                     .get();
         } catch (ExecutionException e) {
             if (e.getCause() instanceof UnsupportedFeature && !EventStoreDB.isTestedAgainstVersion20()) {

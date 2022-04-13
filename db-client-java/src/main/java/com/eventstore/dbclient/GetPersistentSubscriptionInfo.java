@@ -17,7 +17,7 @@ import java.util.concurrent.ExecutionException;
 
 import static com.eventstore.dbclient.HttpUtils.*;
 
-public final class GetPersistentSubscriptionInfo {
+final class GetPersistentSubscriptionInfo {
     public static CompletableFuture<Optional<PersistentSubscriptionInfo>> execute(GrpcClient client, GetPersistentSubscriptionInfoOptions options, String stream, String groupName) {
         return client.runWithArgs(args -> {
             CompletableFuture<Optional<PersistentSubscriptionInfo>> result = new CompletableFuture<>();

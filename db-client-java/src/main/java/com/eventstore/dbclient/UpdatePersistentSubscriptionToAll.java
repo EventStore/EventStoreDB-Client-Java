@@ -4,13 +4,12 @@ import com.eventstore.dbclient.proto.persistentsubscriptions.Persistent;
 import com.eventstore.dbclient.proto.shared.Shared;
 
 public class UpdatePersistentSubscriptionToAll extends AbstractUpdatePersistentSubscription {
-    private final PersistentSubscriptionToAllSettings settings;
-
+    private final UpdatePersistentSubscriptionToAllOptions options;
     public UpdatePersistentSubscriptionToAll(GrpcClient connection, String group,
                                              UpdatePersistentSubscriptionToAllOptions options) {
         super(connection, group, options.getSettings(), options.getMetadata());
 
-        this.settings = options.getSettings();
+        this.options = options;
     }
 
     @Override
@@ -18,12 +17,14 @@ public class UpdatePersistentSubscriptionToAll extends AbstractUpdatePersistentS
         Persistent.UpdateReq.Options.Builder optionsBuilder = Persistent.UpdateReq.Options.newBuilder();
         Persistent.UpdateReq.AllOptions.Builder allOptionsBuilder = Persistent.UpdateReq.AllOptions.newBuilder();
 
-        if (settings.getPosition() == Position.START) {
+        StreamPosition<Position> startFrom = options.getSettings().getStartFrom();
+
+        if (startFrom instanceof StreamPosition.Start) {
             allOptionsBuilder.setStart(Shared.Empty.newBuilder());
-        } else if (settings.getPosition() == Position.END) {
+        } else if (startFrom instanceof StreamPosition.End) {
             allOptionsBuilder.setEnd(Shared.Empty.newBuilder());
         } else {
-            Position position = settings.getPosition();
+            Position position = ((StreamPosition.Position<Position>) startFrom).getPosition();
             allOptionsBuilder.setPosition(Persistent.UpdateReq.Position.newBuilder()
                     .setCommitPosition(position.getCommitUnsigned())
                     .setPreparePosition(position.getPrepareUnsigned()));

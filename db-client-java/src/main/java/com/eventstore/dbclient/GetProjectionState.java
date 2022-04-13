@@ -13,7 +13,7 @@ import io.grpc.stub.MetadataUtils;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
-public class GetProjectionState<TResult> {
+class GetProjectionState<TResult> {
 
     private final GrpcClient client;
     private final String projectionName;

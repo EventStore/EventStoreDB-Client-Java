@@ -11,10 +11,10 @@ public class CreatePersistentSubscriptionTests extends ESDBTests {
     public void testCreatePersistentSub() throws Throwable {
         EventStoreDBPersistentSubscriptionsClient client = getEmptyServer().getPersistentSubscriptionsClient();
 
-        client.create(generateName(), generateName())
+        client.createToStream(generateName(), generateName())
                 .get();
 
-        client.create(generateName(), generateName(), PersistentSubscriptionSettings.builder().startFrom(1).build())
+        client.createToStream(generateName(), generateName(), CreatePersistentSubscriptionToStreamOptions.get().startFrom(2))
                 .get();
     }
 
@@ -26,8 +26,8 @@ public class CreatePersistentSubscriptionTests extends ESDBTests {
             client.createToAll(generateName())
                     .get();
 
-            client.createToAll(generateName(), PersistentSubscriptionToAllSettings.builder()
-                            .startFrom(2, 1).build())
+
+            client.createToAll(generateName(), CreatePersistentSubscriptionToAllOptions.get().startFrom(1, 2))
                     .get();
         } catch (ExecutionException e) {
             if (e.getCause() instanceof UnsupportedFeature && !EventStoreDB.isTestedAgainstVersion20()) {

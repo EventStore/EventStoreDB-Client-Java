@@ -7,7 +7,7 @@ import com.eventstore.dbclient.proto.streams.StreamsOuterClass;
  * TODO - Implement a better way to handle very long stream to not end
  * if OOM
  */
-public class ReadStream extends AbstractRead {
+class ReadStream extends AbstractRead {
     private final String streamName;
     private final ReadStreamOptions options;
     private final long maxCount;

@@ -1,22 +1,19 @@
 package com.eventstore.dbclient;
 
-public class PersistentSubscriptionInfo {
-    private String eventStreamId;
+import java.util.List;
+
+public abstract class PersistentSubscriptionInfo {
+    private String eventSource;
     private String groupName;
     private String status;
-    private double averageItemsPerSecond;
-    private long totalItemsProcessed;
-    private long lastKnownEventNumber;
-    private long connectionCount;
-    private long totalInFlightMessages;
-    private PersistentSubscriptionConfig config;
+    private List<PersistentSubscriptionConnectionInfo> connections;
 
-    public String getEventStreamId() {
-        return eventStreamId;
+    public String getEventSource() {
+        return eventSource;
     }
 
-    public void setEventStreamId(String eventStreamId) {
-        this.eventStreamId = eventStreamId;
+    public void setEventSource(String eventSource) {
+        this.eventSource = eventSource;
     }
 
     public String getGroupName() {
@@ -35,51 +32,11 @@ public class PersistentSubscriptionInfo {
         this.status = status;
     }
 
-    public double getAverageItemsPerSecond() {
-        return averageItemsPerSecond;
+    public List<PersistentSubscriptionConnectionInfo> getConnections() {
+        return connections;
     }
 
-    public void setAverageItemsPerSecond(double averageItemsPerSecond) {
-        this.averageItemsPerSecond = averageItemsPerSecond;
-    }
-
-    public long getTotalItemsProcessed() {
-        return totalItemsProcessed;
-    }
-
-    public void setTotalItemsProcessed(long totalItemsProcessed) {
-        this.totalItemsProcessed = totalItemsProcessed;
-    }
-
-    public long getLastKnownEventNumber() {
-        return lastKnownEventNumber;
-    }
-
-    public void setLastKnownEventNumber(long lastKnownEventNumber) {
-        this.lastKnownEventNumber = lastKnownEventNumber;
-    }
-
-    public long getConnectionCount() {
-        return connectionCount;
-    }
-
-    public void setConnectionCount(long connectionCount) {
-        this.connectionCount = connectionCount;
-    }
-
-    public long getTotalInFlightMessages() {
-        return totalInFlightMessages;
-    }
-
-    public void setTotalInFlightMessages(long totalInFlightMessages) {
-        this.totalInFlightMessages = totalInFlightMessages;
-    }
-
-    public PersistentSubscriptionConfig getConfig() {
-        return config;
-    }
-
-    public void setConfig(PersistentSubscriptionConfig config) {
-        this.config = config;
+    public void setConnections(List<PersistentSubscriptionConnectionInfo> connections) {
+        this.connections = connections;
     }
 }

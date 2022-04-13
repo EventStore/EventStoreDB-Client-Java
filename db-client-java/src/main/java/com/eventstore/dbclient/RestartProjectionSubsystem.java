@@ -7,7 +7,7 @@ import io.grpc.stub.MetadataUtils;
 
 import java.util.concurrent.CompletableFuture;
 
-public class RestartProjectionSubsystem {
+class RestartProjectionSubsystem {
     private final GrpcClient client;
     private final Metadata metadata;
 
