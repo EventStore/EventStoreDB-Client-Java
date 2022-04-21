@@ -11,14 +11,14 @@ public abstract class AbstractUpdatePersistentSubscription {
     private final GrpcClient connection;
     private final String group;
     private final PersistentSubscriptionSettings settings;
-    private Metadata metadata;
+    private final OptionsBase options;
 
     public AbstractUpdatePersistentSubscription(GrpcClient connection, String group,
-                                                PersistentSubscriptionSettings settings, Metadata metadata) {
+                                                PersistentSubscriptionSettings settings, OptionsBase options) {
         this.connection = connection;
         this.group = group;
         this.settings = settings;
-        this.metadata = metadata;
+        this.options = options;
     }
 
     protected Persistent.UpdateReq.Settings.Builder createSettings() {
@@ -30,8 +30,8 @@ public abstract class AbstractUpdatePersistentSubscription {
     public CompletableFuture execute() {
         return this.connection.runWithArgs(args -> {
             CompletableFuture result = new CompletableFuture();
-            PersistentSubscriptionsGrpc.PersistentSubscriptionsStub client = MetadataUtils
-                    .attachHeaders(PersistentSubscriptionsGrpc.newStub(args.getChannel()), metadata);
+            PersistentSubscriptionsGrpc.PersistentSubscriptionsStub client =
+                    GrpcUtils.configureStub(PersistentSubscriptionsGrpc.newStub(args.getChannel()), this.connection.getSettings(), this.options);
             Persistent.UpdateReq.Settings.Builder settingsBuilder = createSettings();
 
             settingsBuilder

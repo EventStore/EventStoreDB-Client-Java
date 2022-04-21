@@ -10,12 +10,12 @@ import java.util.concurrent.CompletableFuture;
 class ResetProjection {
     private final GrpcClient client;
     private final String projectionName;
-    private final Metadata metadata;
+    private final ResetProjectionOptions options;
 
     public ResetProjection(final GrpcClient client, final String projectionName, final ResetProjectionOptions options) {
         this.client = client;
         this.projectionName = projectionName;
-        this.metadata = options.getMetadata();
+        this.options = options;
     }
 
     public CompletableFuture execute() {
@@ -28,8 +28,8 @@ class ResetProjection {
                     .setOptions(optionsBuilder)
                     .build();
 
-            ProjectionsGrpc.ProjectionsStub client = MetadataUtils
-                    .attachHeaders(ProjectionsGrpc.newStub(channel), this.metadata);
+            ProjectionsGrpc.ProjectionsStub client =
+                    GrpcUtils.configureStub(ProjectionsGrpc.newStub(channel), this.client.getSettings(), this.options);
 
             CompletableFuture<Projectionmanagement.ResetResp> result = new CompletableFuture<>();
 

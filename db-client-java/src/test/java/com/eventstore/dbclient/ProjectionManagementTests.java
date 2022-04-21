@@ -272,19 +272,27 @@ public class ProjectionManagementTests extends ESDBTests {
 
         Thread.sleep(5000);
 
+        GetProjectionResultOptions options = GetProjectionResultOptions.get()
+                .partition("odd");
+
         CountResult oddState = projectionClient
-            .getResult(name, "odd", CountResult.class)
+            .getResult(name, CountResult.class, options)
             .get();
 
+        GetProjectionStateOptions stateOptions = GetProjectionStateOptions.get()
+                .partition("even");
+
         CountResult evenState = projectionClient
-            .getState(name, "even", CountResult.class)
+            .getState(name, CountResult.class, stateOptions)
             .get();
 
         assertCountingProjectionResultAsExpected(oddState);
         assertCountingProjectionResultAsExpected(evenState);
 
         CountResult invalidState = projectionClient
-            .getState(name, "non-existing-partition", CountResult.class)
+            .getState(name, CountResult.class,
+                    GetProjectionStateOptions.get()
+                    .partition("non-existing-partition"))
             .get();
 
         Assertions.assertEquals(0, invalidState.count);
@@ -300,19 +308,26 @@ public class ProjectionManagementTests extends ESDBTests {
 
         waitUntilProjectionStatusIs(name, "Running");
 
+        GetProjectionStateOptions options = GetProjectionStateOptions.get()
+                .partition("odd");
+
         CountResult oddState = projectionClient
-            .getState(name, "odd", CountResult.class)
+            .getState(name, CountResult.class, options)
             .get();
 
+        options.partition("even");
+
         CountResult evenState = projectionClient
-            .getState(name, "even", CountResult.class)
+            .getState(name, CountResult.class, options)
             .get();
 
         assertCountingProjectionResultAsExpected(oddState);
         assertCountingProjectionResultAsExpected(evenState);
 
+        options.partition("non-existing-partition");
+
         CountResult invalidState = projectionClient
-            .getState(name, "non-existing-partition", CountResult.class)
+            .getState(name, CountResult.class, options)
             .get();
 
         Assertions.assertEquals(0, invalidState.count);

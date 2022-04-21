@@ -20,6 +20,7 @@ public class ConnectionSettingsBuilder {
     private LinkedList<Endpoint> _hosts = new LinkedList<>();
     private long _keepAliveTimeout = Consts.DEFAULT_KEEP_ALIVE_TIMEOUT_IN_MS;
     private long _keepAliveInterval = Consts.DEFAULT_KEEP_ALIVE_INTERVAL_IN_MS;
+    private Long _defaultDeadline = null;
 
     public EventStoreDBClientSettings buildConnectionSettings() {
         return new EventStoreDBClientSettings(_dnsDiscover,
@@ -33,7 +34,8 @@ public class ConnectionSettingsBuilder {
                 _defaultCredentials,
                 _hosts.toArray(new Endpoint[_hosts.size()]),
                 _keepAliveTimeout,
-                _keepAliveInterval);
+                _keepAliveInterval,
+                _defaultDeadline);
     }
 
     public ConnectionSettingsBuilder dnsDiscover(boolean dnsDiscover) {
@@ -108,6 +110,11 @@ public class ConnectionSettingsBuilder {
             this._keepAliveInterval = value;
         }
 
+        return this;
+    }
+
+    public ConnectionSettingsBuilder defaultDeadline(long value) {
+        this._defaultDeadline = value;
         return this;
     }
 }

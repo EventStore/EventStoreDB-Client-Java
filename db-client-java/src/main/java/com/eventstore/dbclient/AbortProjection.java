@@ -10,12 +10,12 @@ import java.util.concurrent.CompletableFuture;
 class AbortProjection {
     private final GrpcClient client;
     private final String projectionName;
-    private final Metadata metadata;
+    private final AbortProjectionOptions options;
 
     public AbortProjection(final GrpcClient client, final String projectionName, final AbortProjectionOptions options) {
         this.client = client;
         this.projectionName = projectionName;
-        this.metadata = options.getMetadata();
+        this.options = options;
     }
 
     public CompletableFuture execute() {
@@ -29,8 +29,8 @@ class AbortProjection {
                     .setOptions(optionsBuilder)
                     .build();
 
-            ProjectionsGrpc.ProjectionsStub client = MetadataUtils
-                    .attachHeaders(ProjectionsGrpc.newStub(channel), this.metadata);
+            ProjectionsGrpc.ProjectionsStub client =
+                    GrpcUtils.configureStub(ProjectionsGrpc.newStub(channel), this.client.getSettings(), this.options);
 
             CompletableFuture<Projectionmanagement.DisableResp> result = new CompletableFuture<>();
 

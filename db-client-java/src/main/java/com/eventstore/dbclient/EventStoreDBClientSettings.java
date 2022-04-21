@@ -13,6 +13,7 @@ public class EventStoreDBClientSettings {
     private Endpoint[] hosts;
     private long keepAliveTimeout;
     private long keepAliveInterval;
+    private Long defaultDeadline;
 
     public boolean isDnsDiscover() {
         return dnsDiscover;
@@ -62,6 +63,10 @@ public class EventStoreDBClientSettings {
         return keepAliveInterval;
     }
 
+    public Long getDefaultDeadline() {
+        return defaultDeadline;
+    }
+
     public EventStoreDBClientSettings(
             boolean dnsDiscover,
             int maxDiscoverAttempts,
@@ -74,7 +79,8 @@ public class EventStoreDBClientSettings {
             Credentials defaultCredentials,
             Endpoint[] hosts,
             long keepAliveTimeout,
-            long keepAliveInterval
+            long keepAliveInterval,
+            Long defaultDeadline
     ) {
         this.dnsDiscover = dnsDiscover;
         this.maxDiscoverAttempts = maxDiscoverAttempts;
@@ -88,6 +94,7 @@ public class EventStoreDBClientSettings {
         this.hosts = hosts;
         this.keepAliveTimeout = keepAliveTimeout;
         this.keepAliveInterval = keepAliveInterval;
+        this.defaultDeadline = defaultDeadline;
     }
 
     public static ConnectionSettingsBuilder builder() {

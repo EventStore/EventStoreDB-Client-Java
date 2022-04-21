@@ -78,6 +78,10 @@ abstract class GrpcClient {
         }
     }
 
+    public EventStoreDBClientSettings getSettings() {
+        return settings;
+    }
+
     public <A> CompletableFuture<A> runWithArgs(Function<WorkItemArgs, CompletableFuture<A>> action) {
         final CompletableFuture<A> result = new CompletableFuture<>();
         final GrpcClient self = this;
@@ -276,7 +280,7 @@ abstract class GrpcClient {
     private void closeConnection() {
         if (this.channel != null) {
             try {
-                this.channel.shutdown().awaitTermination(Timeouts.DEFAULT.shutdownTimeout, Timeouts.DEFAULT.shutdownTimeoutUnit);
+                this.channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 logger.error("Error when closing gRPC channel", e);
             } finally {

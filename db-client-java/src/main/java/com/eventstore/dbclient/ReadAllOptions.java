@@ -5,6 +5,7 @@ public class ReadAllOptions extends OptionsWithPositionAndResolveLinkTosBase<Rea
 
     private ReadAllOptions() {
         this.direction = Direction.Forwards;
+        this.kind = OperationKind.Streaming;
     }
 
     public static ReadAllOptions get() {

@@ -11,14 +11,14 @@ abstract class AbstractCreatePersistentSubscription<TPos, TSettings extends Pers
     private final GrpcClient client;
     private final String group;
     private final TSettings settings;
-    private Metadata metadata;
+    private final OptionsBase options;
 
     public AbstractCreatePersistentSubscription(GrpcClient client, String group,
-                                                TSettings settings, Metadata metadata) {
+                                                TSettings settings, OptionsBase options) {
         this.client = client;
         this.group = group;
         this.settings = settings;
-        this.metadata = metadata;
+        this.options = options;
     }
 
     protected Persistent.CreateReq.Settings.Builder createSettings(){
@@ -30,8 +30,9 @@ abstract class AbstractCreatePersistentSubscription<TPos, TSettings extends Pers
     public CompletableFuture execute() {
         return this.client.runWithArgs(args -> {
             CompletableFuture result = new CompletableFuture();
-            PersistentSubscriptionsGrpc.PersistentSubscriptionsStub client = MetadataUtils
-                    .attachHeaders(PersistentSubscriptionsGrpc.newStub(args.getChannel()), this.metadata);
+            PersistentSubscriptionsGrpc.PersistentSubscriptionsStub client =
+                    GrpcUtils.configureStub(PersistentSubscriptionsGrpc.newStub(args.getChannel()), this.client.getSettings(), this.options);
+
             Persistent.CreateReq.Settings.Builder settingsBuilder = createSettings();
 
             settingsBuilder

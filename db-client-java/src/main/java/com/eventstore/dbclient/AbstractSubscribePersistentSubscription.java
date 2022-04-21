@@ -39,9 +39,8 @@ abstract class AbstractSubscribePersistentSubscription {
 
     public CompletableFuture<PersistentSubscription> execute() {
         return this.connection.runWithArgs(args -> {
-            Metadata headers = this.options.getMetadata();
-            PersistentSubscriptionsGrpc.PersistentSubscriptionsStub client = MetadataUtils
-                    .attachHeaders(PersistentSubscriptionsGrpc.newStub(args.getChannel()), headers);
+            PersistentSubscriptionsGrpc.PersistentSubscriptionsStub client =
+                    GrpcUtils.configureStub(PersistentSubscriptionsGrpc.newStub(args.getChannel()), this.connection.getSettings(), this.options);
 
             final CompletableFuture<PersistentSubscription> result = new CompletableFuture<>();
 

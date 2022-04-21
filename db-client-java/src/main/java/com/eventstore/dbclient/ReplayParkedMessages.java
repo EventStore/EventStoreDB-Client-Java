@@ -43,8 +43,8 @@ final class ReplayParkedMessages {
                        .setOptions(optionBuilder)
                        .build();
 
-               PersistentSubscriptionsGrpc.PersistentSubscriptionsStub stub = MetadataUtils
-                       .attachHeaders(PersistentSubscriptionsGrpc.newStub(args.getChannel()), options.getMetadata());
+               PersistentSubscriptionsGrpc.PersistentSubscriptionsStub stub =
+                       GrpcUtils.configureStub(PersistentSubscriptionsGrpc.newStub(args.getChannel()), client.getSettings(), options);
 
                stub.replayParked(req, GrpcUtils.convertSingleResponse(result, resp -> 42 ));
            } else {

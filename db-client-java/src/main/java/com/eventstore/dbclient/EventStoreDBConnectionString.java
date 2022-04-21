@@ -19,11 +19,7 @@ public class EventStoreDBConnectionString {
     private String connectionString;
     private final ConnectionSettingsBuilder settings = EventStoreDBClientSettings.builder();
     private final List<String> notCurrentlySupported = Arrays.asList(
-            "maxDiscoverAttempts",
-            "discoveryInterval",
-            "gossipTimeout",
-            "throwOnAppendFailure",
-            "defaultCredentials"
+            "throwOnAppendFailure"
     );
     private HashMap<String,String> LowerToKey = new HashMap<String,String>(){
         {
@@ -37,6 +33,7 @@ public class EventStoreDBConnectionString {
             put("throwonappendfailure", "throwOnAppendFailure");
             put("keepalivetimeout", "keepAliveTimeout");
             put("keepaliveinterval", "keepAliveInterval");
+            put("defaultdeadline", "defaultDeadline");
         }
     };
 
@@ -351,6 +348,30 @@ public class EventStoreDBConnectionString {
                 }
                 break;
             }
+            case "defaultdeadline":
+                try {
+                    long parsedValue = parseLong(value);
+
+                    if (parsedValue <= 0) {
+                        logger.error("Invalid defaultDeadline of {}. Please provide a strictly positive integer", parsedValue);
+
+                        throw new ParseError(
+                                this.connectionString,
+                                keyPosition,
+                                this.nextPosition,
+                                "positive integer"
+                        );
+                    }
+
+                    this.settings.defaultDeadline(parsedValue);
+                } catch (NumberFormatException e) {
+                    throw new ParseError(
+                            this.connectionString,
+                            keyPosition,
+                            this.nextPosition,
+                            "integer"
+                    );
+                }
             default: {
                 logger.warn("Unknown option {}, setting will be ignored.", key);
             }

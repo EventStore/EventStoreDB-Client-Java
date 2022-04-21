@@ -8,7 +8,7 @@ class CreatePersistentSubscriptionToAll extends AbstractCreatePersistentSubscrip
 
     public CreatePersistentSubscriptionToAll(GrpcClient client, String group,
                                              CreatePersistentSubscriptionToAllOptions options) {
-        super(client, group, options.getSettings(), options.getMetadata());
+        super(client, group, options.getSettings(), options);
         this.options = options;
     }
 

@@ -4,6 +4,7 @@ public class SubscribeToAllOptions extends OptionsWithPositionAndResolveLinkTosB
     protected SubscriptionFilter filter;
 
     private SubscribeToAllOptions() {
+        this.kind = OperationKind.Streaming;
     }
 
     public static SubscribeToAllOptions get() {

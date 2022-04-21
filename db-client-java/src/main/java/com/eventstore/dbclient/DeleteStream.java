@@ -25,7 +25,7 @@ class DeleteStream {
     public CompletableFuture<DeleteResult> execute() {
         return this.client.run(channel -> {
             Metadata headers = this.options.getMetadata();
-            StreamsGrpc.StreamsStub client = MetadataUtils.attachHeaders(StreamsGrpc.newStub(channel), headers);
+            StreamsGrpc.StreamsStub client = GrpcUtils.configureStub(StreamsGrpc.newStub(channel), this.client.getSettings(), this.options);
 
             if (this.options.isSoftDelete()) {
                 StreamsOuterClass.DeleteReq req = StreamsOuterClass.DeleteReq.newBuilder()
