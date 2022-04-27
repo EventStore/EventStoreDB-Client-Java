@@ -1,8 +1,11 @@
 package com.eventstore.dbclient;
 
+import io.reactivex.rxjava3.core.Flowable;
+import org.junit.Ignore;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import testcontainers.module.ESDBTests;
+import testcontainers.module.EventStoreDB;
 
 import java.util.List;
 
@@ -58,6 +61,28 @@ public class ReadStreamTests extends ESDBTests {
         Assertions.assertEquals(result1.getEvents().size(), result2.getEvents().size());
         Assertions.assertEquals(firstEvent1.getEventId(), firstEvent2.getEventId());
     }
+
+    @Test
+    public void testStreamPositionWhenReading() throws Throwable {
+        if (EventStoreDB.isTestedAgains20_10()) {
+            return;
+        }
+
+        EventStoreDBClient client = getPopulatedServer().getClient();
+
+        ReadStreamOptions options = ReadStreamOptions.get()
+                .forwards()
+                .fromStart()
+                .notResolveLinkTos();
+
+        long last = Flowable.fromPublisher(client.readStreamReactive("dataset20M-1800", options))
+                .filter(ReadMessage::hasLastStreamPosition)
+                .map(ReadMessage::getLastStreamPosition)
+                .blockingFirst();
+
+        Assertions.assertEquals(1_999, last);
+    }
+
 
     private void verifyAgainstTestData(List<ResolvedEvent> actualEvents, String filenameStem) {
         ResolvedEvent[] actualEventsArray = actualEvents.toArray(new ResolvedEvent[0]);

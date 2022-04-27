@@ -13,7 +13,7 @@ import org.reactivestreams.Subscriber;
 
 import java.util.concurrent.CompletableFuture;
 
-abstract class AbstractRead implements Publisher<ResolvedEvent> {
+abstract class AbstractRead implements Publisher<ReadMessage> {
     protected static final StreamsOuterClass.ReadReq.Options.Builder defaultReadOptions;
 
     private final GrpcClient client;
@@ -34,7 +34,7 @@ abstract class AbstractRead implements Publisher<ResolvedEvent> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void subscribe(Subscriber<? super ResolvedEvent> subscriber) {
+    public void subscribe(Subscriber<? super ReadMessage> subscriber) {
         ReadSubscription readSubscription = new ReadSubscription(subscriber);
         subscriber.onSubscribe(readSubscription);
 
@@ -61,13 +61,11 @@ abstract class AbstractRead implements Publisher<ResolvedEvent> {
                         return;
                     }
 
-                    if (value.hasEvent()) {
-                        try {
-                            readSubscription.onNext(ResolvedEvent.fromWire(value.getEvent()));
-                        } catch (Throwable t) {
-                            readSubscription.onError(t);
-                            this.completed = true;
-                        }
+                    try {
+                        readSubscription.onNext(new ReadMessage(value));
+                    } catch (Throwable t) {
+                        readSubscription.onError(t);
+                        this.completed = true;
                     }
                 }
 

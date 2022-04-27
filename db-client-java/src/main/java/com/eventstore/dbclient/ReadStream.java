@@ -26,6 +26,7 @@ class ReadStream extends AbstractRead {
                 .setStream(GrpcUtils.toStreamOptions(this.streamName, this.options.getStartingRevision()))
                 .setResolveLinks(this.options.shouldResolveLinkTos())
                 .setCount(this.maxCount)
+                .setControlOption(StreamsOuterClass.ReadReq.Options.ControlOption.newBuilder().setCompatibility(1))
                 .setNoFilter(Shared.Empty.getDefaultInstance())
                 .setReadDirection(this.options.getDirection() == Direction.Forwards ?
                         StreamsOuterClass.ReadReq.Options.ReadDirection.Forwards :

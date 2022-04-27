@@ -73,6 +73,7 @@ abstract class AbstractSubscribePersistentSubscription {
                             this._subscription = new PersistentSubscription(this._requestStream,
                                     readResp.getSubscriptionConfirmation().getSubscriptionId());
                             result.complete(this._subscription);
+                            listener.onConfirmation(this._subscription);
                             return;
                         }
 
@@ -88,7 +89,9 @@ abstract class AbstractSubscribePersistentSubscription {
                             return;
                         }
 
-                        listener.onEvent(this._subscription, ResolvedEvent.fromWire(readResp.getEvent()));
+                        int retryCount = readResp.getEvent().hasNoRetryCount() ? 0 : readResp.getEvent().getRetryCount();
+
+                        listener.onEvent(this._subscription, retryCount, ResolvedEvent.fromWire(readResp.getEvent()));
                     }
 
                     @Override

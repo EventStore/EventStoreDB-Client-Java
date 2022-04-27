@@ -9,4 +9,8 @@ public abstract class SubscriptionListener {
 
     public void onCancelled(Subscription subscription) {
     }
+
+    public void onConfirmation(Subscription subscription) {
+
+    }
 }

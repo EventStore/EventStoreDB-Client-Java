@@ -20,6 +20,8 @@ public class ReadAllReactiveTests extends ESDBTests {
                 .notResolveLinkTos();
 
         List<ResolvedEvent> events = Flowable.fromPublisher(client.readAllReactive(10, options))
+                .filter(ReadMessage::hasEvent)
+                .map(ReadMessage::getEvent)
                 .collect(toList())
                 .blockingGet();
 
@@ -36,6 +38,8 @@ public class ReadAllReactiveTests extends ESDBTests {
                 .notResolveLinkTos();
 
         List<ResolvedEvent> events = Flowable.fromPublisher(client.readAllReactive(10, options))
+                .filter(ReadMessage::hasEvent)
+                .map(ReadMessage::getEvent)
                 .collect(toList())
                 .blockingGet();
 
@@ -52,6 +56,8 @@ public class ReadAllReactiveTests extends ESDBTests {
                 .notResolveLinkTos();
 
         List<ResolvedEvent> events = Flowable.fromPublisher(client.readAllReactive(10, options))
+                .filter(ReadMessage::hasEvent)
+                .map(ReadMessage::getEvent)
                 .collect(toList())
                 .blockingGet();
 

@@ -3,7 +3,7 @@ package com.eventstore.dbclient;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
-abstract class ReadSubscriber implements Subscriber<ResolvedEvent> {
+abstract class ReadSubscriber implements Subscriber<ReadMessage> {
 
     private Subscription subscription;
 
@@ -18,9 +18,9 @@ abstract class ReadSubscriber implements Subscriber<ResolvedEvent> {
     }
 
     @Override
-    public final void onNext(ResolvedEvent resolvedEvent) {
+    public final void onNext(ReadMessage resolvedEvent) {
         onEvent(resolvedEvent);
     }
 
-    public abstract void onEvent(ResolvedEvent resolvedEvent);
+    public abstract void onEvent(ReadMessage resolvedEvent);
 }

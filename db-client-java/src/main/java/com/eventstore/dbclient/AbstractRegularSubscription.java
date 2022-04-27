@@ -8,7 +8,6 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ClientCallStreamObserver;
 import io.grpc.stub.ClientResponseObserver;
-import io.grpc.stub.MetadataUtils;
 
 import javax.validation.constraints.NotNull;
 import java.util.concurrent.CompletableFuture;
@@ -65,6 +64,7 @@ abstract class AbstractRegularSubscription {
                         this._subscription = new Subscription(this._requestStream,
                                 readResp.getConfirmation().getSubscriptionId(), checkpointer);
                         future.complete(this._subscription);
+                        listener.onConfirmation(this._subscription);
                         return;
                     }
 
