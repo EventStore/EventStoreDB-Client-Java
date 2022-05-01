@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 
+@SuppressWarnings("unchecked")
 public class OfflineMetadataTests {
     @Test
     public void testSerializationIsoMorphism() throws Throwable {

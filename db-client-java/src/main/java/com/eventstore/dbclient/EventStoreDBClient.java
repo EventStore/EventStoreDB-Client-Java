@@ -99,6 +99,7 @@ public class EventStoreDBClient extends EventStoreDBClientBase {
             CompletableFuture<StreamMetadata> out = new CompletableFuture<>();
 
             try {
+                @SuppressWarnings("unchecked")
                 HashMap<String, Object> source = event.getEventDataAs(HashMap.class);
 
                 out.complete(StreamMetadata.deserialize(source));

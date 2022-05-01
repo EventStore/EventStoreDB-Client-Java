@@ -26,6 +26,7 @@ class OptionsBase<T> {
         return this.metadata.getUserCredentials();
     }
 
+    @SuppressWarnings("unchecked")
     public T authenticated(UserCredentials credentials) {
         this.credentials = credentials;
         return (T)this;
@@ -39,11 +40,13 @@ class OptionsBase<T> {
         return requiresLeader(false);
     }
 
+    @SuppressWarnings("unchecked")
     public T requiresLeader(boolean value) {
         this.requiresLeader = value;
         return (T)this;
     }
 
+    @SuppressWarnings("unchecked")
     public T deadline(long durationInMs) {
         deadline = durationInMs;
 

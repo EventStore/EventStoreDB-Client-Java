@@ -21,6 +21,8 @@ class CreatePersistentSubscriptionToStream extends AbstractCreatePersistentSubsc
     }
 
     @Override
+    @SuppressWarnings("deprecation")
+    // We have to support the setStreamIdentifier call while 20.10LTS is still supported.
     protected Persistent.CreateReq.Options.Builder createOptions() {
         Persistent.CreateReq.Options.Builder optionsBuilder = Persistent.CreateReq.Options.newBuilder();
         Shared.StreamIdentifier.Builder streamIdentifierBuilder = Shared.StreamIdentifier.newBuilder();

@@ -27,6 +27,7 @@ public abstract class AbstractUpdatePersistentSubscription {
 
     protected abstract Persistent.UpdateReq.Options.Builder createOptions();
 
+    @SuppressWarnings("unchecked")
     public CompletableFuture execute() {
         return this.connection.runWithArgs(args -> {
             CompletableFuture result = new CompletableFuture();

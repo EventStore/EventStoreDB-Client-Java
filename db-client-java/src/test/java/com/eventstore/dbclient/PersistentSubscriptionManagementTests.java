@@ -13,6 +13,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@SuppressWarnings("unchecked")
 public class PersistentSubscriptionManagementTests extends ESDBTests {
     @Test
     @Order(1)

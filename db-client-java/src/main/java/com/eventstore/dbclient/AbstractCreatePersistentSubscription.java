@@ -27,6 +27,7 @@ abstract class AbstractCreatePersistentSubscription<TPos, TSettings extends Pers
 
     protected abstract Persistent.CreateReq.Options.Builder createOptions();
 
+    @SuppressWarnings({"unchecked", "deprecation"})
     public CompletableFuture execute() {
         return this.client.runWithArgs(args -> {
             CompletableFuture result = new CompletableFuture();

@@ -20,6 +20,7 @@ abstract class AbstractDeletePersistentSubscription {
 
     protected abstract Persistent.DeleteReq.Options.Builder createOptions();
 
+    @SuppressWarnings("unchecked")
     public CompletableFuture execute() {
         return this.client.runWithArgs(args -> {
             CompletableFuture result = new CompletableFuture();
