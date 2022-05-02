@@ -21,7 +21,7 @@ public class AppendingEvents {
                 .build();
 
         AppendToStreamOptions options = AppendToStreamOptions.get()
-                .expectedRevision(ExpectedRevision.NO_STREAM);
+                .expectedRevision(ExpectedRevision.noStream());
 
         client.appendToStream("some-stream", options, eventData)
                 .get();
@@ -41,7 +41,7 @@ public class AppendingEvents {
                 .build();
 
         AppendToStreamOptions options = AppendToStreamOptions.get()
-                .expectedRevision(ExpectedRevision.ANY);
+                .expectedRevision(ExpectedRevision.any());
 
         client.appendToStream("same-event-stream", options, eventData)
                 .get();
@@ -75,7 +75,7 @@ public class AppendingEvents {
                 .build();
 
         AppendToStreamOptions options = AppendToStreamOptions.get()
-                .expectedRevision(ExpectedRevision.NO_STREAM);
+                .expectedRevision(ExpectedRevision.noStream());
 
         client.appendToStream("no-stream-stream", options, eventDataOne)
                 .get();
@@ -93,12 +93,11 @@ public class AppendingEvents {
                 .forwards()
                 .fromStart();
 
-        ReadResult result = client.readStream("concurrency-stream", readStreamOptions)
+        List<ResolvedEvent> events = client.readStream("concurrency-stream", readStreamOptions)
                 .get();
 
-        List<ResolvedEvent> events = result.getEvents();
         ResolvedEvent lastEvent = events.get(events.size() - 1);
-        StreamRevision revision = lastEvent.getEvent().getStreamRevision();
+        long revision = lastEvent.getEvent().getRevision();
 
         EventData clientOneData = EventData
                 .builderAsJson(

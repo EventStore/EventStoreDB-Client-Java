@@ -12,18 +12,11 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
-public class EventStoreDBClientBase {
+class EventStoreDBClientBase {
     final Logger logger = LoggerFactory.getLogger(EventStoreDBClientBase.class);
-    final protected GrpcClient client;
-    final protected UserCredentials credentials;
+    final private GrpcClient client;
 
     protected EventStoreDBClientBase(EventStoreDBClientSettings settings) {
-        if (settings.getDefaultCredentials() != null) {
-            this.credentials = settings.getDefaultCredentials().toUserCredentials();
-        } else {
-            this.credentials = null;
-        }
-
         SslContext sslContext = null;
 
         if (settings.isTls()) {
@@ -60,7 +53,16 @@ public class EventStoreDBClientBase {
         this.client = new SingleNodeClient(settings.getHosts()[0].getHostname(), settings.getHosts()[0].getPort(), sslContext, settings);
     }
 
+    /**
+     * Closes a connection and cleans all its allocated resources.
+     * @throws ExecutionException
+     * @throws InterruptedException
+     */
     public void shutdown() throws ExecutionException, InterruptedException {
         this.client.shutdown();
+    }
+
+    GrpcClient getGrpcClient() {
+        return client;
     }
 }

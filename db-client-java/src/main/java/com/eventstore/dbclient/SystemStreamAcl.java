@@ -1,12 +1,15 @@
 package com.eventstore.dbclient;
 
-public class SystemStreamAcl implements Acl {
-    public static final String ACL_NAME = "$systemStreamAcl";
+/**
+ * Admin stream access control list (ACL).
+ */
+class SystemStreamAcl implements Acl {
+    private static final String ACL_NAME = "$systemStreamAcl";
     private static final SystemStreamAcl SINGLETON = new SystemStreamAcl();
 
     private SystemStreamAcl() {}
 
-    public static SystemStreamAcl deserialize(String source) {
+    static SystemStreamAcl deserialize(String source) {
         SystemStreamAcl acl = null;
 
         if (source.equals(ACL_NAME))
@@ -15,7 +18,7 @@ public class SystemStreamAcl implements Acl {
         return acl;
     }
 
-    public static SystemStreamAcl getInstance() {
+    static SystemStreamAcl getInstance() {
         return SINGLETON;
     }
 

@@ -1,6 +1,6 @@
 package com.eventstore.dbclient;
 
-public class Tuple<A, B> {
+class Tuple<A, B> {
     private final A _1;
     private final B _2;
 

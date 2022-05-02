@@ -88,7 +88,7 @@ public class PersistentSubscriptionManagementTests extends ESDBTests {
             client.createToAll(groupName)
                     .get();
         } catch (ExecutionException e) {
-            if (e.getCause() instanceof UnsupportedFeature && !EventStoreDB.isTestedAgainstVersion20()) {
+            if (e.getCause() instanceof UnsupportedFeatureException && !EventStoreDB.isTestedAgainstVersion20()) {
                 throw e;
             }
 
@@ -119,7 +119,7 @@ public class PersistentSubscriptionManagementTests extends ESDBTests {
         String groupName = generateName();
         client.createToStream(streamName, groupName)
                 .get();
-        Optional<PersistentSubscriptionInfo> result = Optional.empty();
+        Optional<PersistentSubscriptionToStreamInfo> result = Optional.empty();
         for (int i = 0; i < 10; i++) {
             result = client.getInfoToStream(streamName, groupName).get();
             if (!result.isPresent()) {
@@ -143,14 +143,14 @@ public class PersistentSubscriptionManagementTests extends ESDBTests {
             client.createToAll(groupName)
                     .get();
         } catch (ExecutionException e) {
-            if (e.getCause() instanceof UnsupportedFeature && !EventStoreDB.isTestedAgainstVersion20()) {
+            if (e.getCause() instanceof UnsupportedFeatureException && !EventStoreDB.isTestedAgainstVersion20()) {
                 throw e;
             }
 
             return;
         }
 
-        Optional<PersistentSubscriptionInfo> result = client.getInfoToAll(groupName).get();
+        Optional<PersistentSubscriptionToAllInfo> result = client.getInfoToAll(groupName).get();
 
         Assertions.assertTrue(result.isPresent());
         Assertions.assertEquals("$all", result.get().getEventSource());
@@ -161,7 +161,7 @@ public class PersistentSubscriptionManagementTests extends ESDBTests {
     @Order(6)
     public void testGetPersistentSubscriptionInfoNotExisting() throws Throwable {
         EventStoreDBPersistentSubscriptionsClient client = getEmptyServer().getPersistentSubscriptionsClient();
-        Optional<PersistentSubscriptionInfo> result = client.getInfoToStream(generateName(), generateName()).get();
+        Optional<PersistentSubscriptionToStreamInfo> result = client.getInfoToStream(generateName(), generateName()).get();
 
         Assertions.assertFalse(result.isPresent());
     }
@@ -249,7 +249,7 @@ public class PersistentSubscriptionManagementTests extends ESDBTests {
             client.createToAll(groupName)
                     .get();
         } catch (ExecutionException e) {
-            if (e.getCause() instanceof UnsupportedFeature && !EventStoreDB.isTestedAgainstVersion20()) {
+            if (e.getCause() instanceof UnsupportedFeatureException && !EventStoreDB.isTestedAgainstVersion20()) {
                 throw e;
             }
 
@@ -325,7 +325,7 @@ public class PersistentSubscriptionManagementTests extends ESDBTests {
         String groupName = String.format("/foo/%s/group", generateName());
 
         client.createToStream(streamName, groupName).get();
-        Optional<PersistentSubscriptionInfo> info = Optional.empty();
+        Optional<PersistentSubscriptionToStreamInfo> info = Optional.empty();
         for (int i = 0; i < 10; i++) {
             info = client.getInfoToStream(streamName, groupName).get();
 

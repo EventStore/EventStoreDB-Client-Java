@@ -14,10 +14,9 @@ public class ReadingEvents {
                 .forwards()
                 .fromStart();
 
-        ReadResult result = client.readStream("some-stream", options)
+        List<ResolvedEvent> events = client.readStream("some-stream", options)
                 .get();
 
-        List<ResolvedEvent> events = result.getEvents();
         // endregion read-from-stream
 
         // region iterate-stream
@@ -32,12 +31,12 @@ public class ReadingEvents {
         // region read-from-stream-position
         ReadStreamOptions options = ReadStreamOptions.get()
                 .forwards()
-                .fromRevision(10);
+                .fromRevision(10)
+                .maxCount(20);
 
-        ReadResult result = client.readStream("some-stream", 20, options)
+        List<ResolvedEvent> events = client.readStream("some-stream", options)
                 .get();
 
-        List<ResolvedEvent> events = result.getEvents();
         // endregion read-from-stream-position
 
         // region iterate-stream
@@ -50,14 +49,12 @@ public class ReadingEvents {
 
     private static void readStreamOverridingUserCredentials(EventStoreDBClient client) throws ExecutionException, InterruptedException {
         // region overriding-user-credentials
-        UserCredentials credentials = new UserCredentials("admin", "changeit");
-
         ReadStreamOptions options = ReadStreamOptions.get()
                 .forwards()
                 .fromStart()
-                .authenticated(credentials);
+                .authenticated("admin", "changeit");
 
-        ReadResult result = client.readStream("some-stream", options)
+        List<ResolvedEvent> result = client.readStream("some-stream", options)
                 .get();
         // endregion overriding-user-credentials
     }
@@ -66,13 +63,13 @@ public class ReadingEvents {
         // region checking-for-stream-presence
         ReadStreamOptions options = ReadStreamOptions.get()
                 .forwards()
-                .fromRevision(10);
+                .fromRevision(10)
+                .maxCount(20);
 
         List<ResolvedEvent> events = null;
         try {
-            ReadResult result = client.readStream("some-stream", 20, options)
+            events = client.readStream("some-stream", options)
                     .get();
-            events = result.getEvents();
         } catch (ExecutionException e) {
             Throwable innerException = e.getCause();
 
@@ -94,10 +91,8 @@ public class ReadingEvents {
                 .backwards()
                 .fromEnd();
 
-        ReadResult result = client.readStream("some-stream", options)
+        List<ResolvedEvent> events = client.readStream("some-stream", options)
                 .get();
-
-        List<ResolvedEvent> events = result.getEvents();
 
         for (ResolvedEvent resolvedEvent : events) {
             RecordedEvent recordedEvent = resolvedEvent.getOriginalEvent();
@@ -112,10 +107,9 @@ public class ReadingEvents {
                 .forwards()
                 .fromStart();
 
-        ReadResult result = client.readAll(options)
+        List<ResolvedEvent> events = client.readAll(options)
                 .get();
 
-        List<ResolvedEvent> events = result.getEvents();
         // endregion read-from-all-stream
 
         // region read-from-all-stream-iterate
@@ -128,14 +122,12 @@ public class ReadingEvents {
 
     private static void readAllOverridingUserCredentials(EventStoreDBClient client) throws ExecutionException, InterruptedException {
         // region read-all-overriding-user-credentials
-        UserCredentials credentials = new UserCredentials("admin", "changeit");
-
         ReadAllOptions options = ReadAllOptions.get()
                 .forwards()
                 .fromStart()
-                .authenticated(credentials);
+                .authenticated("admin", "changeit");
 
-        ReadResult result = client.readAll(options)
+        List<ResolvedEvent> result = client.readAll(options)
                 .get();
         // endregion read-all-overriding-user-credentials
     }
@@ -146,10 +138,8 @@ public class ReadingEvents {
                 .forwards()
                 .fromStart();
 
-        ReadResult result = client.readAll(options)
+        List<ResolvedEvent> events = client.readAll(options)
                 .get();
-
-        List<ResolvedEvent> events = result.getEvents();
 
         for (ResolvedEvent resolvedEvent : events) {
             RecordedEvent recordedEvent = resolvedEvent.getOriginalEvent();
@@ -167,10 +157,9 @@ public class ReadingEvents {
                 .backwards()
                 .fromEnd();
 
-        ReadResult result = client.readAll(options)
+        List<ResolvedEvent> events = client.readAll(options)
                 .get();
 
-        List<ResolvedEvent> events = result.getEvents();
         // endregion read-from-all-stream-backwards
 
         // region read-from-all-stream-iterate
@@ -186,10 +175,8 @@ public class ReadingEvents {
                 .forwards()
                 .fromStart();
 
-        ReadResult result = client.readAll(options)
+        List<ResolvedEvent> events = client.readAll(options)
                 .get();
-
-        List<ResolvedEvent> events = result.getEvents();
 
         for (ResolvedEvent resolvedEvent : events) {
             RecordedEvent recordedEvent = resolvedEvent.getOriginalEvent();
@@ -207,10 +194,9 @@ public class ReadingEvents {
                 .fromStart()
                 .resolveLinkTos();
 
-        ReadResult result = client.readAll(options)
+        List<ResolvedEvent> events = client.readAll(options)
                 .get();
 
-        List<ResolvedEvent> events = result.getEvents();
         // endregion read-from-all-stream-resolving-link-Tos
         for (ResolvedEvent resolvedEvent : events) {
             RecordedEvent recordedEvent = resolvedEvent.getOriginalEvent();

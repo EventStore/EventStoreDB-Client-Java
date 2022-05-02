@@ -15,14 +15,22 @@ class SubscribeToAll extends AbstractRegularSubscription {
 
     @Override
     protected StreamsOuterClass.ReadReq.Options.Builder createOptions() {
+        StreamsOuterClass.ReadReq.Options.AllOptions.Builder allOptions = StreamsOuterClass.ReadReq.Options.AllOptions.newBuilder();
+
+        if (this.options.getPosition().isEnd()) {
+            allOptions.setEnd(Shared.Empty.getDefaultInstance());
+        } else if (this.options.getPosition().isStart()) {
+            allOptions.setStart(Shared.Empty.getDefaultInstance());
+        } else {
+            StreamPosition.Position<Position> position = (StreamPosition.Position<Position>) this.options.getPosition();
+            allOptions.setPosition(StreamsOuterClass.ReadReq.Options.Position.newBuilder()
+                    .setCommitPosition(position.getPositionOrThrow().getCommitUnsigned())
+                    .setPreparePosition(position.getPositionOrThrow().getPrepareUnsigned()));
+        }
         StreamsOuterClass.ReadReq.Options.Builder options =
                 defaultSubscribeOptions.clone()
                         .setResolveLinks(this.options.shouldResolveLinkTos())
-                        .setAll(StreamsOuterClass.ReadReq.Options.AllOptions.newBuilder()
-                                .setPosition(StreamsOuterClass.ReadReq.Options.Position.newBuilder()
-                                        .setCommitPosition(this.options.getPosition().getCommitUnsigned())
-                                        .setPreparePosition(this.options.getPosition().getPrepareUnsigned()))
-                                .build());
+                        .setAll(allOptions);
 
         if (this.options.getFilter() != null) {
             this.options.getFilter().addToWireStreamsReadReq(options);

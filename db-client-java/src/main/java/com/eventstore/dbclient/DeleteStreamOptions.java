@@ -1,27 +1,15 @@
 package com.eventstore.dbclient;
 
+/**
+ * Options of the delete or tombstone stream request.
+ */
 public class DeleteStreamOptions extends OptionsWithExpectedRevisionBase<DeleteStreamOptions> {
-    private boolean softDelete;
+    DeleteStreamOptions() {}
 
-    private DeleteStreamOptions() {
-        this.softDelete = true;
-    }
-
+    /**
+     * Returns options with default values.
+     */
     public static DeleteStreamOptions get() {
         return new DeleteStreamOptions();
-    }
-
-    public boolean isSoftDelete() {
-        return this.softDelete;
-    }
-
-    public DeleteStreamOptions softDelete() {
-        this.softDelete = true;
-        return this;
-    }
-
-    public DeleteStreamOptions hardDelete() {
-        this.softDelete = false;
-        return this;
     }
 }

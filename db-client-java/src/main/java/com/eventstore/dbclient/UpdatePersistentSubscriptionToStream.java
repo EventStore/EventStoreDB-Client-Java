@@ -36,8 +36,7 @@ class UpdatePersistentSubscriptionToStream extends AbstractUpdatePersistentSubsc
         } else if (position instanceof StreamPosition.End) {
             streamOptionsBuilder.setEnd(Shared.Empty.newBuilder());
         } else {
-            long pos = ((StreamPosition.Position<Long>) position).getPosition();
-            streamOptionsBuilder.setRevision(pos);
+            streamOptionsBuilder.setRevision(position.getPositionOrThrow());
         }
 
         streamIdentifierBuilder.setStreamName(ByteString.copyFromUtf8(stream));

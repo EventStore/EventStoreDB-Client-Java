@@ -2,7 +2,7 @@ package com.eventstore.dbclient;
 
 import io.grpc.Metadata;
 
-public class ConnectionMetadata {
+class ConnectionMetadata {
     private Metadata metadata;
 
     public ConnectionMetadata() {

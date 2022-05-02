@@ -14,12 +14,13 @@ public class ReadStreamTests extends ESDBTests {
         ReadStreamOptions options = ReadStreamOptions.get()
                 .forwards()
                 .fromStart()
+                .maxCount(10)
                 .notResolveLinkTos();
 
-        ReadResult result = client.readStream("dataset20M-1800", 10, options)
+        List<ResolvedEvent> result = client.readStream("dataset20M-1800", options)
                 .get();
 
-        verifyAgainstTestData(result.getEvents(), "dataset20M-1800-e0-e10");
+        verifyAgainstTestData(result, "dataset20M-1800-e0-e10");
     }
 
     @Test
@@ -29,12 +30,13 @@ public class ReadStreamTests extends ESDBTests {
         ReadStreamOptions options = ReadStreamOptions.get()
                 .backwards()
                 .fromEnd()
+                .maxCount(10)
                 .notResolveLinkTos();
 
-        ReadResult result = client.readStream("dataset20M-1800", 10, options)
+        List<ResolvedEvent> result = client.readStream("dataset20M-1800", options)
                 .get();
 
-        verifyAgainstTestData(result.getEvents(), "dataset20M-1800-e1999-e1990");
+        verifyAgainstTestData(result, "dataset20M-1800-e1999-e1990");
     }
 
     @Test
@@ -46,16 +48,16 @@ public class ReadStreamTests extends ESDBTests {
                 .fromEnd()
                 .notResolveLinkTos();
 
-        ReadResult result1 = client.readStream("dataset20M-1800", Long.MAX_VALUE, options)
+        List<ResolvedEvent> result1 = client.readStream("dataset20M-1800", options)
                 .get();
 
-        ReadResult result2 = client.readStream("dataset20M-1800", options)
+        List<ResolvedEvent> result2 = client.readStream("dataset20M-1800", options)
                 .get();
 
-        RecordedEvent firstEvent1 = result1.getEvents().get(0).getOriginalEvent();
-        RecordedEvent firstEvent2 = result2.getEvents().get(0).getOriginalEvent();
+        RecordedEvent firstEvent1 = result1.get(0).getOriginalEvent();
+        RecordedEvent firstEvent2 = result2.get(0).getOriginalEvent();
 
-        Assertions.assertEquals(result1.getEvents().size(), result2.getEvents().size());
+        Assertions.assertEquals(result1.size(), result2.size());
         Assertions.assertEquals(firstEvent1.getEventId(), firstEvent2.getEventId());
     }
 

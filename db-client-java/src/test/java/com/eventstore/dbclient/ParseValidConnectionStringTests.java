@@ -126,7 +126,7 @@ public class ParseValidConnectionStringTests {
 
     @ParameterizedTest
     @MethodSource("validConnectionStrings")
-    public void test(String connectionString, String json) throws ParseError, JsonProcessingException {
+    public void test(String connectionString, String json) throws ConnectionStringParsingException, JsonProcessingException {
 
         EventStoreDBClientSettings expectedSettings = this.parseJson(json);
         EventStoreDBClientSettings parsedSettings = EventStoreDBConnectionString.parse(connectionString);

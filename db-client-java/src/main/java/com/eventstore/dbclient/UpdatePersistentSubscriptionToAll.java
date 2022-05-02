@@ -3,7 +3,7 @@ package com.eventstore.dbclient;
 import com.eventstore.dbclient.proto.persistentsubscriptions.Persistent;
 import com.eventstore.dbclient.proto.shared.Shared;
 
-public class UpdatePersistentSubscriptionToAll extends AbstractUpdatePersistentSubscription {
+class UpdatePersistentSubscriptionToAll extends AbstractUpdatePersistentSubscription {
     private final UpdatePersistentSubscriptionToAllOptions options;
     public UpdatePersistentSubscriptionToAll(GrpcClient connection, String group,
                                              UpdatePersistentSubscriptionToAllOptions options) {
@@ -24,7 +24,7 @@ public class UpdatePersistentSubscriptionToAll extends AbstractUpdatePersistentS
         } else if (startFrom instanceof StreamPosition.End) {
             allOptionsBuilder.setEnd(Shared.Empty.newBuilder());
         } else {
-            Position position = ((StreamPosition.Position<Position>) startFrom).getPosition();
+            Position position = startFrom.getPositionOrThrow();
             allOptionsBuilder.setPosition(Persistent.UpdateReq.Position.newBuilder()
                     .setCommitPosition(position.getCommitUnsigned())
                     .setPreparePosition(position.getPrepareUnsigned()));

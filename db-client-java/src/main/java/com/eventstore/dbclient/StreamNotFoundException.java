@@ -1,4 +1,8 @@
 package com.eventstore.dbclient;
 
-public class StreamNotFoundException extends Throwable {
+/**
+ * When a stream is not found.
+ */
+public class StreamNotFoundException extends RuntimeException {
+    StreamNotFoundException(){}
 }

@@ -4,10 +4,10 @@ import javax.validation.constraints.NotNull;
 
 import java.util.Objects;
 
+/**
+ * Transaction log position.
+ */
 public class Position implements Comparable<Position> {
-    public static final Position START = new Position(0, 0);
-    public static final Position END = new Position(-1, -1);
-
     private final long prepare;
     private final long commit;
 
@@ -21,14 +21,20 @@ public class Position implements Comparable<Position> {
         this.commit = commitUnsigned;
     }
 
-    public Position(String prepare, String commit) {
+    Position(String prepare, String commit) {
         this(Long.parseUnsignedLong(commit), Long.parseUnsignedLong(prepare));
     }
 
+    /**
+     * Returns the prepare position.
+     */
     public long getPrepareUnsigned() {
         return prepare;
     }
 
+    /**
+     * Returns the commit position.
+     */
     public long getCommitUnsigned() {
         return commit;
     }

@@ -1,20 +1,29 @@
 package com.eventstore.dbclient;
 
+/**
+ * Options of the subscribe to $all request.
+ */
 public class SubscribeToAllOptions extends OptionsWithPositionAndResolveLinkTosBase<SubscribeToAllOptions> {
-    protected SubscriptionFilter filter;
+    private SubscriptionFilter filter;
 
     private SubscribeToAllOptions() {
-        this.kind = OperationKind.Streaming;
+        super(OperationKind.Streaming);
     }
 
+    /**
+     * Returns options with default values.
+     */
     public static SubscribeToAllOptions get() {
         return new SubscribeToAllOptions();
     }
 
-    public SubscriptionFilter getFilter() {
+    SubscriptionFilter getFilter() {
         return filter;
     }
 
+    /**
+     * Applies a server-side filter to determine if an event of the subscription should be yielded.
+     */
     public SubscribeToAllOptions filter(SubscriptionFilter filter) {
         this.filter = filter;
         return this;

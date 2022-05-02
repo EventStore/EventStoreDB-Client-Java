@@ -63,7 +63,7 @@ public class SubscribeToAllTests extends ESDBTests {
             public void onEvent(Subscription subscription, ResolvedEvent event) {
                 RecordedEvent record = event.getEvent();
 
-                assertEquals(new StreamRevision(expectedStreamVersions[current]), record.getStreamRevision());
+                assertEquals(expectedStreamVersions[current], record.getRevision());
                 expectedPositions[current].assertEquals(record.getPosition());
 
                 receivedEvents.countDown();
@@ -82,7 +82,7 @@ public class SubscribeToAllTests extends ESDBTests {
         };
 
         SubscriptionFilter filter = SubscriptionFilter.newBuilder()
-                .withEventTypePrefix("eventType-194")
+                .addEventTypePrefix("eventType-194")
                 .build();
 
         SubscribeToAllOptions options = SubscribeToAllOptions.get()

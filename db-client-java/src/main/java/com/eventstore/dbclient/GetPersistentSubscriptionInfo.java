@@ -7,13 +7,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.protobuf.ByteString;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
-import io.grpc.stub.MetadataUtils;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 import static com.eventstore.dbclient.HttpUtils.*;
 
@@ -23,7 +21,7 @@ final class GetPersistentSubscriptionInfo {
             CompletableFuture<Optional<PersistentSubscriptionInfo>> result = new CompletableFuture<>();
 
             if (stream.equals("$all") && !args.supportFeature(FeatureFlags.PERSISTENT_SUBSCRIPTION_TO_ALL)) {
-                result.completeExceptionally(new UnsupportedFeature());
+                result.completeExceptionally(new UnsupportedFeatureException());
                 return result;
             }
 

@@ -31,8 +31,8 @@ public class ParseInvalidConnectionStringTests {
 
     @ParameterizedTest
     @MethodSource("invalidConnectionStrings")
-    public void test(String input) throws ParseError {
-        Assertions.assertThrows(ParseError.class, () -> {
+    public void test(String input) throws ConnectionStringParsingException {
+        Assertions.assertThrows(ConnectionStringParsingException.class, () -> {
             EventStoreDBClientSettings parsedSettings = EventStoreDBConnectionString.parse(input);
         });
     }

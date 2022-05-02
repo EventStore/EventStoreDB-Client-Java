@@ -8,7 +8,6 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ClientCallStreamObserver;
 import io.grpc.stub.ClientResponseObserver;
-import io.grpc.stub.MetadataUtils;
 import io.grpc.stub.StreamObserver;
 
 import java.util.concurrent.CompletableFuture;
@@ -53,7 +52,7 @@ abstract class AbstractSubscribePersistentSubscription {
                     .build();
 
             if (req.getOptions().hasAll() && !args.supportFeature(FeatureFlags.PERSISTENT_SUBSCRIPTION_TO_ALL)) {
-                result.completeExceptionally(new UnsupportedFeature());
+                result.completeExceptionally(new UnsupportedFeatureException());
             } else {
 
                 ClientResponseObserver<Persistent.ReadReq, Persistent.ReadResp> observer = new ClientResponseObserver<Persistent.ReadReq, Persistent.ReadResp>() {

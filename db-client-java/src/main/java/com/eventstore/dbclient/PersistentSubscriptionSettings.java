@@ -2,6 +2,9 @@ package com.eventstore.dbclient;
 
 import java.time.Duration;
 
+/**
+ * Common persistent subscription settings type.
+ */
 public abstract class PersistentSubscriptionSettings {
     private int checkpointAfter;
     private boolean extraStatistics;
@@ -14,11 +17,11 @@ public abstract class PersistentSubscriptionSettings {
     private int messageTimeoutMs;
     private int checkpointLowerBound;
     private int readBatchSize;
-    private String consumerStrategyName;
+    private NamedConsumerStrategy namedConsumerStrategy;
 
-    public PersistentSubscriptionSettings() {}
+    PersistentSubscriptionSettings() {}
 
-    public static PersistentSubscriptionToStreamSettings defaultRegular() {
+    static PersistentSubscriptionToStreamSettings defaultRegular() {
         PersistentSubscriptionToStreamSettings settings = new PersistentSubscriptionToStreamSettings();
         defaultCommon(settings);
 
@@ -27,7 +30,7 @@ public abstract class PersistentSubscriptionSettings {
         return settings;
     }
 
-    public static PersistentSubscriptionToAllSettings defaultToAll() {
+    static PersistentSubscriptionToAllSettings defaultToAll() {
         PersistentSubscriptionToAllSettings settings = new PersistentSubscriptionToAllSettings();
         defaultCommon(settings);
 
@@ -46,13 +49,13 @@ public abstract class PersistentSubscriptionSettings {
         settings.setCheckpointLowerBound(10);
         settings.setCheckpointUpperBound(1_000);
         settings.setMaxSubscriberCount(0);
-        settings.setConsumerStrategyName(NamedConsumerStrategy.ROUND_ROBIN);
+        settings.setNamedConsumerStrategy(NamedConsumerStrategy.ROUND_ROBIN);
     }
 
-    public PersistentSubscriptionSettings(int checkpointAfter, boolean extraStatistics, boolean resolveLinks,
+    PersistentSubscriptionSettings(int checkpointAfter, boolean extraStatistics, boolean resolveLinks,
                                           int historyBufferSize, int liveBufferSize, int checkpointUpperBound,
                                           int maxRetryCount, int maxSubscriberCount, int messageTimeoutMs,
-                                          int minCheckpointCount, int readBatchSize, String consumerStrategyName) {
+                                          int minCheckpointCount, int readBatchSize, NamedConsumerStrategy namedConsumerStrategy) {
         this.checkpointAfter = checkpointAfter;
         this.extraStatistics = extraStatistics;
         this.resolveLinkTos = resolveLinks;
@@ -64,7 +67,7 @@ public abstract class PersistentSubscriptionSettings {
         this.messageTimeoutMs = messageTimeoutMs;
         this.checkpointLowerBound = minCheckpointCount;
         this.readBatchSize = readBatchSize;
-        this.consumerStrategyName = consumerStrategyName;
+        this.namedConsumerStrategy = namedConsumerStrategy;
     }
 
     /**
@@ -89,14 +92,11 @@ public abstract class PersistentSubscriptionSettings {
     }
 
     /**
-     * @deprecated prefer {@link #shouldResolveLinkTos()}
-     */
-    public boolean isResolveLinks() {
-        return shouldResolveLinkTos();
-    }
-
-    /**
-     * Whether the subscription should resolve linkTo events to their linked events.
+     * If true, link resolution is enabled.
+     *
+     * The best way to explain link resolution is when using system projections. When reading the stream <i>$streams</i>
+     * , each event is actually a link pointing to the first event of a stream. By enabling link resolution feature,
+     * EventStoreDB will also return the event targeted by the link.
      */
     public boolean shouldResolveLinkTos() {
         return resolveLinkTos;
@@ -114,14 +114,6 @@ public abstract class PersistentSubscriptionSettings {
      */
     public int getLiveBufferSize() {
         return liveBufferSize;
-    }
-
-    /**
-     * @deprecated prefer {@link #getCheckpointUpperBound()}
-     */
-    @Deprecated
-    public long getMaxCheckpointCount() {
-        return this.getCheckpointUpperBound();
     }
 
     /**
@@ -160,14 +152,6 @@ public abstract class PersistentSubscriptionSettings {
     }
 
     /**
-     * @deprecated prefer {@link #getCheckpointLowerBound()}
-     */
-    @Deprecated
-    public long getMinCheckpointCount() {
-        return this.getCheckpointLowerBound();
-    }
-
-    /**
      * The minimum number of messages to process before a checkpoint may be written.
      */
     public int getCheckpointLowerBound() {
@@ -182,76 +166,108 @@ public abstract class PersistentSubscriptionSettings {
     }
 
     /**
-     * @deprecated prefer {@link #getConsumerStrategyName()}
+     * The strategy to use for distributing events to client consumers.
      */
-    @Deprecated
-    public ConsumerStrategy getStrategy() throws Exception {
+    public NamedConsumerStrategy getNamedConsumerStrategy() {
+        return namedConsumerStrategy;
+    }
 
-        switch (consumerStrategyName){
-            case NamedConsumerStrategy.DISPATCH_TO_SINGLE: return ConsumerStrategy.DispatchToSingle;
-            case NamedConsumerStrategy.ROUND_ROBIN: return ConsumerStrategy.RoundRobin;
-            case NamedConsumerStrategy.PINNED: return ConsumerStrategy.Pinned;
-        }
+    /**
+     * The amount of time to try checkpoint after in milliseconds.
+     */
+    void setCheckpointAfter(int checkpointAfter) {
+        this.checkpointAfter = checkpointAfter;
+    }
 
-        throw new Exception("Non-default ConsumerStrategy specified, use getConsumerStrategyName()");
+    /**
+     * Enables tracking of in depth latency statistics on this subscription.
+     */
+    void setExtraStatistics(boolean extraStatistics) {
+        this.extraStatistics = extraStatistics;
+    }
+
+    /**
+     * If true, link resolution is enabled.
+     *
+     * The best way to explain link resolution is when using system projections. When reading the stream <i>$streams</i>
+     * , each event is actually a link pointing to the first event of a stream. By enabling link resolution feature,
+     * EventStoreDB will also return the event targeted by the link.
+     */
+    public boolean isResolveLinkTos() {
+        return resolveLinkTos;
+    }
+
+    /**
+     * Enables link resolution.
+     *
+     * The best way to explain link resolution is when using system projections. When reading the stream <i>$streams</i>
+     * , each event is actually a link pointing to the first event of a stream. By enabling link resolution feature,
+     * EventStoreDB will also return the event targeted by the link.
+     */
+    void setResolveLinkTos(boolean resolveLinkTos) {
+        this.resolveLinkTos = resolveLinkTos;
+    }
+
+    /**
+     * The number of events to cache when catching up. Default 500.
+     */
+    void setHistoryBufferSize(int historyBufferSize) {
+        this.historyBufferSize = historyBufferSize;
+    }
+
+    /**
+     * The size of the buffer (in-memory) listening to live messages as they happen before paging occurs. Default 500.
+     */
+    void setLiveBufferSize(int liveBufferSize) {
+        this.liveBufferSize = liveBufferSize;
+    }
+
+    /**
+     * The maximum number of messages not checkpointed before forcing a checkpoint.
+     */
+    void setCheckpointUpperBound(int checkpointUpperBound) {
+        this.checkpointUpperBound = checkpointUpperBound;
+    }
+
+    /**
+     * The maximum number of retries (due to timeout) before a message is considered to be parked.
+     */
+    void setMaxRetryCount(int maxRetryCount) {
+        this.maxRetryCount = maxRetryCount;
+    }
+
+    /**
+     * The maximum number of subscribers allowed.
+     */
+    void setMaxSubscriberCount(int maxSubscriberCount) {
+        this.maxSubscriberCount = maxSubscriberCount;
+    }
+
+    /**
+     * The amount of time in milliseconds after which to consider a message as timed out and retried.
+     */
+    void setMessageTimeoutMs(int messageTimeoutMs) {
+        this.messageTimeoutMs = messageTimeoutMs;
+    }
+
+    /**
+     * The minimum number of messages to process before a checkpoint may be written.
+     */
+    void setCheckpointLowerBound(int checkpointLowerBound) {
+        this.checkpointLowerBound = checkpointLowerBound;
+    }
+
+    /**
+     * The number of events read at a time when catching up.
+     */
+    void setReadBatchSize(int readBatchSize) {
+        this.readBatchSize = readBatchSize;
     }
 
     /**
      * The strategy to use for distributing events to client consumers.
      */
-    public String getConsumerStrategyName() {
-        return consumerStrategyName;
-    }
-
-    public void setCheckpointAfter(int checkpointAfter) {
-        this.checkpointAfter = checkpointAfter;
-    }
-
-    public void setExtraStatistics(boolean extraStatistics) {
-        this.extraStatistics = extraStatistics;
-    }
-
-    public boolean isResolveLinkTos() {
-        return resolveLinkTos;
-    }
-
-    public void setResolveLinkTos(boolean resolveLinkTos) {
-        this.resolveLinkTos = resolveLinkTos;
-    }
-
-    public void setHistoryBufferSize(int historyBufferSize) {
-        this.historyBufferSize = historyBufferSize;
-    }
-
-    public void setLiveBufferSize(int liveBufferSize) {
-        this.liveBufferSize = liveBufferSize;
-    }
-
-    public void setCheckpointUpperBound(int checkpointUpperBound) {
-        this.checkpointUpperBound = checkpointUpperBound;
-    }
-
-    public void setMaxRetryCount(int maxRetryCount) {
-        this.maxRetryCount = maxRetryCount;
-    }
-
-    public void setMaxSubscriberCount(int maxSubscriberCount) {
-        this.maxSubscriberCount = maxSubscriberCount;
-    }
-
-    public void setMessageTimeoutMs(int messageTimeoutMs) {
-        this.messageTimeoutMs = messageTimeoutMs;
-    }
-
-    public void setCheckpointLowerBound(int checkpointLowerBound) {
-        this.checkpointLowerBound = checkpointLowerBound;
-    }
-
-    public void setReadBatchSize(int readBatchSize) {
-        this.readBatchSize = readBatchSize;
-    }
-
-    public void setConsumerStrategyName(String consumerStrategyName) {
-        this.consumerStrategyName = consumerStrategyName;
+    void setNamedConsumerStrategy(NamedConsumerStrategy namedConsumerStrategy) {
+        this.namedConsumerStrategy = namedConsumerStrategy;
     }
 }
