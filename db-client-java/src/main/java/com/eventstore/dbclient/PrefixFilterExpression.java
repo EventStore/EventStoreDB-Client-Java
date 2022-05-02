@@ -3,21 +3,16 @@ package com.eventstore.dbclient;
 import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
-public class PrefixFilterExpression implements Comparable<PrefixFilterExpression> {
-    public static PrefixFilterExpression NONE = new PrefixFilterExpression("");
-
+class PrefixFilterExpression implements Comparable<PrefixFilterExpression> {
     @NotNull
     private final String value;
-
     public PrefixFilterExpression(@NotNull String value) {
         this.value = value;
     }
-
     @Override
     public String toString() {
         return this.value;
     }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

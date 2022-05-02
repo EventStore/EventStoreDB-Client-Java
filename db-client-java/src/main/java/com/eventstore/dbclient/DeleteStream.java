@@ -12,13 +12,14 @@ import java.util.concurrent.CompletableFuture;
 class DeleteStream {
     private final GrpcClient client;
     private final String streamName;
+    private final boolean softDelete;
 
     private final DeleteStreamOptions options;
 
-    public DeleteStream(GrpcClient client, String streamName, DeleteStreamOptions options) {
+    public DeleteStream(GrpcClient client, String streamName, boolean softDelete, DeleteStreamOptions options) {
         this.client = client;
         this.streamName = streamName;
-
+        this.softDelete = softDelete;
         this.options = options;
     }
 
@@ -27,7 +28,7 @@ class DeleteStream {
             Metadata headers = this.options.getMetadata();
             StreamsGrpc.StreamsStub client = GrpcUtils.configureStub(StreamsGrpc.newStub(channel), this.client.getSettings(), this.options);
 
-            if (this.options.isSoftDelete()) {
+            if (this.softDelete) {
                 StreamsOuterClass.DeleteReq req = StreamsOuterClass.DeleteReq.newBuilder()
                         .setOptions(this.options.getExpectedRevision().applyOnWire(StreamsOuterClass.DeleteReq.Options.newBuilder()
                                 .setStreamIdentifier(Shared.StreamIdentifier.newBuilder()

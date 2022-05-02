@@ -1,22 +1,31 @@
 package com.eventstore.dbclient;
 
+/**
+ * Options of the subscribe persistent subscription request.
+ */
 public class SubscribePersistentSubscriptionOptions extends OptionsBase<SubscribePersistentSubscriptionOptions> {
     private int bufferSize;
 
     private SubscribePersistentSubscriptionOptions() {
+        super(OperationKind.Streaming);
         this.bufferSize = 10;
-        this.kind = OperationKind.Streaming;
     }
 
+    /**
+     * Returns options with default values.
+     */
     public static SubscribePersistentSubscriptionOptions get() {
         return new SubscribePersistentSubscriptionOptions();
     }
 
-    public int getBufferSize() {
+    int getBufferSize() {
         return bufferSize;
     }
 
-    public SubscribePersistentSubscriptionOptions setBufferSize(int value) {
+    /**
+     * Persistent subscription's buffer size.
+     */
+    public SubscribePersistentSubscriptionOptions bufferSize(int value) {
         bufferSize = value;
         return this;
     }

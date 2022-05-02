@@ -2,16 +2,17 @@ package com.eventstore.dbclient;
 
 import com.eventstore.dbclient.proto.persistentsubscriptions.Persistent;
 import com.eventstore.dbclient.proto.persistentsubscriptions.PersistentSubscriptionsGrpc;
-import io.grpc.Metadata;
-import io.grpc.stub.MetadataUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CompletableFuture;
 
-public abstract class AbstractUpdatePersistentSubscription {
+abstract class AbstractUpdatePersistentSubscription {
     private final GrpcClient connection;
     private final String group;
     private final PersistentSubscriptionSettings settings;
     private final OptionsBase options;
+    private static final Logger logger = LoggerFactory.getLogger(AbstractUpdatePersistentSubscription.class);
 
     public AbstractUpdatePersistentSubscription(GrpcClient connection, String group,
                                                 PersistentSubscriptionSettings settings, OptionsBase options) {
@@ -48,16 +49,15 @@ public abstract class AbstractUpdatePersistentSubscription {
                     .setExtraStatistics(settings.isExtraStatistics())
                     .setCheckpointAfterMs((int)settings.getCheckpointAfterInMs());
 
-            switch (settings.getConsumerStrategyName()) {
-                case NamedConsumerStrategy.DISPATCH_TO_SINGLE:
-                    settingsBuilder.setNamedConsumerStrategy(Persistent.UpdateReq.ConsumerStrategy.DispatchToSingle);
-                    break;
-                case NamedConsumerStrategy.ROUND_ROBIN:
-                    settingsBuilder.setNamedConsumerStrategy(Persistent.UpdateReq.ConsumerStrategy.RoundRobin);
-                    break;
-                case NamedConsumerStrategy.PINNED:
-                    settingsBuilder.setNamedConsumerStrategy(Persistent.UpdateReq.ConsumerStrategy.Pinned);
-                    break;
+            if (settings.getNamedConsumerStrategy().isDispatchToSingle()) {
+                settingsBuilder.setNamedConsumerStrategy(Persistent.UpdateReq.ConsumerStrategy.DispatchToSingle);
+            } else if (settings.getNamedConsumerStrategy().isRoundRobin()) {
+                settingsBuilder.setNamedConsumerStrategy(Persistent.UpdateReq.ConsumerStrategy.RoundRobin);
+            } else if (settings.getNamedConsumerStrategy().isPinned()) {
+                settingsBuilder.setNamedConsumerStrategy(Persistent.UpdateReq.ConsumerStrategy.Pinned);
+            } else {
+                logger.error(String.format("Unsupported named consumer strategy: '%s'", settings.getNamedConsumerStrategy().toString()));
+                throw new UnsupportedFeatureException();
             }
 
             Persistent.UpdateReq req = Persistent.UpdateReq.newBuilder()
@@ -67,7 +67,7 @@ public abstract class AbstractUpdatePersistentSubscription {
                     .build();
 
             if (req.getOptions().hasAll() && !args.supportFeature(FeatureFlags.PERSISTENT_SUBSCRIPTION_TO_ALL)) {
-                result.completeExceptionally(new UnsupportedFeature());
+                result.completeExceptionally(new UnsupportedFeatureException());
             } else {
                 client.update(req, GrpcUtils.convertSingleResponse(result));
             }

@@ -1,27 +1,44 @@
 package com.eventstore.dbclient;
 
+/**
+ * Options for the create persistent subscription to stream request.
+ */
 public class CreatePersistentSubscriptionToStreamOptions
         extends AbstractPersistentSubscriptionSettingsBuilder<CreatePersistentSubscriptionToStreamOptions, PersistentSubscriptionToStreamSettings> {
-    protected CreatePersistentSubscriptionToStreamOptions() {
+    CreatePersistentSubscriptionToStreamOptions() {
         super(PersistentSubscriptionSettings.defaultRegular());
     }
 
+    /**
+     * Returns options with default values.
+     */
     public static CreatePersistentSubscriptionToStreamOptions get() {
         return new CreatePersistentSubscriptionToStreamOptions();
     }
 
+    /**
+     * Starts the subscription from the beginning of the given stream.
+
+     */
     public CreatePersistentSubscriptionToStreamOptions fromStart() {
-        settings.setStartFrom(StreamPosition.start());
+        getSettings().setStartFrom(StreamPosition.start());
         return this;
     }
 
+    /**
+     * Starts the subscription from the end of the given stream.
+
+     */
     public CreatePersistentSubscriptionToStreamOptions fromEnd() {
-        settings.setStartFrom(StreamPosition.end());
+        getSettings().setStartFrom(StreamPosition.end());
         return this;
     }
 
+    /**
+     * Starts the subscription from the given stream revision.
+     */
     public CreatePersistentSubscriptionToStreamOptions startFrom(long revision) {
-        settings.setStartFrom(StreamPosition.position(revision));
+        getSettings().setStartFrom(StreamPosition.position(revision));
         return this;
     }
 }

@@ -5,7 +5,6 @@ import com.eventstore.dbclient.proto.shared.Shared;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.eventstore.dbclient.proto.persistentsubscriptions.Persistent;
 import com.google.protobuf.ByteString;
-import io.grpc.stub.MetadataUtils;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -22,7 +21,7 @@ final class ListPersistentSubscriptions {
             CompletableFuture<List<A>> result = new CompletableFuture<>();
 
             if (stream.equals("$all") && !args.supportFeature(FeatureFlags.PERSISTENT_SUBSCRIPTION_TO_ALL)) {
-                result.completeExceptionally(new UnsupportedFeature());
+                result.completeExceptionally(new UnsupportedFeatureException());
                 return result;
             }
 

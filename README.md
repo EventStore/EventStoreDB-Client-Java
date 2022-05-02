@@ -5,6 +5,10 @@ compatible with Java 8 and above.
 
 *Note: This client is currently under active development and further API changes are expected. Feedback is very welcome.*
 
+## Documentation
+* General documentation can be found in [Event Store GRPC Docs].
+* The latest stable version Javadoc can be found here: https://eventstore.github.io/EventStoreDB-Client-Java
+
 ## Access to binaries
 EventStore Ltd publishes GA (general availability) versions to [Maven Central].
 
@@ -183,3 +187,4 @@ review our [Contributing Guide][contributing] and [Code of Conduct][code-of-cond
 [docs]: https://developers.eventstore.com/server/v21.6/installation/
 [discuss]: https://discuss.eventstore.com/
 [Maven Central]: https://search.maven.org/artifact/com.eventstore/db-client-java
+[Event Store GRPC Docs]: https://developers.eventstore.com/clients/grpc

@@ -9,6 +9,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+/**
+ * Subscription filter that targets $all stream.
+ */
 public class SubscriptionFilter {
     @NotNull
     private final EventFilter filter;
@@ -16,17 +19,22 @@ public class SubscriptionFilter {
     private final int checkpointIntervalUnsigned;
     private final Checkpointer checkpointer;
 
+    /**
+     * Creates a new subscription filter builder.
+     * @see SubscriptionFilterBuilder
+     * @return a builder.
+     */
     public static SubscriptionFilterBuilder newBuilder() {
         return new SubscriptionFilterBuilder();
     }
 
-    public SubscriptionFilter(@NotNull final EventFilter filter) {
+    SubscriptionFilter(@NotNull final EventFilter filter) {
         this.filter = filter;
         this.checkpointer = null;
         this.checkpointIntervalUnsigned = 1; // TODO(jen20): Review this default
     }
 
-    public SubscriptionFilter(@NotNull final EventFilter filter,
+    SubscriptionFilter(@NotNull final EventFilter filter,
                               final int checkpointIntervalUnsigned,
                               @NotNull final Checkpointer checkpointer) {
         this.filter = filter;

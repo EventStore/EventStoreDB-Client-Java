@@ -26,7 +26,7 @@ public class PersistentSubscriptions {
                 @Override
                 public void onEvent(PersistentSubscription subscription, int retryCount, ResolvedEvent event) {
                     System.out.println("Received event"
-                        + event.getOriginalEvent().getStreamRevision()
+                        + event.getOriginalEvent().getRevision()
                         + "@" + event.getOriginalEvent().getStreamId());
                 }
 
@@ -55,7 +55,7 @@ public class PersistentSubscriptions {
                     public void onEvent(PersistentSubscription subscription, int retryCount, ResolvedEvent event) {
                         try {
                             System.out.println("Received event"
-                                    + event.getOriginalEvent().getStreamRevision()
+                                    + event.getOriginalEvent().getRevision()
                                     + "@" + event.getOriginalEvent().getStreamId());
                             subscription.ack(event);
                         }
@@ -85,7 +85,7 @@ public class PersistentSubscriptions {
                 public void onEvent(PersistentSubscription subscription, int retryCount, ResolvedEvent event) {
                     try {
                         System.out.println("Received event"
-                            + event.getOriginalEvent().getStreamRevision()
+                            + event.getOriginalEvent().getRevision()
                             + "@" + event.getOriginalEvent().getStreamId());
                         subscription.ack(event);
                     }
@@ -128,7 +128,7 @@ public class PersistentSubscriptions {
 
     public static void getPersistentSubscriptionToStreamInfo(EventStoreDBPersistentSubscriptionsClient client) throws ExecutionException, InterruptedException {
         // #region get-persistent-subscription-to-stream-info
-        Optional<PersistentSubscriptionInfo> result = client.getInfoToStream("test-stream", "subscription-group").get();
+        Optional<PersistentSubscriptionToStreamInfo> result = client.getInfoToStream("test-stream", "subscription-group").get();
         if (result.isPresent()) {
             PersistentSubscriptionInfo info = result.get();
 
@@ -139,7 +139,7 @@ public class PersistentSubscriptions {
 
     public static void getPersistentSubscriptionToAllInfo(EventStoreDBPersistentSubscriptionsClient client) throws ExecutionException, InterruptedException {
         // #region get-persistent-subscription-to-all-info
-        Optional<PersistentSubscriptionInfo> result = client.getInfoToAll( "subscription-group").get();
+        Optional<PersistentSubscriptionToAllInfo> result = client.getInfoToAll( "subscription-group").get();
         if (result.isPresent()) {
             PersistentSubscriptionInfo info = result.get();
 

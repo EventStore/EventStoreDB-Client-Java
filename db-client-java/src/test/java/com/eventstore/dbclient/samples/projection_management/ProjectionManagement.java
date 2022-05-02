@@ -4,6 +4,7 @@ import com.eventstore.dbclient.*;
 import org.junit.*;
 import testcontainers.module.ESDBTests;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class ProjectionManagement extends ESDBTests {
@@ -226,9 +227,9 @@ public class ProjectionManagement extends ESDBTests {
     private static void listAll(EventStoreDBProjectionManagementClient client)
             throws java.lang.InterruptedException, java.util.concurrent.ExecutionException {
         // region ListAll
-        ListProjectionsResult result = client.list().get();
+        List<ProjectionDetails> details = client.list().get();
 
-        for (ProjectionDetails detail: result.getProjections()) {
+        for (ProjectionDetails detail: details) {
             System.out.println(
                 detail.getName() + ", " +
                 detail.getStatus() + ", " +
@@ -238,15 +239,15 @@ public class ProjectionManagement extends ESDBTests {
         }
         // endregion ListAll
 
-        Assert.assertTrue(result.getProjections().size() >= 5);
+        Assert.assertTrue(details.size() >= 5);
     }
 
     private static void list(EventStoreDBProjectionManagementClient client)
             throws java.lang.InterruptedException, java.util.concurrent.ExecutionException {
         // region ListContinuous
-        ListProjectionsResult result = client.list().get();
+        List<ProjectionDetails> details = client.list().get();
 
-        for (ProjectionDetails detail: result.getProjections()) {
+        for (ProjectionDetails detail: details) {
             System.out.println(
                 detail.getName() + ", " +
                 detail.getStatus() + ", " +
@@ -256,7 +257,7 @@ public class ProjectionManagement extends ESDBTests {
         }
         // endregion ListContinuous
 
-        Assert.assertTrue(result.getProjections().size() >= 5);
+        Assert.assertTrue(details.size() >= 5);
     }
 
     private static void getStatus(EventStoreDBProjectionManagementClient client)

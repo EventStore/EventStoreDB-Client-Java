@@ -2,6 +2,9 @@ package com.eventstore.dbclient;
 
 import java.util.Map;
 
+/**
+ * Holds a persistent subscription connection info.
+ */
 public class PersistentSubscriptionConnectionInfo {
     private String from;
     private String username;
@@ -13,75 +16,105 @@ public class PersistentSubscriptionConnectionInfo {
     private String connectionName;
     private Map<String, Long> extraStatistics;
 
+    PersistentSubscriptionConnectionInfo() {}
+
+    /**
+     * Origin of this connection.
+     */
     public String getFrom() {
         return from;
     }
 
-    public void setFrom(String from) {
+    void setFrom(String from) {
         this.from = from;
     }
 
+    /**
+     * Connection's username.
+     */
     public String getUsername() {
         return username;
     }
 
-    public void setUsername(String username) {
+    void setUsername(String username) {
         this.username = username;
     }
 
+    /**
+     * Average events per second on this connection.
+     */
     public double getAverageItemsPerSecond() {
         return averageItemsPerSecond;
     }
 
-    public void setAverageItemsPerSecond(int averageItemsPerSecond) {
+    void setAverageItemsPerSecond(int averageItemsPerSecond) {
         this.averageItemsPerSecond = averageItemsPerSecond;
     }
 
+    /**
+     * Total items on this connection.
+     */
     public long getTotalItems() {
         return totalItems;
     }
 
-    public void setTotalItems(long totalItems) {
+    void setTotalItems(long totalItems) {
         this.totalItems = totalItems;
     }
 
+    /**
+     * Number of items seen since last measurement on this connection. Used as the basis for
+     * <i>averageItemsPerSecond</i>
+     */
     public long getCountSinceLastMeasurement() {
         return countSinceLastMeasurement;
     }
 
-    public void setCountSinceLastMeasurement(long countSinceLastMeasurement) {
+    void setCountSinceLastMeasurement(long countSinceLastMeasurement) {
         this.countSinceLastMeasurement = countSinceLastMeasurement;
     }
 
+    /**
+     * Number of available slots.
+     */
     public long getAvailableSlots() {
         return availableSlots;
     }
 
-    public void setAvailableSlots(int availableSlots) {
+    void setAvailableSlots(int availableSlots) {
         this.availableSlots = availableSlots;
     }
 
+    /**
+     * Number of in flight messages on this connection.
+     */
     public long getInFlightMessages() {
         return inFlightMessages;
     }
 
-    public void setInFlightMessages(int inFlightMessages) {
+    void setInFlightMessages(int inFlightMessages) {
         this.inFlightMessages = inFlightMessages;
     }
 
+    /**
+     * Connection name.
+     */
     public String getConnectionName() {
         return connectionName;
     }
 
-    public void setConnectionName(String connectionName) {
+    void setConnectionName(String connectionName) {
         this.connectionName = connectionName;
     }
 
+    /**
+     * Timing measurements for the connection. Can be enabled with the <i>extraStatistics</i> setting.
+     */
     public Map<String, Long> getExtraStatistics() {
         return extraStatistics;
     }
 
-    public void setExtraStatistics(Map<String, Long> extraStatistics) {
+    void setExtraStatistics(Map<String, Long> extraStatistics) {
         this.extraStatistics = extraStatistics;
     }
 }

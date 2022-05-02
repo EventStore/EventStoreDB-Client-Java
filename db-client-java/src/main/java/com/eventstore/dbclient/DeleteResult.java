@@ -3,14 +3,20 @@ package com.eventstore.dbclient;
 import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
+/**
+ * Object returned on a successful stream deletion request.
+ */
 public class DeleteResult {
     private final Position logPosition;
 
-    public DeleteResult(@NotNull Position logPosition) {
+    DeleteResult(@NotNull Position logPosition) {
         this.logPosition = logPosition;
     }
 
-    public Position getLogPosition() {
+    /**
+     * Returns the transaction log position of the stream deletion.
+     */
+    public Position getPosition() {
         return logPosition;
     }
 

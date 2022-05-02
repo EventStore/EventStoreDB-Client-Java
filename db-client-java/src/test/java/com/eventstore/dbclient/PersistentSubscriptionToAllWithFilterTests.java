@@ -51,7 +51,7 @@ public class PersistentSubscriptionToAllWithFilterTests extends ESDBTests {
         };
 
         SubscriptionFilter filter = SubscriptionFilter.newBuilder()
-            .withEventTypePrefix(filteredEventType)
+            .addEventTypePrefix(filteredEventType)
             .build();
 
         try {
@@ -60,7 +60,7 @@ public class PersistentSubscriptionToAllWithFilterTests extends ESDBTests {
                             .filter(filter))
                     .get();
         } catch (ExecutionException e) {
-            if (e.getCause() instanceof UnsupportedFeature && !EventStoreDB.isTestedAgainstVersion20()) {
+            if (e.getCause() instanceof UnsupportedFeatureException && !EventStoreDB.isTestedAgainstVersion20()) {
                 throw e;
             }
 

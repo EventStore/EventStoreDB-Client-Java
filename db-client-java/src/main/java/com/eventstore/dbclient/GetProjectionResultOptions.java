@@ -1,5 +1,8 @@
 package com.eventstore.dbclient;
 
+/**
+ * Options of the get projection result request.
+ */
 public class GetProjectionResultOptions extends OptionsBase<GetProjectionResultOptions> {
     private String partition;
 
@@ -7,16 +10,22 @@ public class GetProjectionResultOptions extends OptionsBase<GetProjectionResultO
         this.partition = "";
     }
 
+    /**
+     * Returns options with default values.
+     */
     public static GetProjectionResultOptions get() {
         return new GetProjectionResultOptions();
     }
 
-    public String getPartition() {
+   String getPartition() {
         return this.partition;
-    }
+   }
 
-    public GetProjectionResultOptions partition(String partition) {
-        this.partition = partition;
-        return this;
-    }
+    /**
+     * Specifies which partition to retrieve the result from.
+     */
+   public GetProjectionResultOptions partition(String partition) {
+       this.partition = partition;
+       return this;
+   }
 }

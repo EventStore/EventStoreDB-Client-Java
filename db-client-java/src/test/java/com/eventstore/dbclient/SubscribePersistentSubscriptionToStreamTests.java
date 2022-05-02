@@ -60,7 +60,7 @@ public class SubscribePersistentSubscriptionToStreamTests extends ESDBTests {
         final CompletableFuture<Integer> result = new CompletableFuture<>();
 
         SubscribePersistentSubscriptionOptions connectOptions = SubscribePersistentSubscriptionOptions.get()
-                .setBufferSize(32);
+                .bufferSize(32);
 
         client.subscribeToStream(streamName, "aGroup", connectOptions, new PersistentSubscriptionListener() {
             private int count = 0;
@@ -102,7 +102,7 @@ public class SubscribePersistentSubscriptionToStreamTests extends ESDBTests {
             client.createToAll("aGroup")
                     .get();
         } catch (ExecutionException e) {
-            if (e.getCause() instanceof UnsupportedFeature && !EventStoreDB.isTestedAgainstVersion20()) {
+            if (e.getCause() instanceof UnsupportedFeatureException && !EventStoreDB.isTestedAgainstVersion20()) {
                 throw e;
             }
 
@@ -117,7 +117,7 @@ public class SubscribePersistentSubscriptionToStreamTests extends ESDBTests {
         final CompletableFuture<Integer> result = new CompletableFuture<>();
 
         SubscribePersistentSubscriptionOptions connectOptions = SubscribePersistentSubscriptionOptions.get()
-                .setBufferSize(32);
+                .bufferSize(32);
 
         client.subscribeToAll("aGroup", connectOptions, new PersistentSubscriptionListener() {
             private int count = 0;

@@ -12,7 +12,10 @@ import java.util.regex.Pattern;
 import static java.lang.Integer.parseInt;
 import static java.lang.Long.parseLong;
 
-public class EventStoreDBConnectionString {
+/**
+ * Utility class to parse a connection string.
+ */
+public final class EventStoreDBConnectionString {
     private final Logger logger = LoggerFactory.getLogger(EventStoreDBConnectionString.class);
     private int position = 0;
     private int nextPosition = 0;
@@ -37,14 +40,27 @@ public class EventStoreDBConnectionString {
         }
     };
 
-    public static EventStoreDBClientSettings parse(String connectionString) throws ParseError {
+    EventStoreDBConnectionString() {}
+
+    /**
+     * Parses a string representation of a client settings.
+     * @return a client settings.
+     * @throws ConnectionStringParsingException if the connection is malformed.
+     */
+    public static EventStoreDBClientSettings parse(String connectionString) throws ConnectionStringParsingException {
         return new EventStoreDBConnectionString().parseConnectionString(connectionString);
     }
 
+
+    /**
+     * Parses a string representation of a client settings. Throws a runtime exception if the connection string is
+     * malformed.
+     * @return a client settings.
+     */
     public static EventStoreDBClientSettings parseOrThrow(String connectionString) {
         try {
             return EventStoreDBConnectionString.parse(connectionString);
-        } catch (ParseError e) {
+        } catch (ConnectionStringParsingException e) {
             throw new RuntimeException(e);
         }
     }
@@ -53,12 +69,12 @@ public class EventStoreDBConnectionString {
         return this.connectionString.substring(this.position);
     }
 
-    private EventStoreDBClientSettings parseConnectionString(String connectionString) throws ParseError {
+    private EventStoreDBClientSettings parseConnectionString(String connectionString) throws ConnectionStringParsingException {
         this.connectionString = connectionString.trim().replaceAll("/+$", "");
         return this.parseProtocol();
     }
 
-    private EventStoreDBClientSettings parseProtocol() throws ParseError {
+    private EventStoreDBClientSettings parseProtocol() throws ConnectionStringParsingException {
         this.position = nextPosition;
         String expected = "esdb:// or esdb+discover://";
         String pattern = "^(?<protocol>[^:]+)://";
@@ -81,10 +97,10 @@ public class EventStoreDBConnectionString {
             }
         }
 
-        throw new ParseError(this.connectionString, this.position, this.nextPosition, expected);
+        throw new ConnectionStringParsingException(this.connectionString, this.position, this.nextPosition, expected);
     }
 
-    private EventStoreDBClientSettings parseCredentials() throws ParseError {
+    private EventStoreDBClientSettings parseCredentials() throws ConnectionStringParsingException {
         this.position = nextPosition;
         String expected = "<URL encoded username>:<Url encoded password>";
         String pattern = "^(?:(?<credentials>[^:]+:[^@]+)@)";
@@ -105,16 +121,16 @@ public class EventStoreDBConnectionString {
                 String password = URLDecoder.decode(credentials[1], "utf-8");
                 this.settings.defaultCredentials(username, password);
             } catch (UnsupportedEncodingException e) {
-                throw new ParseError(this.connectionString, this.position, this.nextPosition, expected);
+                throw new ConnectionStringParsingException(this.connectionString, this.position, this.nextPosition, expected);
             }
 
             return this.parseHosts(true);
         }
 
-        throw new ParseError(this.connectionString, this.position, this.nextPosition, expected);
+        throw new ConnectionStringParsingException(this.connectionString, this.position, this.nextPosition, expected);
     }
 
-    private EventStoreDBClientSettings parseHosts(boolean mustMatch) throws ParseError {
+    private EventStoreDBClientSettings parseHosts(boolean mustMatch) throws ConnectionStringParsingException {
         this.position = nextPosition;
         String expected = "<URL encoded username>:<Url encoded password>";
         String pattern = "^(?:(?<host>[^$+!?*'(),;\\[\\]{}|\"%~#<>=&/]+)[,/]?)";
@@ -123,7 +139,7 @@ public class EventStoreDBConnectionString {
         boolean found = m.find();
 
         if (!found && mustMatch) {
-            throw new ParseError(this.connectionString, this.position, this.nextPosition, expected);
+            throw new ConnectionStringParsingException(this.connectionString, this.position, this.nextPosition, expected);
         }
 
         if (found && !m.group("host").isEmpty()) {
@@ -134,7 +150,7 @@ public class EventStoreDBConnectionString {
             String rawPort = hostParts.length > 1 ? hostParts[1] : "2113";
 
             if (hostParts.length > 2) {
-                throw new ParseError(
+                throw new ConnectionStringParsingException(
                         this.connectionString,
                         this.position + (address + ":" + rawPort).length(),
                         this.nextPosition,
@@ -146,7 +162,7 @@ public class EventStoreDBConnectionString {
                 Endpoint host = new Endpoint(address, port);
                 this.settings.addHost(host);
             } catch (NumberFormatException e) {
-                throw new ParseError(
+                throw new ConnectionStringParsingException(
                         this.connectionString,
                         this.position + address.length(),
                         this.nextPosition,
@@ -160,7 +176,7 @@ public class EventStoreDBConnectionString {
         return this.parseSearchParams(true);
     }
 
-    public static Optional<NodePreference> parseNodePreference(String value) {
+    static Optional<NodePreference> parseNodePreference(String value) {
         switch (value.toLowerCase()) {
             case "leader":
                 return Optional.of(NodePreference.LEADER);
@@ -177,7 +193,7 @@ public class EventStoreDBConnectionString {
 
     private static final String[] NODE_PREFERENCE_VALUES = new String[] { "leader", "follower", "readonlyreplica","random" };
 
-    private EventStoreDBClientSettings parseSearchParams(boolean first) throws ParseError {
+    private EventStoreDBClientSettings parseSearchParams(boolean first) throws ConnectionStringParsingException {
         this.position = nextPosition;
         if (this.position == this.connectionString.length()) {
             return this.settings.buildConnectionSettings();
@@ -189,7 +205,7 @@ public class EventStoreDBConnectionString {
         boolean found = m.find();
 
         if (!found || m.group("key").isEmpty() || m.group("value").isEmpty()) {
-            throw new ParseError(this.connectionString, this.position, this.nextPosition, expected);
+            throw new ConnectionStringParsingException(this.connectionString, this.position, this.nextPosition, expected);
         }
 
         this.nextPosition += m.end();
@@ -209,7 +225,7 @@ public class EventStoreDBConnectionString {
                 if (preference.isPresent()) {
                     this.settings.nodePreference(preference.get());
                 } else {
-                    throw new ParseError(this.connectionString, keyPosition, this.nextPosition,
+                    throw new ConnectionStringParsingException(this.connectionString, keyPosition, this.nextPosition,
                             Arrays.toString(NODE_PREFERENCE_VALUES));
                 }
                 break;
@@ -219,7 +235,7 @@ public class EventStoreDBConnectionString {
                     int parsedValue = parseInt(value);
                     this.settings.maxDiscoverAttempts(parsedValue);
                 } catch (NumberFormatException e) {
-                    throw new ParseError(
+                    throw new ConnectionStringParsingException(
                             this.connectionString,
                             keyPosition,
                             this.nextPosition,
@@ -233,7 +249,7 @@ public class EventStoreDBConnectionString {
                     int parsedValue = parseInt(value);
                     this.settings.discoveryInterval(parsedValue);
                 } catch (NumberFormatException e) {
-                    throw new ParseError(
+                    throw new ConnectionStringParsingException(
                             this.connectionString,
                             keyPosition,
                             this.nextPosition,
@@ -247,7 +263,7 @@ public class EventStoreDBConnectionString {
                     int parsedValue = parseInt(value);
                     this.settings.gossipTimeout(parsedValue);
                 } catch (NumberFormatException e) {
-                    throw new ParseError(
+                    throw new ConnectionStringParsingException(
                             this.connectionString,
                             keyPosition,
                             this.nextPosition,
@@ -258,28 +274,28 @@ public class EventStoreDBConnectionString {
             }
             case "dnsdiscover": {
                 if (!value.equals("true") && !value.equals("false")) {
-                    throw new ParseError(this.connectionString, keyPosition, this.nextPosition, "true or false");
+                    throw new ConnectionStringParsingException(this.connectionString, keyPosition, this.nextPosition, "true or false");
                 }
                 this.settings.dnsDiscover(value.equals("true"));
                 break;
             }
             case "tls": {
                 if (!value.equals("true") && !value.equals("false")) {
-                    throw new ParseError(this.connectionString, keyPosition, this.nextPosition, "true or false");
+                    throw new ConnectionStringParsingException(this.connectionString, keyPosition, this.nextPosition, "true or false");
                 }
                 this.settings.tls(value.equals("true"));
                 break;
             }
             case "tlsverifycert": {
                 if (!value.equals("true") && !value.equals("false")) {
-                    throw new ParseError(this.connectionString, keyPosition, this.nextPosition, "true or false");
+                    throw new ConnectionStringParsingException(this.connectionString, keyPosition, this.nextPosition, "true or false");
                 }
                 this.settings.tlsVerifyCert(value.equals("true"));
                 break;
             }
             case "throwonappendfailure": {
                 if (!value.equals("true") && !value.equals("false")) {
-                    throw new ParseError(this.connectionString, keyPosition, this.nextPosition, "true or false");
+                    throw new ConnectionStringParsingException(this.connectionString, keyPosition, this.nextPosition, "true or false");
                 }
                 this.settings.throwOnAppendFailure(value.equals("true"));
                 break;
@@ -294,7 +310,7 @@ public class EventStoreDBConnectionString {
                     if (parsedValue < -1) {
                         logger.error("Invalid keepAliveTimeout of {}. Please provide a positive integer, or -1 to disable.", parsedValue);
 
-                        throw new ParseError(
+                        throw new ConnectionStringParsingException(
                                 this.connectionString,
                                 keyPosition,
                                 this.nextPosition,
@@ -307,7 +323,7 @@ public class EventStoreDBConnectionString {
 
                     this.settings.keepAliveTimeout(parsedValue);
                 } catch (NumberFormatException e) {
-                    throw new ParseError(
+                    throw new ConnectionStringParsingException(
                             this.connectionString,
                             keyPosition,
                             this.nextPosition,
@@ -326,7 +342,7 @@ public class EventStoreDBConnectionString {
                     if (parsedValue < -1) {
                         logger.error("Invalid keepAliveInterval of {}. Please provide a positive integer, or -1 to disable.", parsedValue);
 
-                        throw new ParseError(
+                        throw new ConnectionStringParsingException(
                                 this.connectionString,
                                 keyPosition,
                                 this.nextPosition,
@@ -339,7 +355,7 @@ public class EventStoreDBConnectionString {
 
                     this.settings.keepAliveInterval(parsedValue);
                 } catch (NumberFormatException e) {
-                    throw new ParseError(
+                    throw new ConnectionStringParsingException(
                             this.connectionString,
                             keyPosition,
                             this.nextPosition,
@@ -355,7 +371,7 @@ public class EventStoreDBConnectionString {
                     if (parsedValue <= 0) {
                         logger.error("Invalid defaultDeadline of {}. Please provide a strictly positive integer", parsedValue);
 
-                        throw new ParseError(
+                        throw new ConnectionStringParsingException(
                                 this.connectionString,
                                 keyPosition,
                                 this.nextPosition,
@@ -365,7 +381,7 @@ public class EventStoreDBConnectionString {
 
                     this.settings.defaultDeadline(parsedValue);
                 } catch (NumberFormatException e) {
-                    throw new ParseError(
+                    throw new ConnectionStringParsingException(
                             this.connectionString,
                             keyPosition,
                             this.nextPosition,

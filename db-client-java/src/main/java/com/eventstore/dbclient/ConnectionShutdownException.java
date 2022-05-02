@@ -1,7 +1,10 @@
 package com.eventstore.dbclient;
 
+/**
+ * When a connection is already closed.
+ */
 public class ConnectionShutdownException extends Exception {
-    public ConnectionShutdownException() {
+    ConnectionShutdownException() {
         super("The connection is closed");
     }
 }

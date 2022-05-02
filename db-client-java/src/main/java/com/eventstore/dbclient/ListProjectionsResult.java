@@ -2,7 +2,7 @@ package com.eventstore.dbclient;
 
 import java.util.List;
 
-public class ListProjectionsResult {
+class ListProjectionsResult {
     private final List<ProjectionDetails> projections;
 
     public ListProjectionsResult(List<ProjectionDetails> projections) {
