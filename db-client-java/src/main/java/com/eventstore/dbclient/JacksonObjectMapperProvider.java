@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -31,12 +32,11 @@ import java.util.stream.Collectors;
  * Registry of shared ObjectMapper instances, each with its unique bindingName.
  */
 public class JacksonObjectMapperProvider {
+  public static final JacksonObjectMapperProvider INSTANCE = new JacksonObjectMapperProvider();
   private final Logger logger = LoggerFactory.getLogger(JacksonObjectMapperProvider.class);
   private final Map<String, ObjectMapper> objectMappers = new ConcurrentHashMap<>();
-  private final JacksonObjectMapperFactory objectMapperFactory;
 
-  public JacksonObjectMapperProvider(JacksonObjectMapperFactory objectMapperFactory) {
-    this.objectMapperFactory = objectMapperFactory;
+  private JacksonObjectMapperProvider() {
   }
 
   /**
@@ -68,7 +68,12 @@ public class JacksonObjectMapperProvider {
    */
   private ObjectMapper create(String bindingName, JsonFactory jsonFactory) {
     Configuration configuration = this.configForBinding(bindingName);
-    return createObjectMapper(bindingName, jsonFactory, configuration);
+
+    JacksonObjectMapperFactory objectMapperFactory = Optional.ofNullable(System.getProperty(JacksonObjectMapperFactory.NAME))
+            .map(name -> getInstanceFromName(name, JacksonObjectMapperFactory.class))
+            .orElse(new JacksonObjectMapperFactoryImpl());
+
+    return createObjectMapper(bindingName, objectMapperFactory, jsonFactory, configuration);
   }
 
   private Configuration configForBinding(String bindingName) {
@@ -81,17 +86,31 @@ public class JacksonObjectMapperProvider {
     return baseConf;
   }
 
+  private <T> T getInstanceFromName(String className, Class<T> clazz) {
+    try {
+      return clazz.cast(Class.forName(className)
+              .getConstructor()
+              .newInstance());
+    } catch (Exception e) {
+      logger.error("Could not load configured Jackson class {}, " +
+              "please verify classpath dependencies or amend the configuration " +
+              "[serialization.jackson]. Continuing without this class.", className, e);
+    }
+    return null;
+  }
+
   private ObjectMapper createObjectMapper(
           String bindingName,
+          JacksonObjectMapperFactory objectMapperFactory,
           JsonFactory jsonFactory,
           Configuration configuration) {
 
     JsonFactory configuredJsonFactory = createJsonFactory(bindingName, objectMapperFactory, jsonFactory, configuration);
     ObjectMapper mapper = objectMapperFactory.newObjectMapper(configuredJsonFactory);
 
-    configureObjectMapperFeatures(bindingName, mapper, configuration);
-    configureObjectMapperModules(bindingName, mapper, configuration);
-    configureObjectVisibility(bindingName, mapper, configuration);
+    configureObjectMapperFeatures(bindingName, mapper, objectMapperFactory, configuration);
+    configureObjectMapperModules(bindingName, mapper, objectMapperFactory, configuration);
+    configureObjectVisibility(bindingName, mapper, objectMapperFactory, configuration);
     return mapper;
   }
 
@@ -143,7 +162,7 @@ public class JacksonObjectMapperProvider {
                     e -> onValue.apply(e.getValue().toString())));
   }
 
-  private void configureObjectMapperFeatures(String bindingName, ObjectMapper objectMapper, Configuration configuration) {
+  private void configureObjectMapperFeatures(String bindingName, ObjectMapper objectMapper, JacksonObjectMapperFactory objectMapperFactory, Configuration configuration) {
     // Serialization Features
     Map<SerializationFeature, Boolean> configuredSerializationFeatures = getConfiguredFeatures(configuration, "serialization-features", SerializationFeature::valueOf, Boolean::parseBoolean);
 
@@ -183,24 +202,13 @@ public class JacksonObjectMapperProvider {
   private void configureObjectMapperModules(
           String bindingName,
           ObjectMapper objectMapper,
-          Configuration configuration) {
+          JacksonObjectMapperFactory objectMapperFactory, Configuration configuration) {
 
     List<Object> config = configuration.getList("modules.module");
 
     List<Module> configuredModules = config.stream()
             .map(Object::toString)
-            .map((String className) -> {
-              try {
-                return (Module) Class.forName(className)
-                        .getConstructor()
-                        .newInstance();
-              } catch (Exception e) {
-                logger.error("Could not load configured Jackson module {}, " +
-                        "please verify classpath dependencies or amend the configuration " +
-                        "[serialization.jackson-modules]. Continuing without this module.", className, e);
-              }
-              return null;
-            })
+            .map((String className) -> getInstanceFromName(className, Module.class))
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
 
@@ -212,7 +220,7 @@ public class JacksonObjectMapperProvider {
     });
   }
 
-  private void configureObjectVisibility(String bindingName, ObjectMapper objectMapper, Configuration configuration) {
+  private void configureObjectVisibility(String bindingName, ObjectMapper objectMapper, JacksonObjectMapperFactory objectMapperFactory, Configuration configuration) {
     // Object Visibility
     Map<PropertyAccessor, Visibility> configuredVisibility = getConfiguredFeatures(configuration, "visibility", PropertyAccessor::valueOf, Visibility::valueOf);
 

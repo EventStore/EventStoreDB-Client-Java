@@ -17,8 +17,8 @@ import java.util.List;
 import java.util.Map;
 
 public class HttpUtils {
-    private static final ObjectMapper mapper = new JacksonObjectMapperProvider(new JacksonObjectMapperFactoryImpl()).
-            getOrCreate(HttpUtils.class.getSimpleName(), null);
+    private static final ObjectMapper mapper = JacksonObjectMapperProvider.INSTANCE
+                    .getOrCreate(HttpUtils.class.getSimpleName(), null);
 
     public static Exception checkForError(int code) {
         switch (code) {

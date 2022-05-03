@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.core.StreamReadFeature;
 import com.fasterxml.jackson.core.StreamWriteFeature;
 import com.fasterxml.jackson.core.json.JsonReadFeature;
@@ -21,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 
 public interface JacksonObjectMapperFactory {
+  String NAME = JacksonObjectMapperFactory.class.getSimpleName();
+
   default ObjectMapper newObjectMapper(JsonFactory jsonFactory) {
     return JsonMapper.builder(jsonFactory).build();
   }

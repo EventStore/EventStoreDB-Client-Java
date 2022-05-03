@@ -52,7 +52,7 @@ public class RecordedEvent {
         this.eventType = systemMetadata.get(SystemMetadataKeys.TYPE);
         this.contentType = systemMetadata.get(SystemMetadataKeys.CONTENT_TYPE);
         this.created = systemMetadataDateToInstant(systemMetadata.get(SystemMetadataKeys.CREATED));
-        this.mapper = new JacksonObjectMapperProvider(new JacksonObjectMapperFactoryImpl()).getOrCreate(this.getClass().getSimpleName(), null);
+        this.mapper = JacksonObjectMapperProvider.INSTANCE.getOrCreate(this.getClass().getSimpleName(), null);
     }
 
     /**

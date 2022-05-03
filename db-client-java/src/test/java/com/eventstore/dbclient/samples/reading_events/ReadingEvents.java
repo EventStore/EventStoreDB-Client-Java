@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class ReadingEvents {
-    private static final ObjectMapper mapper = new JacksonObjectMapperProvider(new JacksonObjectMapperFactoryImpl()).
-            getOrCreate(ReadingEvents.class.getSimpleName(), null);
+    private static final ObjectMapper mapper = JacksonObjectMapperProvider.INSTANCE
+            .getOrCreate(ReadingEvents.class.getSimpleName(), null);
 
     private static void readFromStream(EventStoreDBClient client) throws ExecutionException, InterruptedException, JsonProcessingException {
         // region read-from-stream
