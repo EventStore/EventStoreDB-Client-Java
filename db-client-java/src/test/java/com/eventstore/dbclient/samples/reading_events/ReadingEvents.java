@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class ReadingEvents {
+    private static final ObjectMapper mapper = new JacksonObjectMapperProvider(new JacksonObjectMapperFactoryImpl()).
+            getOrCreate(ReadingEvents.class.getSimpleName(), null);
+
     private static void readFromStream(EventStoreDBClient client) throws ExecutionException, InterruptedException, JsonProcessingException {
         // region read-from-stream
         ReadStreamOptions options = ReadStreamOptions.get()
@@ -23,7 +26,7 @@ public class ReadingEvents {
         // region iterate-stream
         for (ResolvedEvent resolvedEvent : events) {
             RecordedEvent recordedEvent = resolvedEvent.getOriginalEvent();
-            System.out.println(new ObjectMapper().writeValueAsString(recordedEvent.getEventData()));
+            System.out.println(mapper.writeValueAsString(recordedEvent.getEventData()));
         }
         // endregion iterate-stream
     }
@@ -43,7 +46,7 @@ public class ReadingEvents {
         // region iterate-stream
         for (ResolvedEvent resolvedEvent : events) {
             RecordedEvent recordedEvent = resolvedEvent.getOriginalEvent();
-            System.out.println(new ObjectMapper().writeValueAsString(recordedEvent.getEventData()));
+            System.out.println(mapper.writeValueAsString(recordedEvent.getEventData()));
         }
         // endregion iterate-stream
     }
@@ -83,7 +86,7 @@ public class ReadingEvents {
 
         for (ResolvedEvent resolvedEvent : events) {
             RecordedEvent recordedEvent = resolvedEvent.getOriginalEvent();
-            System.out.println(new ObjectMapper().writeValueAsString(recordedEvent.getEventData()));
+            System.out.println(mapper.writeValueAsString(recordedEvent.getEventData()));
         }
         // endregion checking-for-stream-presence
     }
@@ -101,7 +104,7 @@ public class ReadingEvents {
 
         for (ResolvedEvent resolvedEvent : events) {
             RecordedEvent recordedEvent = resolvedEvent.getOriginalEvent();
-            System.out.println(new ObjectMapper().writeValueAsString(recordedEvent.getEventData()));
+            System.out.println(mapper.writeValueAsString(recordedEvent.getEventData()));
         }
         // endregion reading-backwards
     }
@@ -121,7 +124,7 @@ public class ReadingEvents {
         // region read-from-all-stream-iterate
         for (ResolvedEvent resolvedEvent : events) {
             RecordedEvent recordedEvent = resolvedEvent.getOriginalEvent();
-            System.out.println(new ObjectMapper().writeValueAsString(recordedEvent.getEventData()));
+            System.out.println(mapper.writeValueAsString(recordedEvent.getEventData()));
         }
         // endregion read-from-all-stream-iterate
     }
@@ -156,7 +159,7 @@ public class ReadingEvents {
             if (recordedEvent.getEventType().startsWith("$")) {
                 continue;
             }
-            System.out.println(new ObjectMapper().writeValueAsString(recordedEvent.getEventData()));
+            System.out.println(mapper.writeValueAsString(recordedEvent.getEventData()));
         }
         // endregion ignore-system-events
     }
@@ -176,7 +179,7 @@ public class ReadingEvents {
         // region read-from-all-stream-iterate
         for (ResolvedEvent resolvedEvent : events) {
             RecordedEvent recordedEvent = resolvedEvent.getOriginalEvent();
-            System.out.println(new ObjectMapper().writeValueAsString(recordedEvent.getEventData()));
+            System.out.println(mapper.writeValueAsString(recordedEvent.getEventData()));
         }
         // endregion read-from-all-stream-iterate
     }
@@ -196,7 +199,7 @@ public class ReadingEvents {
             if (!recordedEvent.getEventType().startsWith("$")) {
                 continue;
             }
-            System.out.println(new ObjectMapper().writeValueAsString(recordedEvent.getEventData()));
+            System.out.println(mapper.writeValueAsString(recordedEvent.getEventData()));
         }
     }
 
@@ -214,7 +217,7 @@ public class ReadingEvents {
         // endregion read-from-all-stream-resolving-link-Tos
         for (ResolvedEvent resolvedEvent : events) {
             RecordedEvent recordedEvent = resolvedEvent.getOriginalEvent();
-            System.out.println(new ObjectMapper().writeValueAsString(recordedEvent.getEventData()));
+            System.out.println(mapper.writeValueAsString(recordedEvent.getEventData()));
         }
     }
 }

@@ -3,14 +3,13 @@ package com.eventstore.dbclient;
 import com.eventstore.dbclient.proto.persistentsubscriptions.Persistent;
 import com.eventstore.dbclient.proto.shared.Shared;
 import com.eventstore.dbclient.proto.streams.StreamsOuterClass;
-import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
-import java.util.StringJoiner;
 import java.util.UUID;
 
 public class RecordedEvent {
@@ -33,7 +32,7 @@ public class RecordedEvent {
     @NotNull
     private final String contentType;
 
-    private static final JsonMapper mapper = new JsonMapper();
+    private final ObjectMapper mapper;
 
     public RecordedEvent(
             @NotNull String eventStreamId,
@@ -53,6 +52,7 @@ public class RecordedEvent {
         this.eventType = systemMetadata.get(SystemMetadataKeys.TYPE);
         this.contentType = systemMetadata.get(SystemMetadataKeys.CONTENT_TYPE);
         this.created = systemMetadataDateToInstant(systemMetadata.get(SystemMetadataKeys.CREATED));
+        this.mapper = new JacksonObjectMapperProvider(new JacksonObjectMapperFactoryImpl()).getOrCreate(this.getClass().getSimpleName(), null);
     }
 
     /**

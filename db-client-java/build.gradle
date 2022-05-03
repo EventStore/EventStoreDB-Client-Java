@@ -15,7 +15,7 @@ plugins {
 }
 
 group = 'com.eventstore'
-version = '2.1.0-SNAPSHOT'
+version = '2.1.1-SNAPSHOT'
 
 java {
     withJavadocJar()
@@ -42,7 +42,11 @@ dependencies {
     implementation "io.grpc:grpc-stub:${grpcVersion}"
     implementation "io.grpc:grpc-protobuf:${grpcVersion}"
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.2'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.13.2'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.2'
     implementation 'org.slf4j:slf4j-api:1.7.36'
+    implementation 'org.apache.commons:commons-configuration2:2.7'
+    implementation 'commons-beanutils:commons-beanutils:1.9.4'
 
     testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
     testImplementation "org.junit.jupiter:junit-jupiter-params:${junitVersion}"
@@ -160,3 +164,5 @@ tasks.withType(Sign) {
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
+
+apply plugin: 'maven-publish'

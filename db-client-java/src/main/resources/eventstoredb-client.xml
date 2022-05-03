@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--This is the reference config file that contains all the default settings.
+    Make your edits/overrides in your eventstoredb-client.xml.-->
+<configuration>
+    <serialization>
+        <jackson>
+            <!-- The Jackson JSON serializer will register these modules.-->
+            <modules>
+                <!-- Support for java 8 data types.-->
+                <module>com.fasterxml.jackson.datatype.jdk8.Jdk8Module</module>
+                <module>com.fasterxml.jackson.datatype.jsr310.JavaTimeModule</module>
+            </modules>
+            <stream>
+                <!-- Configuration of the JsonFactory StreamReadFeature.
+                    See com.fasterxml.jackson.core.StreamReadFeature
+                    Enum values corresponding to the StreamReadFeatures and
+                    their boolean value, for example:
+                        <read-features>
+                           <STRICT_DUPLICATE_DETECTION>true</STRICT_DUPLICATE_DETECTION>
+                        </read-features>
+                -->
+                <!-- Configuration of the JsonFactory StreamWriteFeature.
+                    See com.fasterxml.jackson.core.StreamWriteFeature
+                    Enum values corresponding to the StreamWriteFeatures and
+                    their boolean value, for example:
+                        <write-features>
+                            <WRITE_BIGDECIMAL_AS_PLAIN>true</WRITE_BIGDECIMAL_AS_PLAIN>
+                        </write-features>
+                -->
+            </stream>
+            <json>
+                <!-- Configuration of the JsonFactory JsonReadFeature.
+                    See com.fasterxml.jackson.core.json.JsonReadFeature
+                    Enum values corresponding to the JsonReadFeatures and
+                    their boolean value, for example:
+                        <read-features>
+                            <ALLOW_SINGLE_QUOTES>true</ALLOW_SINGLE_QUOTES>
+                        </read-features>
+                -->
+                <!-- Configuration of the JsonFactory JsonWriteFeature.
+                    See com.fasterxml.jackson.core.json.JsonWriteFeature
+                    Enum values corresponding to the JsonWriteFeatures and
+                    their boolean value, for example:
+                        <write-features>
+                            <WRITE_NUMBERS_AS_STRINGS>true</WRITE_NUMBERS_AS_STRINGS>
+                        </write-features>
+                -->
+                <!-- Configuration of the ObjectMapper JsonParser features.
+                    See com.fasterxml.jackson.core.JsonParser.Feature
+                    Enum values corresponding to the JsonParser.Feature and their
+                    boolean value, for example:
+                        <parser-features>
+                            <ALLOW_SINGLE_QUOTES>true</ALLOW_SINGLE_QUOTES>
+                        </parser-features>
+                -->
+                <!-- Configuration of the ObjectMapper JsonParser features.
+                    See com.fasterxml.jackson.core.JsonGenerator.Feature
+                    Enum values corresponding to the JsonGenerator.Feature and
+                    their boolean value, for example:
+                        <generator-features>
+                            <WRITE_NUMBERS_AS_STRINGS>true</WRITE_NUMBERS_AS_STRINGS>
+                        </generator-features>
+                -->
+            </json>
+            <!-- Configuration of the ObjectMapper serialization features.
+                See com.fasterxml.jackson.databind.SerializationFeature
+                Enum values corresponding to the SerializationFeature and their boolean value.
+            -->
+            <serialization-features>
+                <WRITE_DATES_AS_TIMESTAMPS>true</WRITE_DATES_AS_TIMESTAMPS>
+            </serialization-features>
+            <!-- Configuration of the ObjectMapper deserialization features.
+                See com.fasterxml.jackson.databind.DeserializationFeature
+                Enum values corresponding to the DeserializationFeature and their boolean value.
+            -->
+            <deserialization-features>
+                <FAIL_ON_UNKNOWN_PROPERTIES>false</FAIL_ON_UNKNOWN_PROPERTIES>
+            </deserialization-features>
+            <!-- Configuration of the ObjectMapper mapper features.
+                See com.fasterxml.jackson.databind.MapperFeature
+                Enum values corresponding to the MapperFeature and their
+                boolean values, for example:
+                <mapper-features>
+                    <SORT_PROPERTIES_ALPHABETICALLY>true</SORT_PROPERTIES_ALPHABETICALLY>
+                </mapper-features>
+            -->
+            <!-- Configuration of the JsonFactory Visibility.
+                See com.fasterxml.jackson.annotation.PropertyAccessor
+                and com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility
+                Enum values. For example, to serialize only public fields
+                overwrite the default values with:
+                    <FIELD>PUBLIC_ONLY</FIELD>
+
+                Default: all fields (including private and protected) are serialized.
+                <FIELD>ANY</FIELD>
+            -->
+            <visibility>
+                <FIELD>ANY</FIELD>
+            </visibility>
+        </jackson>
+    </serialization>
+</configuration>
