@@ -55,6 +55,7 @@ public class StreamAcl implements Acl {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private static ArrayList<String> deserializeRoles(HashMap<String, Object> source, String key) {
         ArrayList<String> list = null;
         Object value = source.get(key);

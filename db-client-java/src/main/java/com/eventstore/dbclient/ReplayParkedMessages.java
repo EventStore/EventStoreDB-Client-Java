@@ -14,6 +14,7 @@ import java.util.concurrent.CompletableFuture;
 import static com.eventstore.dbclient.HttpUtils.*;
 
 final class ReplayParkedMessages {
+    @SuppressWarnings("unchecked")
     public static CompletableFuture execute(GrpcClient client, ReplayParkedMessagesOptions options, String stream, String groupName) {
         return client.runWithArgs(args -> {
            CompletableFuture result = new CompletableFuture();

@@ -19,6 +19,7 @@ class OptionsWithPositionAndResolveLinkTosBase<T> extends OptionsWithResolveLink
         return this.fromPosition(Position.END);
     }
 
+    @SuppressWarnings("unchecked")
     public T fromPosition(Position position) {
         this.position = position;
         return (T)this;

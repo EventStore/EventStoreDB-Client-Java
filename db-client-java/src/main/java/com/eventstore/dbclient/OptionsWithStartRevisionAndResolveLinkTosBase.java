@@ -11,6 +11,7 @@ class OptionsWithStartRevisionAndResolveLinkTosBase<T> extends OptionsWithResolv
         return this.startRevision;
     }
 
+    @SuppressWarnings("unchecked")
     public T fromRevision(StreamRevision startRevision) {
         this.startRevision = startRevision;
         return (T)this;
