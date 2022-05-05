@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <serialization>
+        <jackson>
+            <modules>
+                <module>com.fasterxml.jackson.datatype.jdk8.Jdk8Module</module>
+            </modules>
+            <serialization-features>
+                <WRITE_DATES_AS_TIMESTAMPS>true</WRITE_DATES_AS_TIMESTAMPS>
+            </serialization-features>
+            <deserialization-features>
+                <FAIL_ON_UNKNOWN_PROPERTIES>false</FAIL_ON_UNKNOWN_PROPERTIES>
+            </deserialization-features>
+            <visibility>
+                <FIELD>ANY</FIELD>
+            </visibility>
+            <RecordedEvent>
+                <modules>
+                    <module>com.fasterxml.jackson.datatype.jsr310.JavaTimeModule</module>
+                </modules>
+            </RecordedEvent>
+        </jackson>
+    </serialization>
+</configuration>

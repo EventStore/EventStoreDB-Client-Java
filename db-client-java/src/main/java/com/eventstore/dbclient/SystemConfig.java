@@ -6,8 +6,6 @@ import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-
 public class SystemConfig {
   private static final SystemConfig INSTANCE = new SystemConfig();
   private Configuration configuration;
@@ -15,8 +13,7 @@ public class SystemConfig {
   private SystemConfig() {
     try {
       Configurations configs = new Configurations();
-      configuration = configs.xml(new File("eventstoredb-client.xml"));
-
+      configuration = configs.xml(ClassLoader.getSystemClassLoader().getResource("eventstoredb-client.xml"));
     } catch (ConfigurationException e) {
       Logger logger = LoggerFactory.getLogger(SystemConfig.class);
       logger.error("An error occurred trying to retrieve configurations.", e);
@@ -32,6 +29,6 @@ public class SystemConfig {
   }
 
   public boolean hasPath(String path) {
-    return configuration.containsKey(path);
+    return !getConfig(path).isEmpty();
   }
 }

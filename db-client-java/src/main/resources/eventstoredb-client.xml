@@ -4,11 +4,13 @@
 <configuration>
     <serialization>
         <jackson>
-            <!-- The Jackson JSON serializer will register these modules.-->
             <modules>
-                <!-- Support for java 8 data types.-->
-                <module>com.fasterxml.jackson.datatype.jdk8.Jdk8Module</module>
-                <module>com.fasterxml.jackson.datatype.jsr310.JavaTimeModule</module>
+                <!-- The Jackson JSON serializer will register these modules.
+                    Support for java 8 data types.
+                    for example:
+                        <module>com.fasterxml.jackson.datatype.jdk8.Jdk8Module</module>
+                        <module>com.fasterxml.jackson.datatype.jsr310.JavaTimeModule</module>
+                -->
             </modules>
             <stream>
                 <!-- Configuration of the JsonFactory StreamReadFeature.
@@ -62,19 +64,21 @@
                         </generator-features>
                 -->
             </json>
-            <!-- Configuration of the ObjectMapper serialization features.
-                See com.fasterxml.jackson.databind.SerializationFeature
-                Enum values corresponding to the SerializationFeature and their boolean value.
-            -->
             <serialization-features>
-                <WRITE_DATES_AS_TIMESTAMPS>true</WRITE_DATES_AS_TIMESTAMPS>
+                <!-- Configuration of the ObjectMapper serialization features.
+                    See com.fasterxml.jackson.databind.SerializationFeature
+                    Enum values corresponding to the SerializationFeature and their boolean value.
+                    for example:
+                        <WRITE_DATES_AS_TIMESTAMPS>true</WRITE_DATES_AS_TIMESTAMPS>
+                -->
             </serialization-features>
-            <!-- Configuration of the ObjectMapper deserialization features.
-                See com.fasterxml.jackson.databind.DeserializationFeature
-                Enum values corresponding to the DeserializationFeature and their boolean value.
-            -->
             <deserialization-features>
-                <FAIL_ON_UNKNOWN_PROPERTIES>false</FAIL_ON_UNKNOWN_PROPERTIES>
+                <!-- Configuration of the ObjectMapper deserialization features.
+                    See com.fasterxml.jackson.databind.DeserializationFeature
+                    Enum values corresponding to the DeserializationFeature and their boolean value.
+                    for example:
+                        <FAIL_ON_UNKNOWN_PROPERTIES>false</FAIL_ON_UNKNOWN_PROPERTIES>
+                -->
             </deserialization-features>
             <!-- Configuration of the ObjectMapper mapper features.
                 See com.fasterxml.jackson.databind.MapperFeature
@@ -84,17 +88,17 @@
                     <SORT_PROPERTIES_ALPHABETICALLY>true</SORT_PROPERTIES_ALPHABETICALLY>
                 </mapper-features>
             -->
-            <!-- Configuration of the JsonFactory Visibility.
-                See com.fasterxml.jackson.annotation.PropertyAccessor
-                and com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility
-                Enum values. For example, to serialize only public fields
-                overwrite the default values with:
-                    <FIELD>PUBLIC_ONLY</FIELD>
-
-                Default: all fields (including private and protected) are serialized.
-                <FIELD>ANY</FIELD>
-            -->
             <visibility>
+                <!-- Configuration of the JsonFactory Visibility.
+                    See com.fasterxml.jackson.annotation.PropertyAccessor
+                    and com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility
+                    Enum values. For example, to serialize only public fields
+                    overwrite the default values with:
+                        <FIELD>PUBLIC_ONLY</FIELD>
+
+                    Default: all fields (including private and protected) are serialized.
+                    <FIELD>ANY</FIELD>
+                -->
                 <FIELD>ANY</FIELD>
             </visibility>
         </jackson>

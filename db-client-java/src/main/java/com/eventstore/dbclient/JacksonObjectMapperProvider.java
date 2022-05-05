@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.ConfigurationMap;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,12 +79,12 @@ public class JacksonObjectMapperProvider {
 
   private Configuration configForBinding(String bindingName) {
     String basePath = "serialization.jackson";
+    String bindingPath = basePath + "." + bindingName;
     SystemConfig systemConfig = SystemConfig.getSystemConfig();
-    Configuration baseConf = systemConfig.getConfig(basePath);
-    if (systemConfig.hasPath(basePath + bindingName)) {
-      return systemConfig.getConfig(basePath + bindingName);
+    if (systemConfig.hasPath(bindingPath)) {
+      return systemConfig.getConfig(bindingPath);
     }
-    return baseConf;
+    return systemConfig.getConfig(basePath);
   }
 
   private <T> T getInstanceFromName(String className, Class<T> clazz) {
@@ -157,6 +158,7 @@ public class JacksonObjectMapperProvider {
     return new ConfigurationMap(configuration.subset(keyword))
             .entrySet()
             .stream()
+            .filter(e -> StringUtils.isNotBlank(e.getKey().toString()))
             .collect(Collectors.toMap(
                     e -> onFeature.apply(e.getKey().toString()),
                     e -> onValue.apply(e.getValue().toString())));
