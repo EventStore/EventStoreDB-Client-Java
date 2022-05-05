@@ -11,6 +11,7 @@ class OptionsWithResolveLinkTosBase<T> extends OptionsBase<T> {
         return this.resolveLinkTos;
     }
 
+    @SuppressWarnings("unchecked")
     public T resolveLinkTos(boolean value) {
         this.resolveLinkTos = value;
         return (T)this;

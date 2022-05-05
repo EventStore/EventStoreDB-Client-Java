@@ -11,6 +11,7 @@ import java.util.concurrent.CompletableFuture;
 import static com.eventstore.dbclient.HttpUtils.checkForError;
 
 class RestartPersistentSubscriptionSubsystem {
+    @SuppressWarnings("unchecked")
     public static CompletableFuture execute(GrpcClient client, RestartPersistentSubscriptionSubsystemOptions options) {
         return client.runWithArgs(args -> {
             CompletableFuture result = new CompletableFuture();

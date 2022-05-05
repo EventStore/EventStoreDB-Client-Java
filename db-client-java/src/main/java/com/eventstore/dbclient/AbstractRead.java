@@ -33,6 +33,7 @@ abstract class AbstractRead implements Publisher<ResolvedEvent> {
     public abstract StreamsOuterClass.ReadReq.Options.Builder createOptions();
 
     @Override
+    @SuppressWarnings("unchecked")
     public void subscribe(Subscriber<? super ResolvedEvent> subscriber) {
         ReadSubscription readSubscription = new ReadSubscription(subscriber);
         subscriber.onSubscribe(readSubscription);

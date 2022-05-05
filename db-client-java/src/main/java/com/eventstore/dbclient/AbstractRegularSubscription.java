@@ -38,6 +38,7 @@ abstract class AbstractRegularSubscription {
 
     protected abstract StreamsOuterClass.ReadReq.Options.Builder createOptions();
 
+    @SuppressWarnings("unchecked")
     public CompletableFuture<Subscription> execute() {
         return this.client.run(channel -> {
             StreamsOuterClass.ReadReq readReq = StreamsOuterClass.ReadReq.newBuilder()
