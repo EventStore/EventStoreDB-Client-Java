@@ -164,6 +164,7 @@ public class JacksonObjectMapperProvider {
                     e -> onValue.apply(e.getValue().toString())));
   }
 
+  @SuppressWarnings("Deprecated")
   private void configureObjectMapperFeatures(String bindingName, ObjectMapper objectMapper, JacksonObjectMapperFactory objectMapperFactory, Configuration configuration) {
     // Serialization Features
     Map<SerializationFeature, Boolean> configuredSerializationFeatures = getConfiguredFeatures(configuration, "serialization-features", SerializationFeature::valueOf, Boolean::parseBoolean);
