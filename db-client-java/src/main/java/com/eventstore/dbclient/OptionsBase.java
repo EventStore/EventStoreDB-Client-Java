@@ -1,71 +1,101 @@
 package com.eventstore.dbclient;
 
+import com.google.errorprone.annotations.Immutable;
+
 import io.grpc.Metadata;
 
-class OptionsBase<T> {
-    protected final ConnectionMetadata metadata;
-    protected Long deadline;
-    protected OperationKind kind;
-    private UserCredentials credentials;
-    private boolean requiresLeader;
+@Immutable
+abstract class OptionsBase {
+	
+	ConnectionMetadata metadata;
+	
+	Long deadline;
+	
+	OperationKind kind;
+	
+	UserCredentials credentials;
+	
+	boolean requiresLeader;
 
-    protected OptionsBase() {
-        this.metadata = new ConnectionMetadata();
-        this.kind = OperationKind.Regular;
-    }
+	protected OptionsBase() {
+		this.metadata = new ConnectionMetadata();
+		this.kind = OperationKind.Regular;
+	}
 
-    public Metadata getMetadata() {
-        return this.metadata.build();
-    }
+	public Metadata getMetadata() {
+		return this.metadata.build();
+	}
 
-    public boolean hasUserCredentials() {
-        return this.metadata.hasUserCredentials();
-    }
+	public boolean hasUserCredentials() {
+		return this.metadata.hasUserCredentials();
+	}
 
-    public String getUserCredentials() {
-        return this.metadata.getUserCredentials();
-    }
+	public String getUserCredentials() {
+		return this.metadata.getUserCredentials();
+	}
 
-    @SuppressWarnings("unchecked")
-    public T authenticated(UserCredentials credentials) {
-        this.credentials = credentials;
-        return (T)this;
-    }
+	public Long getDeadline() {
+		return deadline;
+	}
 
-    public T requiresLeader() {
-        return requiresLeader(true);
-    }
+	public OperationKind getKind() {
+		return kind;
+	}
 
-    public T notRequireLeader() {
-        return requiresLeader(false);
-    }
+	public boolean isLeaderRequired() {
+		return this.requiresLeader;
+	}
 
-    @SuppressWarnings("unchecked")
-    public T requiresLeader(boolean value) {
-        this.requiresLeader = value;
-        return (T)this;
-    }
+	public UserCredentials getCredentials() {
+		return this.credentials;
+	}
 
-    @SuppressWarnings("unchecked")
-    public T deadline(long durationInMs) {
-        deadline = durationInMs;
+	/**
+	 * Builds a new (immutable) instance of the outer class.
+	 */
+	public abstract static class Builder<T extends OptionsBase> {
 
-        return (T)this;
-    }
+		private T delegate;
 
-    public Long getDeadline() {
-        return deadline;
-    }
+		protected Builder() {
+			this.delegate = createNewInstance();
+		}
 
-    public OperationKind getKind() {
-        return kind;
-    }
+		public Builder<T> deadline(long durationInMs) {
+			delegate.deadline = durationInMs;
+			return this;
+		}
 
-    public boolean isLeaderRequired() {
-        return this.requiresLeader;
-    }
+		public Builder<T> authenticated(UserCredentials credentials) {
+			delegate.credentials = credentials;
+			return this;
+		}
 
-    public UserCredentials getCredentials() {
-        return this.credentials;
-    }
+		public Builder<T> requiresLeader() {
+			return requiresLeader(true);
+		}
+
+		public Builder<T> notRequireLeader() {
+			return requiresLeader(false);
+		}
+
+		public Builder<T> requiresLeader(boolean value) {
+			delegate.requiresLeader = value;
+			return this;
+		}
+		
+		protected abstract T createNewInstance();
+		
+		protected T delegate() {
+			return delegate;
+		}
+		
+		public T build() {
+			final T result = delegate;
+			delegate = createNewInstance();
+			return result;
+		}
+
+	}
+
 }

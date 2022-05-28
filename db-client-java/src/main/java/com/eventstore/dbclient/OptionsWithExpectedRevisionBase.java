@@ -1,31 +1,44 @@
 package com.eventstore.dbclient;
 
-class OptionsWithExpectedRevisionBase<T> extends OptionsBase<T> {
-    private ExpectedRevision expectedRevision;
+import com.google.errorprone.annotations.Immutable;
 
-    protected OptionsWithExpectedRevisionBase() {
-        this.expectedRevision = ExpectedRevision.ANY;
-    }
+@Immutable
+abstract class OptionsWithExpectedRevisionBase extends OptionsBase {
+    
+	ExpectedRevision expectedRevision;
 
     public ExpectedRevision getExpectedRevision() {
         return this.expectedRevision;
     }
+    
+	/**
+	 * Builds a new (immutable) instance of the outer class.
+	 */
+	public abstract static class Builder<T extends OptionsWithExpectedRevisionBase> extends OptionsBase.Builder<T> {
 
-    @SuppressWarnings("unchecked")
-    public T expectedRevision(ExpectedRevision revision) {
-        this.expectedRevision = revision;
-        return (T) this;
-    }
+	    public Builder<T> expectedRevision(ExpectedRevision revision) {
+	        delegate().expectedRevision = revision;
+	        return this;
+	    }
 
-    @SuppressWarnings("unchecked")
-    public T expectedRevision(StreamRevision revision) {
-        this.expectedRevision = ExpectedRevision.expectedRevision(revision.getValueUnsigned());
-        return (T) this;
-    }
+	    public Builder<T> expectedRevision(StreamRevision revision) {
+	    	delegate().expectedRevision = ExpectedRevision.expectedRevision(revision.getValueUnsigned());
+	        return this;
+	    }
 
-    @SuppressWarnings("unchecked")
-    public T expectedRevision(long revision) {
-        this.expectedRevision = ExpectedRevision.expectedRevision(revision);
-        return (T) this;
-    }
+	    public Builder<T> expectedRevision(long revision) {
+	    	delegate().expectedRevision = ExpectedRevision.expectedRevision(revision);
+	        return this;
+	    }
+		
+		@Override
+		public T build() {
+			if (delegate().expectedRevision == null) {
+				delegate().expectedRevision = ExpectedRevision.ANY;
+			}
+			return super.build();
+		}
+		
+	}   
+	
 }

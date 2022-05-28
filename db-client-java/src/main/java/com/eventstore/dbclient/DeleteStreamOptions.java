@@ -1,27 +1,44 @@
 package com.eventstore.dbclient;
 
-public class DeleteStreamOptions extends OptionsWithExpectedRevisionBase<DeleteStreamOptions> {
-    private boolean softDelete;
+import com.google.errorprone.annotations.Immutable;
 
-    private DeleteStreamOptions() {
-        this.softDelete = true;
-    }
+@Immutable
+public final class DeleteStreamOptions extends OptionsWithExpectedRevisionBase {
 
-    public static DeleteStreamOptions get() {
-        return new DeleteStreamOptions();
-    }
+	private Boolean softDelete;
 
-    public boolean isSoftDelete() {
-        return this.softDelete;
-    }
+	public boolean isSoftDelete() {
+		return this.softDelete;
+	}
 
-    public DeleteStreamOptions softDelete() {
-        this.softDelete = true;
-        return this;
-    }
+	/**
+	 * Builds a new (immutable) instance of the outer class.
+	 */
+	public static final class Builder extends OptionsWithExpectedRevisionBase.Builder<DeleteStreamOptions> {
 
-    public DeleteStreamOptions hardDelete() {
-        this.softDelete = false;
-        return this;
-    }
+		public Builder softDelete() {
+			delegate().softDelete = true;
+			return this;
+		}
+
+		public Builder hardDelete() {
+			delegate().softDelete = false;
+			return this;
+		}
+
+		@Override
+		public DeleteStreamOptions build() {
+			if (delegate().softDelete == null) {
+				delegate().softDelete = true;
+			}
+			return super.build();
+		}
+
+		@Override
+		protected DeleteStreamOptions createNewInstance() {
+			return new DeleteStreamOptions();
+		}
+
+	}
+
 }
