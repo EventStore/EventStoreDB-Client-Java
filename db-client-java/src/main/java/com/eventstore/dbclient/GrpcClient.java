@@ -141,42 +141,51 @@ abstract class GrpcClient {
         if (candidate.isPresent()) {
             this.endpoint = candidate.get();
             this.channel = createChannel(this.endpoint);
+
             try {
-                this.serverInfo = ServerFeatures.getSupportedFeatures(this.settings, this.channel);
+                if (loadServerFeatures()) {
+                    this.currentChannelId = UUID.randomUUID();
+                    return true;
+                }
             } catch (Exception e) {
-                logger.error("An exception happened when fetching server supported features", e);
-                return false;
+                logger.error("A fatal exception happened when fetching server supported features", e);
             }
-
-            this.currentChannelId = UUID.randomUUID();
-
-            return true;
+            return false;
         }
 
         for (; ; ) {
             logger.debug("Start connection attempt ({}/{})", attempts, settings.getMaxDiscoverAttempts());
             if (doConnect()) {
                 try {
-                    serverInfo = ServerFeatures.getSupportedFeatures(settings, channel);
+                    if (loadServerFeatures()) {
+                        currentChannelId = UUID.randomUUID();
+                        logger.info("Connection created successfully");
+                        return true;
+                    }
                 } catch (Exception e) {
-                    logger.error("An exception happened when fetching server supported features", e);
+                    logger.error("A fatal exception happened when fetching server supported features", e);
                     return false;
                 }
-                currentChannelId = UUID.randomUUID();
-
-                logger.info("Connection created successfully");
-
-                return true;
-            } else {
-                ++attempts;
-                if (attempts > settings.getMaxDiscoverAttempts()) {
-                    logger.error("Maximum discovery attempt count reached: {}", settings.getMaxDiscoverAttempts());
-                    return false;
-                }
-
-                logger.warn("Unable to find a node. Retrying... ({}/{})", attempts, settings.getMaxDiscoverAttempts());
-                sleep(settings.getDiscoveryInterval());
             }
+
+            ++attempts;
+            if (attempts > settings.getMaxDiscoverAttempts()) {
+                logger.error("Maximum discovery attempt count reached: {}", settings.getMaxDiscoverAttempts());
+                return false;
+            }
+
+            logger.warn("Unable to find a node. Retrying... ({}/{})", attempts, settings.getMaxDiscoverAttempts());
+            sleep(settings.getDiscoveryInterval());
+        }
+    }
+
+    private boolean loadServerFeatures() {
+        try {
+            serverInfo = ServerFeatures.getSupportedFeatures(settings, channel);
+            return true;
+        } catch (ServerFeatures.RetryableException e) {
+            logger.warn("An exception happened when fetching server supported features. Retrying connection attempt.", e);
+            return false;
         }
     }
 
