@@ -232,6 +232,7 @@ abstract class GrpcClient {
                 result = false;
                 logger.info("Connection was closed successfully");
             } else {
+                ((Shutdown) msg).completed.accept(42);
                 logger.info("Shutdown request ignored, connection is already closed");
             }
         }
