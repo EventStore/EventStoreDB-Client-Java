@@ -131,10 +131,8 @@ abstract class GrpcClient {
         return runWithArgs(args -> CompletableFuture.completedFuture(args.endpoint));
     }
 
-    private boolean discover(UUID previousId, Optional<Endpoint> candidate) {
-        long attempts = 1;
-
-        // It means we already created a new channel and it was old request.
+    private boolean discover(UUID previousId, long attempts, Optional<Endpoint> candidate) {
+        // It means we already created a new channel, and it was old request.
         if (!currentChannelId.equals(previousId))
             return true;
 
@@ -153,30 +151,31 @@ abstract class GrpcClient {
             return false;
         }
 
-        for (; ; ) {
-            logger.debug("Start connection attempt ({}/{})", attempts, settings.getMaxDiscoverAttempts());
-            if (doConnect()) {
-                try {
-                    if (loadServerFeatures()) {
-                        currentChannelId = UUID.randomUUID();
-                        logger.info("Connection created successfully");
-                        return true;
-                    }
-                } catch (Exception e) {
-                    logger.error("A fatal exception happened when fetching server supported features", e);
-                    return false;
+        logger.debug("Start connection attempt ({}/{})", attempts, settings.getMaxDiscoverAttempts());
+        if (doConnect()) {
+            try {
+                if (loadServerFeatures()) {
+                    currentChannelId = UUID.randomUUID();
+                    logger.info("Connection created successfully");
+                    return true;
                 }
-            }
-
-            ++attempts;
-            if (attempts > settings.getMaxDiscoverAttempts()) {
-                logger.error("Maximum discovery attempt count reached: {}", settings.getMaxDiscoverAttempts());
+            } catch (Exception e) {
+                logger.error("A fatal exception happened when fetching server supported features", e);
                 return false;
             }
-
-            logger.warn("Unable to find a node. Retrying... ({}/{})", attempts, settings.getMaxDiscoverAttempts());
-            sleep(settings.getDiscoveryInterval());
         }
+
+        ++attempts;
+        if (attempts > settings.getMaxDiscoverAttempts()) {
+            logger.error("Maximum discovery attempt count reached: {}", settings.getMaxDiscoverAttempts());
+            return false;
+        }
+
+        logger.warn("Unable to find a node. Retrying... ({}/{})", attempts, settings.getMaxDiscoverAttempts());
+        channel = null;
+        sleep(settings.getDiscoveryInterval());
+        pushMsg(new CreateChannel(previousId, attempts));
+        return true;
     }
 
     private boolean loadServerFeatures() {
@@ -204,7 +203,7 @@ abstract class GrpcClient {
         if (msg instanceof CreateChannel) {
             if (!this.shutdown) {
                 CreateChannel args = (CreateChannel) msg;
-                result = discover(args.previousId, args.channel);
+                result = discover(args.previousId, args.attempts, args.channel);
             } else {
                 logger.warn("Channel creation request ignored, the connection is already closed");
             }
@@ -394,15 +393,24 @@ abstract class GrpcClient {
     class CreateChannel implements Msg {
         final Optional<Endpoint> channel;
         final UUID previousId;
+        final long attempts;
 
         CreateChannel(UUID previousId) {
             this.channel = Optional.empty();
             this.previousId = previousId;
+            this.attempts = 1;
+        }
+
+        CreateChannel(UUID previousId, long attempts) {
+            this.channel = Optional.empty();
+            this.previousId = previousId;
+            this.attempts = attempts;
         }
 
         CreateChannel(UUID previousId, Endpoint endpoint) {
             this.channel = Optional.of(endpoint);
             this.previousId = previousId;
+            this.attempts = 1;
         }
     }
 
