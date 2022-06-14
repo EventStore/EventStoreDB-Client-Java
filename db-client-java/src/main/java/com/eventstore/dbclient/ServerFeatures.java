@@ -21,11 +21,17 @@ class ServerFeatures {
         final ServerFeaturesGrpc.ServerFeaturesStub stub = ServerFeaturesGrpc.newStub(channel);
         try {
             return Optional.ofNullable(getSupportedFeaturesInternal(stub).get(settings.getGossipTimeout(), TimeUnit.MILLISECONDS));
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+        } catch (InterruptedException e) {
+            throw new RuntimeException("Interrupted when fetching server features", e);
+        } catch (TimeoutException e) {
+            throw new RetryableException(e);
+        } catch (ExecutionException e) {
             if (e.getCause() instanceof StatusRuntimeException) {
                 StatusRuntimeException error = (StatusRuntimeException) e.getCause();
                 if (error.getStatus().getCode() == Status.Code.NOT_FOUND || error.getStatus().getCode() == Status.Code.UNIMPLEMENTED) {
                     return Optional.empty();
+                } else if (error.getStatus().getCode() == Status.Code.UNAVAILABLE) {
+                    throw new RetryableException(e);
                 }
             }
             throw new RuntimeException("Error when fetching server features", e);
@@ -123,5 +129,11 @@ class ServerFeatures {
             public void onCompleted() {
             }
         };
+    }
+
+    static class RetryableException extends RuntimeException {
+        public RetryableException(Throwable cause) {
+            super(cause);
+        }
     }
 }
