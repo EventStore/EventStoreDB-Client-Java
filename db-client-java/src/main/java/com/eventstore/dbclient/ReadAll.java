@@ -32,6 +32,7 @@ class ReadAll extends AbstractRead {
         StreamsOuterClass.ReadReq.Options.Builder builder = defaultReadOptions.clone()
                 .setAll(optionsOrBuilder)
                 .setResolveLinks(this.options.shouldResolveLinkTos())
+                .setControlOption(StreamsOuterClass.ReadReq.Options.ControlOption.newBuilder().setCompatibility(1))
                 .setCount(this.maxCount)
                 .setNoFilter(Shared.Empty.getDefaultInstance())
                 .setReadDirection(this.options.getDirection() == Direction.Forwards ?

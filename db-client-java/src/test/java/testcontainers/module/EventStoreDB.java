@@ -36,6 +36,10 @@ public class EventStoreDB extends GenericContainer<EventStoreDB> {
         return Optional.ofNullable(System.getenv("EVENTSTORE_DOCKER_TAG_ENV")).orElse(IMAGE_TAG).startsWith("20");
     }
 
+    public static boolean isTestedAgains20_10() {
+        return Optional.ofNullable(System.getenv("EVENTSTORE_DOCKER_TAG_ENV")).orElse(IMAGE_TAG).startsWith("20.10");
+    }
+
     private final EventStoreDBClientSettings settings;
     private final EventStoreDBClient client;
     private final EventStoreDBPersistentSubscriptionsClient persistentSubscriptionsClient;

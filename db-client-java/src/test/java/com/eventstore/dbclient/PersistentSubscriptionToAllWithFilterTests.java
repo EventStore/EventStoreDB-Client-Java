@@ -30,7 +30,7 @@ public class PersistentSubscriptionToAllWithFilterTests extends ESDBTests {
             int current = 0;
 
             @Override
-            public void onEvent(PersistentSubscription subscription, ResolvedEvent event) {
+            public void onEvent(PersistentSubscription subscription, int retryCount, ResolvedEvent event) {
                 RecordedEvent record = event.getEvent();
 
                 Assertions.assertEquals(filteredEventType, record.getEventType());

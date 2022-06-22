@@ -24,7 +24,7 @@ public class PersistentSubscriptions {
             "subscription-group",
             new PersistentSubscriptionListener() {
                 @Override
-                public void onEvent(PersistentSubscription subscription, ResolvedEvent event) {
+                public void onEvent(PersistentSubscription subscription, int retryCount, ResolvedEvent event) {
                     System.out.println("Received event"
                         + event.getOriginalEvent().getStreamRevision()
                         + "@" + event.getOriginalEvent().getStreamId());
@@ -52,7 +52,7 @@ public class PersistentSubscriptions {
                 "subscription-group",
                 new PersistentSubscriptionListener() {
                     @Override
-                    public void onEvent(PersistentSubscription subscription, ResolvedEvent event) {
+                    public void onEvent(PersistentSubscription subscription, int retryCount, ResolvedEvent event) {
                         try {
                             System.out.println("Received event"
                                     + event.getOriginalEvent().getStreamRevision()
@@ -82,7 +82,7 @@ public class PersistentSubscriptions {
             "subscription-group",
             new PersistentSubscriptionListener() {
                 @Override
-                public void onEvent(PersistentSubscription subscription, ResolvedEvent event) {
+                public void onEvent(PersistentSubscription subscription, int retryCount, ResolvedEvent event) {
                     try {
                         System.out.println("Received event"
                             + event.getOriginalEvent().getStreamRevision()

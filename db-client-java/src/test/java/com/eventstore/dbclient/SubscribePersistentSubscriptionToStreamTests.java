@@ -66,7 +66,7 @@ public class SubscribePersistentSubscriptionToStreamTests extends ESDBTests {
             private int count = 0;
 
             @Override
-            public void onEvent(PersistentSubscription subscription, ResolvedEvent event) {
+            public void onEvent(PersistentSubscription subscription, int retryCount, ResolvedEvent event) {
                 ++this.count;
 
                 subscription.ack(event);
@@ -123,7 +123,7 @@ public class SubscribePersistentSubscriptionToStreamTests extends ESDBTests {
             private int count = 0;
 
             @Override
-            public void onEvent(PersistentSubscription subscription, ResolvedEvent resolvedEvent) {
+            public void onEvent(PersistentSubscription subscription, int retryCount, ResolvedEvent resolvedEvent) {
                 RecordedEvent event = resolvedEvent.getEvent();
 
                 subscription.ack(resolvedEvent);

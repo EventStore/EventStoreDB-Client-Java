@@ -13,14 +13,14 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 class ReadSubscription implements Subscription {
-    private final Subscriber<? super ResolvedEvent> subscriber;
+    private final Subscriber<? super ReadMessage> subscriber;
     private ClientCallStreamObserver<?> streamObserver;
     private final AtomicLong requested = new AtomicLong(0);
     private final AtomicBoolean terminated = new AtomicBoolean(false);
     private final Lock lock = new ReentrantLock();
     private final Condition hasRequested = lock.newCondition();
 
-    ReadSubscription(Subscriber<? super ResolvedEvent> subscriber) {
+    ReadSubscription(Subscriber<? super ReadMessage> subscriber) {
         this.subscriber = subscriber;
     }
 
@@ -43,13 +43,13 @@ class ReadSubscription implements Subscription {
         subscriber.onError(error);
     }
 
-    public void onNext(ResolvedEvent event) {
+    public void onNext(ReadMessage message) {
         lock.lock();
         while (requested.get() == 0 && !terminated.get()) {
             hasRequested.awaitUninterruptibly();
         }
         if (!terminated.get()) {
-            subscriber.onNext(event);
+            subscriber.onNext(message);
             requested.decrementAndGet();
         }
         lock.unlock();

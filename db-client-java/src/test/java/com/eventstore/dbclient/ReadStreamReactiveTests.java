@@ -20,6 +20,8 @@ public class ReadStreamReactiveTests extends ESDBTests {
                 .notResolveLinkTos();
 
         List<ResolvedEvent> events = Flowable.fromPublisher(client.readStreamReactive("dataset20M-1800", 10, options))
+                .filter(ReadMessage::hasEvent)
+                .map(ReadMessage::getEvent)
                 .collect(toList())
                 .blockingGet();
 
@@ -36,6 +38,8 @@ public class ReadStreamReactiveTests extends ESDBTests {
                 .notResolveLinkTos();
 
         List<ResolvedEvent> events = Flowable.fromPublisher(client.readStreamReactive("dataset20M-1800", 10, options))
+                .filter(ReadMessage::hasEvent)
+                .map(ReadMessage::getEvent)
                 .collect(toList())
                 .blockingGet();
 
@@ -52,10 +56,14 @@ public class ReadStreamReactiveTests extends ESDBTests {
                 .notResolveLinkTos();
 
         List<ResolvedEvent> events1 = Flowable.fromPublisher(client.readStreamReactive("dataset20M-1800", Long.MAX_VALUE, options))
+                .filter(ReadMessage::hasEvent)
+                .map(ReadMessage::getEvent)
                 .collect(toList())
                 .blockingGet();
 
         List<ResolvedEvent> events2 = Flowable.fromPublisher(client.readStreamReactive("dataset20M-1800", options))
+                .filter(ReadMessage::hasEvent)
+                .map(ReadMessage::getEvent)
                 .collect(toList())
                 .blockingGet();
 
