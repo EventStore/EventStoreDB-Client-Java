@@ -107,7 +107,7 @@ public final class GrpcUtils {
             metadata.authenticated(credentials);
         }
 
-        if (options.isLeaderRequired()) {
+        if (options.isLeaderRequired() || settings.getNodePreference() == NodePreference.LEADER) {
             metadata.requiresLeader();
         }
 
