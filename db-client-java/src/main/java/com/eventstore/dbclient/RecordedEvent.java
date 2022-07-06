@@ -4,13 +4,13 @@ import com.eventstore.dbclient.proto.persistentsubscriptions.Persistent;
 import com.eventstore.dbclient.proto.shared.Shared;
 import com.eventstore.dbclient.proto.streams.StreamsOuterClass;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.module.kotlin.KotlinModule;
 
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
-import java.util.StringJoiner;
 import java.util.UUID;
 
 public class RecordedEvent {
@@ -34,6 +34,10 @@ public class RecordedEvent {
     private final String contentType;
 
     private static final JsonMapper mapper = new JsonMapper();
+
+    static {
+        mapper.registerModule(new KotlinModule.Builder().build());
+    }
 
     public RecordedEvent(
             @NotNull String eventStreamId,
