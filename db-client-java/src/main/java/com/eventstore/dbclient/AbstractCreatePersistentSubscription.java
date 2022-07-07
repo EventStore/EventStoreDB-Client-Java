@@ -2,8 +2,8 @@ package com.eventstore.dbclient;
 
 import com.eventstore.dbclient.proto.persistentsubscriptions.Persistent;
 import com.eventstore.dbclient.proto.persistentsubscriptions.PersistentSubscriptionsGrpc;
-import io.grpc.Metadata;
-import io.grpc.stub.MetadataUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -12,6 +12,7 @@ abstract class AbstractCreatePersistentSubscription<TPos, TSettings extends Pers
     private final String group;
     private final TSettings settings;
     private final OptionsBase options;
+    private static final Logger logger = LoggerFactory.getLogger(AbstractCreatePersistentSubscription.class);
 
     public AbstractCreatePersistentSubscription(GrpcClient client, String group,
                                                 TSettings settings, OptionsBase options) {
@@ -49,16 +50,15 @@ abstract class AbstractCreatePersistentSubscription<TPos, TSettings extends Pers
                     .setExtraStatistics(settings.isExtraStatistics())
                     .setCheckpointAfterMs(settings.getCheckpointAfterInMs());
 
-            switch (settings.getConsumerStrategyName()) {
-                case NamedConsumerStrategy.DISPATCH_TO_SINGLE:
-                    settingsBuilder.setNamedConsumerStrategy(Persistent.CreateReq.ConsumerStrategy.DispatchToSingle);
-                    break;
-                case NamedConsumerStrategy.ROUND_ROBIN:
-                    settingsBuilder.setNamedConsumerStrategy(Persistent.CreateReq.ConsumerStrategy.RoundRobin);
-                    break;
-                case NamedConsumerStrategy.PINNED:
-                    settingsBuilder.setNamedConsumerStrategy(Persistent.CreateReq.ConsumerStrategy.Pinned);
-                    break;
+            if (settings.getNamedConsumerStrategy().isDispatchToSingle()) {
+                settingsBuilder.setNamedConsumerStrategy(Persistent.CreateReq.ConsumerStrategy.DispatchToSingle);
+            } else if (settings.getNamedConsumerStrategy().isRoundRobin()) {
+                settingsBuilder.setNamedConsumerStrategy(Persistent.CreateReq.ConsumerStrategy.RoundRobin);
+            } else if (settings.getNamedConsumerStrategy().isPinned()) {
+                settingsBuilder.setNamedConsumerStrategy(Persistent.CreateReq.ConsumerStrategy.Pinned);
+            } else {
+                logger.error(String.format("Unsupported named consumer strategy: '%s'", settings.getNamedConsumerStrategy().toString()));
+                throw new UnsupportedFeatureException();
             }
 
             Persistent.CreateReq req = Persistent.CreateReq.newBuilder()
@@ -68,7 +68,7 @@ abstract class AbstractCreatePersistentSubscription<TPos, TSettings extends Pers
                     .build();
 
             if (req.getOptions().hasAll() && !args.supportFeature(FeatureFlags.PERSISTENT_SUBSCRIPTION_TO_ALL)) {
-                result.completeExceptionally(new UnsupportedFeature());
+                result.completeExceptionally(new UnsupportedFeatureException());
             } else {
                 client.create(req, GrpcUtils.convertSingleResponse(result));
             }

@@ -2,8 +2,6 @@ package com.eventstore.dbclient;
 
 import com.eventstore.dbclient.proto.persistentsubscriptions.Persistent;
 import com.eventstore.dbclient.proto.persistentsubscriptions.PersistentSubscriptionsGrpc;
-import io.grpc.Metadata;
-import io.grpc.stub.MetadataUtils;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -33,7 +31,7 @@ abstract class AbstractDeletePersistentSubscription {
                     .build();
 
             if (req.getOptions().hasAll() && !args.supportFeature(FeatureFlags.PERSISTENT_SUBSCRIPTION_TO_ALL)) {
-                result.completeExceptionally(new UnsupportedFeature());
+                result.completeExceptionally(new UnsupportedFeatureException());
             } else {
                 client.delete(req, GrpcUtils.convertSingleResponse(result));
             }

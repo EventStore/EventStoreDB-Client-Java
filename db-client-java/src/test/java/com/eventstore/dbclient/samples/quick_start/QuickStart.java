@@ -8,7 +8,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 public class QuickStart {
-    public static void Run() throws ParseError, ExecutionException, InterruptedException {
+    public static void Run() throws ConnectionStringParsingException, ExecutionException, InterruptedException {
         // region createClient
         EventStoreDBClientSettings settings = EventStoreDBConnectionString.parse("{connectionString}");
         EventStoreDBClient client = EventStoreDBClient.create(settings);
@@ -31,7 +31,7 @@ public class QuickStart {
 
         // region overriding-user-credentials
         AppendToStreamOptions appendToStreamOptions = AppendToStreamOptions.get()
-                .authenticated(new UserCredentials("admin", "changeit"));
+                .authenticated("admin", "changeit");
 
         client.appendToStream("some-stream", appendToStreamOptions, eventData)
                 .get();
@@ -41,12 +41,11 @@ public class QuickStart {
         // region readStream
         ReadStreamOptions options = ReadStreamOptions.get()
                 .forwards()
-                .fromStart();
+                .fromStart()
+                .maxCount(10);
 
-        ReadResult result = client.readStream("some-stream", 10, options)
+        ReadResult result = client.readStream("some-stream", options)
                 .get();
-
-        List<ResolvedEvent> events = result.getEvents();
         // endregion readStream
     }
 }

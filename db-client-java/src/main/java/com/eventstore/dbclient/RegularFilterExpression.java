@@ -4,7 +4,7 @@ import javax.validation.constraints.NotNull;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-public class RegularFilterExpression implements Comparable<RegularFilterExpression> {
+class RegularFilterExpression implements Comparable<RegularFilterExpression> {
     @NotNull
     private final Pattern value;
 

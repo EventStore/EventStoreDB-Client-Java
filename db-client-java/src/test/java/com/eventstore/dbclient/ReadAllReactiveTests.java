@@ -17,9 +17,10 @@ public class ReadAllReactiveTests extends ESDBTests {
         ReadAllOptions options = ReadAllOptions.get()
                 .forwards()
                 .fromStart()
-                .notResolveLinkTos();
+                .notResolveLinkTos()
+                .maxCount(10);
 
-        List<ResolvedEvent> events = Flowable.fromPublisher(client.readAllReactive(10, options))
+        List<ResolvedEvent> events = Flowable.fromPublisher(client.readAllReactive(options))
                 .filter(ReadMessage::hasEvent)
                 .map(ReadMessage::getEvent)
                 .collect(toList())
@@ -35,9 +36,10 @@ public class ReadAllReactiveTests extends ESDBTests {
         ReadAllOptions options = ReadAllOptions.get()
                 .forwards()
                 .fromPosition(new Position(1788, 1788))
-                .notResolveLinkTos();
+                .notResolveLinkTos()
+                .maxCount(10);
 
-        List<ResolvedEvent> events = Flowable.fromPublisher(client.readAllReactive(10, options))
+        List<ResolvedEvent> events = Flowable.fromPublisher(client.readAllReactive(options))
                 .filter(ReadMessage::hasEvent)
                 .map(ReadMessage::getEvent)
                 .collect(toList())
@@ -53,9 +55,10 @@ public class ReadAllReactiveTests extends ESDBTests {
         ReadAllOptions options = ReadAllOptions.get()
                 .backwards()
                 .fromPosition(new Position(3386, 3386))
-                .notResolveLinkTos();
+                .notResolveLinkTos()
+                .maxCount(10);
 
-        List<ResolvedEvent> events = Flowable.fromPublisher(client.readAllReactive(10, options))
+        List<ResolvedEvent> events = Flowable.fromPublisher(client.readAllReactive(options))
                 .filter(ReadMessage::hasEvent)
                 .map(ReadMessage::getEvent)
                 .collect(toList())

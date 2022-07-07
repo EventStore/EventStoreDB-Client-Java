@@ -10,13 +10,11 @@ import com.eventstore.dbclient.proto.streams.StreamsOuterClass;
 class ReadStream extends AbstractRead {
     private final String streamName;
     private final ReadStreamOptions options;
-    private final long maxCount;
 
-    public ReadStream(GrpcClient client, String streamName, long maxCount, ReadStreamOptions options) {
+    public ReadStream(GrpcClient client, String streamName, ReadStreamOptions options) {
         super(client, options);
 
         this.streamName = streamName;
-        this.maxCount = maxCount;
         this.options = options;
     }
 
@@ -25,7 +23,7 @@ class ReadStream extends AbstractRead {
         return defaultReadOptions.clone()
                 .setStream(GrpcUtils.toStreamOptions(this.streamName, this.options.getStartingRevision()))
                 .setResolveLinks(this.options.shouldResolveLinkTos())
-                .setCount(this.maxCount)
+                .setCount(this.options.getMaxCount())
                 .setControlOption(StreamsOuterClass.ReadReq.Options.ControlOption.newBuilder().setCompatibility(1))
                 .setNoFilter(Shared.Empty.getDefaultInstance())
                 .setReadDirection(this.options.getDirection() == Direction.Forwards ?

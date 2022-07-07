@@ -11,7 +11,7 @@ public class SubscribingToStream {
             @Override
             public void onEvent(Subscription subscription, ResolvedEvent event) {
                 System.out.println("Received event"
-                        + event.getOriginalEvent().getStreamRevision()
+                        + event.getOriginalEvent().getRevision()
                         + "@" + event.getOriginalEvent().getStreamId());
                 HandleEvent(event);
             }
@@ -48,25 +48,24 @@ public class SubscribingToStream {
         // endregion subscribe-to-stream-resolving-linktos
 
         // region subscribe-to-stream-subscription-dropped
-        final StreamRevision[] checkpoint = {StreamRevision.START};
-
         client.subscribeToStream(
                 "some-stream",
                 new SubscriptionListener() {
+                    StreamPosition<Long> checkpoint = StreamPosition.start();
                     @Override
                     public void onEvent(Subscription subscription, ResolvedEvent event) {
                         HandleEvent(event);
-                        checkpoint[0] = event.getOriginalEvent().getStreamRevision();
+                        checkpoint = StreamPosition.position(event.getOriginalEvent().getRevision());
                     }
 
                     @Override
                     public void onError(Subscription subscription, Throwable throwable) {
                         System.out.println("Subscription was dropped due to " + throwable.getMessage());
-                        Resubscribe(checkpoint[0]);
+                        Resubscribe(checkpoint);
                     }
                 },
                 SubscribeToStreamOptions.get()
-                        .fromRevision(checkpoint[0])
+                        .fromStart()
         );
         // endregion subscribe-to-stream-subscription-dropped
     }
@@ -77,7 +76,7 @@ public class SubscribingToStream {
             @Override
             public void onEvent(Subscription subscription, ResolvedEvent event) {
                 System.out.println("Received event"
-                        + event.getOriginalEvent().getStreamRevision().getValueUnsigned()
+                        + event.getOriginalEvent().getRevision()
                         + "@" + event.getOriginalEvent().getStreamId());
                 HandleEvent(event);
             }
@@ -102,24 +101,23 @@ public class SubscribingToStream {
         // endregion subscribe-to-all-live
 
         // region subscribe-to-all-subscription-dropped
-        final Position[] checkpoint = {Position.START};
-
         client.subscribeToAll(
                 new SubscriptionListener() {
+                    StreamPosition<Position> checkpoint = StreamPosition.start();
                     @Override
                     public void onEvent(Subscription subscription, ResolvedEvent event) {
                         HandleEvent(event);
-                        checkpoint[0] = event.getOriginalEvent().getPosition();
+                        checkpoint = StreamPosition.position(event.getOriginalEvent().getPosition());
                     }
 
                     @Override
                     public void onError(Subscription subscription, Throwable throwable) {
                         System.out.println("Subscription was dropped due to " + throwable.getMessage());
-                        Resubscribe(checkpoint[0]);
+                        Resubscribe(checkpoint);
                     }
                 },
                 SubscribeToAllOptions.get()
-                        .fromPosition(checkpoint[0])
+                        .fromStart()
         );
         // endregion subscribe-to-all-subscription-dropped
     }
@@ -129,14 +127,14 @@ public class SubscribingToStream {
             @Override
             public void onEvent(Subscription subscription, ResolvedEvent event) {
                 System.out.println("Received event"
-                        + event.getOriginalEvent().getStreamRevision().getValueUnsigned()
+                        + event.getOriginalEvent().getRevision()
                         + "@" + event.getOriginalEvent().getStreamId());
                 HandleEvent(event);
             }
         };
         // region stream-prefix-filtered-subscription
         SubscriptionFilter filter = SubscriptionFilter.newBuilder()
-                .withStreamNamePrefix("test-")
+                .addStreamNamePrefix("test-")
                 .build();
 
         SubscribeToAllOptions options = SubscribeToAllOptions.get()
@@ -159,7 +157,7 @@ public class SubscribingToStream {
             @Override
             public void onEvent(Subscription subscription, ResolvedEvent event) {
                 System.out.println("Received event"
-                        + event.getOriginalEvent().getStreamRevision().getValueUnsigned()
+                        + event.getOriginalEvent().getRevision()
                         + "@" + event.getOriginalEvent().getStreamId());
                 HandleEvent(event);
             }
@@ -179,9 +177,6 @@ public class SubscribingToStream {
     private static void HandleEvent(ResolvedEvent event) {
     }
 
-    private static void Resubscribe(StreamRevision checkpoint) {
-    }
-
-    private static void Resubscribe(Position checkpoint) {
+    private static void Resubscribe(StreamPosition checkpoint) {
     }
 }

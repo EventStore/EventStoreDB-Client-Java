@@ -13,7 +13,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class EventStoreDBClusterClient extends GrpcClient {
+class EventStoreDBClusterClient extends GrpcClient {
     private final Logger logger = LoggerFactory.getLogger(EventStoreDBClusterClient.class);
 
     private final List<InetSocketAddress> seedNodes;
@@ -54,7 +54,7 @@ public class EventStoreDBClusterClient extends GrpcClient {
             }
         }
 
-        return new Tuple<>(null, new NoClusterNodeFound());
+        return new Tuple<>(null, new NoClusterNodeFoundException());
     }
 
     private CompletableFuture<ClusterInfo.Endpoint> attemptDiscovery(InetSocketAddress seed) {

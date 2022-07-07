@@ -32,23 +32,15 @@ public class PositionTests {
 
     @Test
     public void testPositionEquality() {
-        assertEquals(Position.START, Position.START);
-        assertEquals(Position.END, Position.END);
-
         assertEquals(new Position(12345, 10000),
                 new Position(12345, 10000));
 
         assertEquals(new Position(largeUnsignedLess, largeUnsignedGreater),
                 new Position(largeUnsignedLess, largeUnsignedGreater));
-
-        assertNotEquals(Position.START, Position.END);
     }
 
     @Test
     public void testPositionComparable() {
-        assertTrue(Position.START.compareTo(Position.END) < 0);
-        assertTrue(Position.END.compareTo(Position.START) > 0);
-
         Position position1 = new Position(largeUnsignedLess, largeUnsignedGreater);
         Position position2 = new Position(largeUnsignedLess, largeUnsignedGreater);
         assertEquals(0, position1.compareTo(position2));

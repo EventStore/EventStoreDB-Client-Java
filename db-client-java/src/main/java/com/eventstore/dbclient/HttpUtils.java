@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class HttpUtils {
+class HttpUtils {
     private static final ObjectMapper mapper = new ObjectMapper();
 
     public static Exception checkForError(int code) {
@@ -173,7 +173,7 @@ public class HttpUtils {
             config.setCheckpointLowerBound(node.get("minCheckPointCount").asInt());
             config.setCheckpointUpperBound(node.get("maxCheckPointCount").asInt());
             config.setMaxSubscriberCount(node.get("maxSubscriberCount").asInt());
-            config.setConsumerStrategyName(node.get("namedConsumerStrategy").asText());
+            config.setNamedConsumerStrategy(new NamedConsumerStrategy(node.get("namedConsumerStrategy").asText()));
         }
 
         return config;
@@ -253,7 +253,7 @@ public class HttpUtils {
     private static void populateSettings(Persistent.SubscriptionInfo wire, PersistentSubscriptionSettings setts) {
         setts.setHistoryBufferSize(wire.getBufferSize());
         setts.setExtraStatistics(wire.getExtraStatistics());
-        setts.setConsumerStrategyName(wire.getNamedConsumerStrategy());
+        setts.setNamedConsumerStrategy(new NamedConsumerStrategy(wire.getNamedConsumerStrategy()));
         setts.setLiveBufferSize(wire.getLiveBufferSize());
         setts.setCheckpointUpperBound(wire.getMaxCheckPointCount());
         setts.setCheckpointAfter(wire.getCheckPointAfterMilliseconds());

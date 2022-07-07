@@ -5,19 +5,19 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 
-public class EventTypeFilter implements EventFilter {
+class EventTypeFilter implements EventFilter {
     private final PrefixFilterExpression[] prefixFilterExpressions;
     private final RegularFilterExpression regularFilterExpression;
     @NotNull
     private final Optional<Integer> maxSearchWindow;
 
-    public EventTypeFilter(@NotNull Optional<Integer> maxSearchWindow, RegularFilterExpression regex) {
+    EventTypeFilter(@NotNull Optional<Integer> maxSearchWindow, RegularFilterExpression regex) {
         this.maxSearchWindow = maxSearchWindow;
         this.regularFilterExpression = regex;
         this.prefixFilterExpressions = null;
     }
 
-    public EventTypeFilter(@NotNull Optional<Integer> maxSearchWindow, PrefixFilterExpression... prefixes) {
+    EventTypeFilter(@NotNull Optional<Integer> maxSearchWindow, PrefixFilterExpression... prefixes) {
         this.maxSearchWindow = maxSearchWindow;
         this.prefixFilterExpressions = prefixes;
         this.regularFilterExpression = null;

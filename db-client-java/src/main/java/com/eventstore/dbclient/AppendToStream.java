@@ -43,39 +43,31 @@ class AppendToStream {
                 if (resp.hasSuccess()) {
                     StreamsOuterClass.AppendResp.Success success = resp.getSuccess();
 
-                    StreamRevision nextExpectedRevision;
-                    if (success.getCurrentRevisionOptionCase() == StreamsOuterClass.AppendResp.Success.CurrentRevisionOptionCase.NO_STREAM) {
-                        nextExpectedRevision = new StreamRevision(1); // NO_STREAM
-                    } else {
-                        nextExpectedRevision = new StreamRevision(success.getCurrentRevision());
-                    }
-
                     Position logPosition = null;
                     if (success.getPositionOptionCase() == StreamsOuterClass.AppendResp.Success.PositionOptionCase.POSITION) {
                         StreamsOuterClass.AppendResp.Position p = success.getPosition();
                         logPosition = new Position(p.getCommitPosition(), p.getPreparePosition());
                     }
 
-                    return new WriteResult(nextExpectedRevision, logPosition);
+                    return new WriteResult(success.getCurrentRevision(), logPosition);
                 }
                 if (resp.hasWrongExpectedVersion()) {
                     StreamsOuterClass.AppendResp.WrongExpectedVersion wev = resp.getWrongExpectedVersion();
 
-                    StreamRevision expectedRevision;
+                    ExpectedRevision expectedRevision;
                     if (wev.getExpectedRevisionOptionCase() == StreamsOuterClass.AppendResp.WrongExpectedVersion.ExpectedRevisionOptionCase.EXPECTED_ANY) {
-                        expectedRevision = new StreamRevision(2); // StreamState.Constants.Any;
+                        expectedRevision = ExpectedRevision.any();
                     } else if (wev.getExpectedRevisionOptionCase() == StreamsOuterClass.AppendResp.WrongExpectedVersion.ExpectedRevisionOptionCase.EXPECTED_STREAM_EXISTS) {
-                        expectedRevision = new StreamRevision(4); // StreamState.Constants.StreamExists;
+                        expectedRevision = ExpectedRevision.streamExists();
                     } else {
-                        expectedRevision = new StreamRevision(wev.getExpectedRevision());
+                        expectedRevision = ExpectedRevision.expectedRevision(wev.getExpectedRevision());
                     }
 
-                    StreamRevision currentRevision;
+                    ExpectedRevision currentRevision;
                     if (wev.getCurrentRevisionOptionCase() == StreamsOuterClass.AppendResp.WrongExpectedVersion.CurrentRevisionOptionCase.CURRENT_NO_STREAM) {
-                        // TODO(jen20): This feels very wrong?
-                        currentRevision = new StreamRevision(2); //StreamState.Constants.NoStream
+                        currentRevision = ExpectedRevision.noStream();
                     } else {
-                        currentRevision = new StreamRevision(wev.getCurrentRevision());
+                        currentRevision = ExpectedRevision.expectedRevision(wev.getCurrentRevision());
                     }
 
                     String streamName = options.getStreamIdentifier().getStreamName().toStringUtf8();

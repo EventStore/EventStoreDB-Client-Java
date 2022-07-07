@@ -2,6 +2,9 @@ package com.eventstore.dbclient;
 
 import com.eventstore.dbclient.proto.projections.Projectionmanagement;
 
+/**
+ * Provides the details for a projection.
+ */
 public class ProjectionDetails {
     private final long coreProcessingTime;
     private final long version;
@@ -23,7 +26,7 @@ public class ProjectionDetails {
     private final int writePendingEventsBeforeCheckpoint;
     private final int writePendingEventsAfterCheckpoint;
 
-    public ProjectionDetails(long coreProcessingTime, long version, long epoch, String effectiveName,
+    ProjectionDetails(long coreProcessingTime, long version, long epoch, String effectiveName,
                              int writesInProgress, int readsInProgress, int partitionsCached, String status,
                              String stateReason, String name, String mode, String position, float progress,
                              String lastCheckpoint, long eventsProcessedAfterRestart, String checkpointStatus,
@@ -51,7 +54,7 @@ public class ProjectionDetails {
         this.writePendingEventsAfterCheckpoint = writePendingEventsAfterCheckpoint;
     }
 
-    public static ProjectionDetails fromWire(Projectionmanagement.StatisticsResp.Details details) {
+    static ProjectionDetails fromWire(Projectionmanagement.StatisticsResp.Details details) {
         return new ProjectionDetails(
             details.getCoreProcessingTime(),
             details.getVersion(),
@@ -75,78 +78,135 @@ public class ProjectionDetails {
         );
     }
 
+    /**
+     * The core processing time.
+     */
     public long getCoreProcessingTime() {
         return coreProcessingTime;
     }
 
+    /**
+     * The projection version.
+     */
     public long getVersion() {
         return version;
     }
 
+    /**
+     * The projection's current epoch.
+     */
     public long getEpoch() {
         return epoch;
     }
 
+    /**
+     * The projection's effective name.
+     */
     public String getEffectiveName() {
         return effectiveName;
     }
 
+    /**
+     * The projection's writes-in-progress.
+     */
     public int getWritesInProgress() {
         return writesInProgress;
     }
 
+    /**
+     * The projection's reads-in-progress.
+     */
     public int getReadsInProgress() {
         return readsInProgress;
     }
 
+    /**
+     * The number of partitions cached.
+     */
     public int getPartitionsCached() {
         return partitionsCached;
     }
 
+    /**
+     * The projection's status.
+     */
     public String getStatus() {
         return status;
     }
 
+    /**
+     * The projection's StateReason.
+     */
     public String getStateReason() {
         return stateReason;
     }
 
+    /**
+     * The projection's name.
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * The projection's mode.
+     */
     public String getMode() {
         return mode;
     }
 
+    /**
+     * The projection's position.
+     */
     public String getPosition() {
         return position;
     }
 
+    /**
+     * The projection's progress.
+     */
     public float getProgress() {
         return progress;
     }
 
+    /**
+     * The projection's last checkpoint.
+     */
     public String getLastCheckpoint() {
         return lastCheckpoint;
     }
 
+    /**
+     * The projection's events processed after restart.
+     */
     public long getEventsProcessedAfterRestart() {
         return eventsProcessedAfterRestart;
     }
 
+    /**
+     * The projection's checkpoint status.
+     */
     public String getCheckpointStatus() {
         return checkpointStatus;
     }
 
+    /**
+     * The projection's buffered events.
+     */
     public long getBufferedEvents() {
         return bufferedEvents;
     }
 
+    /**
+     * The projection write pending events before checkpoint.
+     */
     public int getWritePendingEventsBeforeCheckpoint() {
         return writePendingEventsBeforeCheckpoint;
     }
 
+    /**
+     * The projection write pending events after checkpoint.
+     */
     public int getWritePendingEventsAfterCheckpoint() {
         return writePendingEventsAfterCheckpoint;
     }

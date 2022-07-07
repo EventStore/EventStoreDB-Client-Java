@@ -11,7 +11,7 @@ public class ServerSideFiltering {
             @Override
             public void onEvent(Subscription subscription, ResolvedEvent event) {
                 System.out.println("Received event"
-                        + event.getOriginalEvent().getStreamRevision().getValueUnsigned()
+                        + event.getOriginalEvent().getRevision()
                         + "@" + event.getOriginalEvent().getStreamId());
             }
         };
@@ -34,7 +34,7 @@ public class ServerSideFiltering {
     private static void eventTypePrefix(EventStoreDBClient client) {
         //region event-type-prefix
         SubscriptionFilter filter = SubscriptionFilter.newBuilder()
-                .withEventTypePrefix("customer-")
+                .addEventTypePrefix("customer-")
                 .build();
         //endregion event-type-prefix
 
@@ -42,7 +42,7 @@ public class ServerSideFiltering {
             @Override
             public void onEvent(Subscription subscription, ResolvedEvent event) {
                 System.out.println("Received event"
-                        + event.getOriginalEvent().getStreamRevision().getValueUnsigned()
+                        + event.getOriginalEvent().getRevision()
                         + "@" + event.getOriginalEvent().getStreamId());
             }
         };
@@ -67,7 +67,7 @@ public class ServerSideFiltering {
             @Override
             public void onEvent(Subscription subscription, ResolvedEvent event) {
                 System.out.println("Received event"
-                        + event.getOriginalEvent().getStreamRevision().getValueUnsigned()
+                        + event.getOriginalEvent().getRevision()
                         + "@" + event.getOriginalEvent().getStreamId());
             }
         };
@@ -84,7 +84,7 @@ public class ServerSideFiltering {
     private static void streamPrefix(EventStoreDBClient client) {
         //region stream-prefix
         SubscriptionFilter filter = SubscriptionFilter.newBuilder()
-                .withStreamNamePrefix("user-")
+                .addStreamNamePrefix("user-")
                 .build();
         //endregion stream-prefix
 
@@ -92,7 +92,7 @@ public class ServerSideFiltering {
             @Override
             public void onEvent(Subscription subscription, ResolvedEvent event) {
                 System.out.println("Received event"
-                        + event.getOriginalEvent().getStreamRevision().getValueUnsigned()
+                        + event.getOriginalEvent().getRevision()
                         + "@" + event.getOriginalEvent().getStreamId());
             }
         };
@@ -117,7 +117,7 @@ public class ServerSideFiltering {
             @Override
             public void onEvent(Subscription subscription, ResolvedEvent event) {
                 System.out.println("Received event"
-                        + event.getOriginalEvent().getStreamRevision().getValueUnsigned()
+                        + event.getOriginalEvent().getRevision()
                         + "@" + event.getOriginalEvent().getStreamId());
             }
         };
@@ -155,7 +155,7 @@ public class ServerSideFiltering {
             @Override
             public void onEvent(Subscription subscription, ResolvedEvent event) {
                 System.out.println("Received event"
-                        + event.getOriginalEvent().getStreamRevision().getValueUnsigned()
+                        + event.getOriginalEvent().getRevision()
                         + "@" + event.getOriginalEvent().getStreamId());
             }
         };
@@ -191,7 +191,7 @@ public class ServerSideFiltering {
             @Override
             public void onEvent(Subscription subscription, ResolvedEvent event) {
                 System.out.println("Received event"
-                        + event.getOriginalEvent().getStreamRevision().getValueUnsigned()
+                        + event.getOriginalEvent().getRevision()
                         + "@" + event.getOriginalEvent().getStreamId());
             }
         };

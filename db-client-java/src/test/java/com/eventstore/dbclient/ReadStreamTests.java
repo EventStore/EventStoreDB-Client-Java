@@ -17,9 +17,10 @@ public class ReadStreamTests extends ESDBTests {
         ReadStreamOptions options = ReadStreamOptions.get()
                 .forwards()
                 .fromStart()
+                .maxCount(10)
                 .notResolveLinkTos();
 
-        ReadResult result = client.readStream("dataset20M-1800", 10, options)
+        ReadResult result = client.readStream("dataset20M-1800", options)
                 .get();
 
         verifyAgainstTestData(result.getEvents(), "dataset20M-1800-e0-e10");
@@ -32,9 +33,10 @@ public class ReadStreamTests extends ESDBTests {
         ReadStreamOptions options = ReadStreamOptions.get()
                 .backwards()
                 .fromEnd()
+                .maxCount(10)
                 .notResolveLinkTos();
 
-        ReadResult result = client.readStream("dataset20M-1800", 10, options)
+        ReadResult result = client.readStream("dataset20M-1800", options)
                 .get();
 
         verifyAgainstTestData(result.getEvents(), "dataset20M-1800-e1999-e1990");
@@ -49,7 +51,7 @@ public class ReadStreamTests extends ESDBTests {
                 .fromEnd()
                 .notResolveLinkTos();
 
-        ReadResult result1 = client.readStream("dataset20M-1800", Long.MAX_VALUE, options)
+        ReadResult result1 = client.readStream("dataset20M-1800", options)
                 .get();
 
         ReadResult result2 = client.readStream("dataset20M-1800", options)

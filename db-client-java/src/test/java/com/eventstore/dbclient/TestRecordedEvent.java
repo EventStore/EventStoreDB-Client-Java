@@ -53,8 +53,8 @@ class TestResolvedEvent {
 class TestStreamRevision {
     private long value;
 
-    public void assertEquals(StreamRevision other) {
-        Assertions.assertEquals(value, other.getValueUnsigned());
+    public void assertEquals(long other) {
+        Assertions.assertEquals(value, other);
     }
 
     public long getValue() {
@@ -135,7 +135,7 @@ class TestRecordedEvent {
 
     public void assertEquals(RecordedEvent other) {
         Assertions.assertEquals(streamId, other.getStreamId());
-        streamRevision.assertEquals(other.getStreamRevision());
+        streamRevision.assertEquals(other.getRevision());
         Assertions.assertEquals(eventId, other.getEventId());
         Assertions.assertEquals(eventType, other.getEventType());
         created.assertEquals(other.getCreated());

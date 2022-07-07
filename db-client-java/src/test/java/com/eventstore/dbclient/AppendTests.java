@@ -49,24 +49,24 @@ public class AppendTests extends ESDBTests {
                 .build();
 
         AppendToStreamOptions appendOptions = AppendToStreamOptions.get()
-                .expectedRevision(ExpectedRevision.NO_STREAM);
+                .expectedRevision(ExpectedRevision.noStream());
 
         WriteResult appendResult = client.appendToStream(streamName, appendOptions, event)
                 .get();
 
-        Assertions.assertEquals(new StreamRevision(0), appendResult.getNextExpectedRevision());
+        Assertions.assertEquals(0, appendResult.getNextExpectedRevision());
 
         ReadStreamOptions readStreamOptions = ReadStreamOptions.get()
                 .fromEnd()
-                .backwards();
+                .backwards()
+                .maxCount(1);
 
         // Ensure appended event is readable
-        ReadResult readResult = client.readStream(streamName, 1, readStreamOptions)
+        ReadResult result = client.readStream(streamName, readStreamOptions)
                 .get();
 
-        List<ResolvedEvent> readEvents = readResult.getEvents();
-        Assertions.assertEquals(1, readEvents.size());
-        RecordedEvent first = readEvents.get(0).getEvent();
+        Assertions.assertEquals(1, result.getEvents().size());
+        RecordedEvent first = result.getEvents().get(0).getEvent();
 
         Assertions.assertEquals(streamName, first.getStreamId());
         Assertions.assertEquals(eventType, first.getEventType());
