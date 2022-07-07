@@ -2,6 +2,9 @@ package com.eventstore.dbclient;
 
 import java.util.*;
 
+/**
+ * Stream-related access control list (ACL).
+ */
 public class StreamAcl implements Acl {
     private ArrayList<String> readRoles;
     private ArrayList<String> writeRoles;
@@ -9,6 +12,10 @@ public class StreamAcl implements Acl {
     private ArrayList<String> metaReadRoles;
     private ArrayList<String> metaWriteRoles;
 
+    /**
+     * Adds read roles.
+     * @param roles
+     */
     public StreamAcl addReadRoles(String... roles) {
         this.readRoles = this.readRoles == null ? new ArrayList<>() : this.readRoles;
         this.readRoles.addAll(Arrays.asList(roles));
@@ -16,6 +23,10 @@ public class StreamAcl implements Acl {
         return this;
     }
 
+    /**
+     * Adds write roles.
+     * @param roles
+     */
     public StreamAcl addWriteRoles(String... roles) {
         this.writeRoles = this.writeRoles == null ? new ArrayList<>() : this.writeRoles;
         this.writeRoles.addAll(Arrays.asList(roles));
@@ -23,6 +34,10 @@ public class StreamAcl implements Acl {
         return this;
     }
 
+    /**
+     * Adds delete roles.
+     * @param roles
+     */
     public StreamAcl addDeleteRoles(String... roles) {
         this.deleteRoles = this.deleteRoles == null ? new ArrayList<>() : this.deleteRoles;
         this.deleteRoles.addAll(Arrays.asList(roles));
@@ -30,6 +45,10 @@ public class StreamAcl implements Acl {
         return this;
     }
 
+    /**
+     * Adds metadata read roles.
+     * @param roles
+     */
     public StreamAcl addMetaReadRoles(String... roles) {
         this.metaReadRoles = this.metaReadRoles == null ? new ArrayList<>() : this.metaReadRoles;
         this.metaReadRoles.addAll(Arrays.asList(roles));
@@ -37,6 +56,10 @@ public class StreamAcl implements Acl {
         return this;
     }
 
+    /**
+     * Adds metadata write roles.
+     * @param roles
+     */
     public StreamAcl addMetaWriteRoles(String... roles) {
         this.metaWriteRoles = this.metaWriteRoles == null ? new ArrayList<>() : this.metaWriteRoles;
         this.metaWriteRoles.addAll(Arrays.asList(roles));
@@ -87,7 +110,7 @@ public class StreamAcl implements Acl {
         return output;
     }
 
-    public static StreamAcl deserialize(HashMap<String, Object> source) {
+     static StreamAcl deserialize(HashMap<String, Object> source) {
         StreamAcl acl = new StreamAcl();
 
         acl.readRoles = deserializeRoles(source, "$r");
@@ -98,22 +121,38 @@ public class StreamAcl implements Acl {
 
         return acl;
     }
+
+    /**
+     * Returns read roles.
+     */
     public ArrayList<String> getReadRoles() {
         return readRoles;
     }
 
+    /**
+     * Returns write roles.
+     */
     public ArrayList<String> getWriteRoles() {
         return writeRoles;
     }
 
+    /**
+     * Returns delete roles.
+     */
     public ArrayList<String> getDeleteRoles() {
         return deleteRoles;
     }
 
+    /**
+     * Return metadata read roles.
+     */
     public ArrayList<String> getMetaReadRoles() {
         return metaReadRoles;
     }
 
+    /**
+     * Return metadata write roles.
+     */
     public ArrayList<String> getMetaWriteRoles() {
         return metaWriteRoles;
     }

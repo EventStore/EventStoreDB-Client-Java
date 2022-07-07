@@ -10,14 +10,16 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
-import java.util.StringJoiner;
 import java.util.UUID;
 
+/**
+ * Represents a previously written event.
+ */
 public class RecordedEvent {
     @NotNull
     private final String streamId;
     @NotNull
-    private final StreamRevision streamRevision;
+    private final long revision;
     @NotNull
     private final UUID eventId;
     @NotNull
@@ -35,9 +37,9 @@ public class RecordedEvent {
 
     private static final JsonMapper mapper = new JsonMapper();
 
-    public RecordedEvent(
+    RecordedEvent(
             @NotNull String eventStreamId,
-            @NotNull StreamRevision streamRevision,
+            @NotNull long streamRevision,
             @NotNull UUID eventId,
             @NotNull Position position,
             @NotNull Map<String, String> systemMetadata,
@@ -45,7 +47,7 @@ public class RecordedEvent {
             @NotNull byte[] userMetadata
     ) {
         this.streamId = eventStreamId;
-        this.streamRevision = streamRevision;
+        this.revision = streamRevision;
         this.eventId = eventId;
         this.position = position;
         this.eventData = eventData;
@@ -67,48 +69,78 @@ public class RecordedEvent {
         return Instant.EPOCH.plusNanos(nanos);
     }
 
+    /**
+     * The stream that event belongs to.
+     */
     @NotNull
     public String getStreamId() {
         return streamId;
     }
 
+    /**
+     * The event's stream revision number.
+     */
     @NotNull
-    public StreamRevision getStreamRevision() {
-        return streamRevision;
+    public long getRevision() {
+        return revision;
     }
 
+    /**
+     * The event's unique identifier.
+     */
     @NotNull
     public UUID getEventId() {
         return eventId;
     }
 
+    /**
+     * The event's type.
+     */
     @NotNull
     public String getEventType() {
         return eventType;
     }
 
+    /**
+     * The event's payload data.
+     */
     public byte[] getEventData() {
         return eventData;
     }
 
+    /**
+     * Deserialized representation of the event's payload. In this case, the payload is supposed to be JSON.
+     */
     public <A> A getEventDataAs(Class<A> clazz) throws IOException {
         return mapper.readValue(this.getEventData(), clazz);
     }
 
+    /**
+     * The event's metadata.
+     */
     public byte[] getUserMetadata() {
         return userMetadata;
     }
 
+    /**
+     * When the event was created.
+     */
     @NotNull
     public Instant getCreated() {
         return created;
     }
 
+    /**
+     * The event's transaction log position.
+     */
     @NotNull
     public Position getPosition() {
         return position;
     }
 
+    /**
+     * The event's content type. Could be <i>application/json</i> or <i>application/octet-stream</i>.
+     */
     @NotNull
     public String getContentType() {
         return contentType;
@@ -119,12 +151,12 @@ public class RecordedEvent {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RecordedEvent that = (RecordedEvent) o;
-        return streamId.equals(that.streamId) && streamRevision.equals(that.streamRevision) && eventId.equals(that.eventId);
+        return streamId.equals(that.streamId) && revision == that.revision && eventId.equals(that.eventId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(streamId, streamRevision, eventId);
+        return Objects.hash(streamId, revision, eventId);
     }
 
     static RecordedEvent fromWire(StreamsOuterClass.ReadResp.ReadEvent.RecordedEvent wireEvent) {
@@ -138,7 +170,7 @@ public class RecordedEvent {
 
         return new RecordedEvent(
                 wireEvent.getStreamIdentifier().getStreamName().toStringUtf8(),
-                new StreamRevision(wireEvent.getStreamRevision()),
+                wireEvent.getStreamRevision(),
                 eventId,
                 new Position(wireEvent.getCommitPosition(), wireEvent.getPreparePosition()),
                 wireEvent.getMetadataMap(),
@@ -157,7 +189,7 @@ public class RecordedEvent {
 
         return new RecordedEvent(
                 wireEvent.getStreamIdentifier().getStreamName().toStringUtf8(),
-                new StreamRevision(wireEvent.getStreamRevision()),
+                wireEvent.getStreamRevision(),
                 eventId,
                 new Position(wireEvent.getCommitPosition(), wireEvent.getPreparePosition()),
                 wireEvent.getMetadataMap(),

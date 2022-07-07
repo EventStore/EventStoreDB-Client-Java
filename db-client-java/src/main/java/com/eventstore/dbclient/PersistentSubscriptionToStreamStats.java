@@ -2,10 +2,16 @@ package com.eventstore.dbclient;
 
 import java.util.Optional;
 
+/**
+ * Processing-related persistent subscription to stream statistics.
+ */
 public class PersistentSubscriptionToStreamStats extends PersistentSubscriptionStats {
     private Long lastCheckpointedEventRevision;
     private Long lastKnownEventRevision;
 
+    /**
+     * The revision number of the last checkpoint.
+     */
     public Optional<Long> getLastCheckpointedEventRevision() {
         if (lastCheckpointedEventRevision == null)
             return Optional.empty();
@@ -13,10 +19,13 @@ public class PersistentSubscriptionToStreamStats extends PersistentSubscriptionS
         return Optional.of(lastCheckpointedEventRevision);
     }
 
-    public void setLastCheckpointedEventRevision(long lastCheckpointedEventRevision) {
+    void setLastCheckpointedEventRevision(long lastCheckpointedEventRevision) {
         this.lastCheckpointedEventRevision = lastCheckpointedEventRevision;
     }
 
+    /**
+     * The revision number of the last known event.
+     */
     public Optional<Long> getLastKnownEventRevision() {
         if (lastKnownEventRevision == null)
             return Optional.empty();
@@ -24,7 +33,7 @@ public class PersistentSubscriptionToStreamStats extends PersistentSubscriptionS
         return Optional.of(lastKnownEventRevision);
     }
 
-    public void setLastKnownEventRevision(long lastKnownEventRevision) {
+    void setLastKnownEventRevision(long lastKnownEventRevision) {
         this.lastKnownEventRevision = lastKnownEventRevision;
     }
 }

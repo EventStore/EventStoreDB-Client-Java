@@ -3,6 +3,9 @@ package com.eventstore.dbclient;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
+/**
+ * Holds a login and a password for authenticated requests.
+ */
 public final class UserCredentials {
     private final String base64Encoded;
 

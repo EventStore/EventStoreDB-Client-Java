@@ -2,8 +2,8 @@ package com.eventstore.dbclient;
 
 import java.time.Duration;
 
-public class AbstractPersistentSubscriptionSettingsBuilder<T, TSettings extends PersistentSubscriptionSettings> extends OptionsBase<T> {
-    protected TSettings settings;
+class AbstractPersistentSubscriptionSettingsBuilder<T, TSettings extends PersistentSubscriptionSettings> extends OptionsBase<T> {
+    private final TSettings settings;
 
     public AbstractPersistentSubscriptionSettingsBuilder(TSettings settings) {
         this.settings = settings;
@@ -197,21 +197,12 @@ public class AbstractPersistentSubscriptionSettingsBuilder<T, TSettings extends 
      * The strategy to use for distributing events to client consumers.
      */
     @SuppressWarnings("unchecked")
-    public T consumerStrategy(ConsumerStrategy strategy) {
-        settings.setConsumerStrategyName(NamedConsumerStrategy.from(strategy));
+    public T namedConsumerStrategy(NamedConsumerStrategy value) {
+        settings.setNamedConsumerStrategy(value);
         return (T) this;
     }
 
-    /**
-     * The strategy to use for distributing events to client consumers.
-     */
-    @SuppressWarnings("unchecked")
-    public T namedConsumerStrategy(String value) {
-        settings.setConsumerStrategyName(value);
-        return (T) this;
-    }
-
-    public TSettings getSettings() {
+    TSettings getSettings() {
         return settings;
     }
 }

@@ -23,7 +23,7 @@ class CreatePersistentSubscriptionToAll extends AbstractCreatePersistentSubscrip
         } else if (position instanceof StreamPosition.End) {
             allOptionsBuilder.setEnd(Shared.Empty.newBuilder());
         } else {
-            Position pos = ((StreamPosition.Position<Position>) position).getPosition();
+            Position pos = position.getPositionOrThrow();
             allOptionsBuilder.setPosition(Persistent.CreateReq.Position.newBuilder()
                     .setCommitPosition(pos.getCommitUnsigned())
                     .setPreparePosition(pos.getPrepareUnsigned()));

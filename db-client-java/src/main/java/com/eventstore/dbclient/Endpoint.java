@@ -3,6 +3,9 @@ package com.eventstore.dbclient;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+/**
+ * A database node endpoint.
+ */
 public class Endpoint {
     final private String hostname;
     final private int port;
@@ -13,15 +16,21 @@ public class Endpoint {
         this.port = port;
     }
 
+    /**
+     * Returns the endpoint's hostname.
+     */
     public String getHostname() {
         return hostname;
     }
 
+    /**
+     * Returns the endpoint's port.
+     */
     public int getPort() {
         return port;
     }
 
-    public URL getURL(boolean secure, String path) {
+    URL getURL(boolean secure, String path) {
         String protocol = secure ? "https" : "http";
         try {
             return new URL(protocol + "://" + hostname + ":" + port + path);

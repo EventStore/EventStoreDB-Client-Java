@@ -2,7 +2,7 @@ package com.eventstore.dbclient;
 
 import java.util.Optional;
 
-public interface EventFilter {
+interface EventFilter {
     PrefixFilterExpression[] getPrefixFilterExpressions();
 
     RegularFilterExpression getRegularFilterExpression();

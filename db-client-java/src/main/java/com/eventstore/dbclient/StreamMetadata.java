@@ -4,6 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * Represents stream metadata with strongly typed properties for system values and a dictionary-like interface for
+ * custom values.
+ */
 public class StreamMetadata {
     private Integer maxAge;
     private Integer truncateBefore;
@@ -12,50 +16,88 @@ public class StreamMetadata {
     private Integer maxCount;
     private HashMap<String, Object> customProperties;
 
+    /**
+     * The maximum age of events allowed in the stream.
+     */
     public Integer getMaxAge() {
         return maxAge;
     }
 
+    /**
+     * The maximum age of events allowed in the stream.
+     */
     public void setMaxAge(Integer maxAge) {
         this.maxAge = maxAge;
     }
 
+    /**
+     * The event number from which previous events can be scavenged. This is used to implement deletion of
+     * streams.
+     */
     public Integer getTruncateBefore() {
         return truncateBefore;
     }
 
+    /**
+     * The event number from which previous events can be scavenged. This is used to implement deletion of
+     * streams.
+     */
     public void setTruncateBefore(Integer truncateBefore) {
         this.truncateBefore = truncateBefore;
     }
 
+    /**
+     * The amount of time for which the stream head is cacheable (in seconds).
+     */
     public Integer getCacheControl() {
         return cacheControl;
     }
 
+    /**
+     * The amount of time for which the stream head is cacheable (in seconds).
+     */
     public void setCacheControl(Integer cacheControl) {
         this.cacheControl = cacheControl;
     }
 
+    /**
+     * The Access Control List of the stream (ACL).
+     */
     public Acl getAcl() {
         return acl;
     }
 
+    /**
+     * The Access Control List of the stream (ACL).
+     */
     public void setAcl(Acl acl) {
         this.acl = acl;
     }
 
+    /**
+     * The maximum number of events allowed in the stream.
+     */
     public Integer getMaxCount() {
         return maxCount;
     }
 
+    /**
+     * The maximum number of events allowed in the stream.
+     */
     public void setMaxCount(Integer maxCount) {
         this.maxCount = maxCount;
     }
 
+    /**
+     * An enumerable of key-value pairs of keys to JSON text for user-provider metadata.
+     */
     public HashMap<String, Object> getCustomProperties() {
         return customProperties;
     }
 
+    /**
+     * An enumerable of key-value pairs of keys to JSON text for user-provider metadata.
+     */
     public void setCustomProperties(HashMap<String, Object> customProperties) {
         this.customProperties = customProperties;
     }
@@ -66,7 +108,7 @@ public class StreamMetadata {
         }
     }
 
-    public Object serialize() {
+    Object serialize() {
         HashMap<String, Object> output = new HashMap<>();
 
         insertValue(output, "$maxAge", this.maxAge);
@@ -90,7 +132,7 @@ public class StreamMetadata {
         return output;
     }
 
-    public static StreamMetadata deserialize(HashMap<String, Object> source) {
+     static StreamMetadata deserialize(HashMap<String, Object> source) {
         StreamMetadata metadata = new StreamMetadata();
         HashMap<String, Object> customProperties = null;
 

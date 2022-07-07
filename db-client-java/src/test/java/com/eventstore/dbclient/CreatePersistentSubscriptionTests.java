@@ -30,7 +30,7 @@ public class CreatePersistentSubscriptionTests extends ESDBTests {
             client.createToAll(generateName(), CreatePersistentSubscriptionToAllOptions.get().startFrom(1, 2))
                     .get();
         } catch (ExecutionException e) {
-            if (e.getCause() instanceof UnsupportedFeature && !EventStoreDB.isTestedAgainstVersion20()) {
+            if (e.getCause() instanceof UnsupportedFeatureException && !EventStoreDB.isTestedAgainstVersion20()) {
                 throw e;
             }
         }

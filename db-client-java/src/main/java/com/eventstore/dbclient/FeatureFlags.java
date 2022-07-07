@@ -1,5 +1,5 @@
 package com.eventstore.dbclient;
-public class FeatureFlags {
+class FeatureFlags {
     public final static int NOTHING = 0;
     public final static int BATCH_APPEND = 1;
     public final static int PERSISTENT_SUBSCRIPTION_LIST = 2;

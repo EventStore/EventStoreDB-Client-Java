@@ -5,17 +5,49 @@ import com.eventstore.dbclient.proto.streams.StreamsOuterClass;
 
 import java.util.Objects;
 
+/**
+ * Constants used for expected revision control.
+ * <p>
+ *
+ * The EventStoreDB server will assure idempotency for all requests using any value in <i>ExpectedRevision</i> except
+ * <i>ANY</i>. When using <i>ANY</i>, the EventStoreDB server will do its best to assure idempotency but will not
+ * guarantee it. Any other <i>ExpectedRevision</i> instances are meant for optimistic concurrency checks.
+ * </p>
+ */
 public abstract class ExpectedRevision {
-    public final static ExpectedRevision ANY = new AnyExpectedRevision();
-    public final static ExpectedRevision NO_STREAM = new NoStreamExpectedRevision();
-    public final static ExpectedRevision STREAM_EXISTS = new StreamExistsExpectedRevision();
+    /**
+     * This write should not conflict with anything and should always succeed.
+     */
+    public static ExpectedRevision any() {
+        return new AnyExpectedRevision();
+    }
+
+    /**
+     * The stream being written to should not yet exist. If it does exist, treats that as a concurrency problem.
+     */
+    public static ExpectedRevision noStream() {
+        return new NoStreamExpectedRevision();
+    }
+
+    /**
+     * The stream should exist. If it or a metadata stream does not exist, treats that as a concurrency problem.
+     */
+    public static ExpectedRevision streamExists() {
+        return new StreamExistsExpectedRevision();
+    }
+
+    /**
+     * States that the last event written to the stream should have an event revision matching your expected value.
+     */
     public static ExpectedRevision expectedRevision(long revision) {
         return new SpecificExpectedRevision(revision);
     }
 
-    abstract public StreamsOuterClass.AppendReq.Options.Builder applyOnWire(StreamsOuterClass.AppendReq.Options.Builder options);
-    abstract public StreamsOuterClass.DeleteReq.Options.Builder applyOnWire(StreamsOuterClass.DeleteReq.Options.Builder options);
-    abstract public StreamsOuterClass.TombstoneReq.Options.Builder applyOnWire(StreamsOuterClass.TombstoneReq.Options.Builder options);
+    ExpectedRevision() {}
+
+    abstract StreamsOuterClass.AppendReq.Options.Builder applyOnWire(StreamsOuterClass.AppendReq.Options.Builder options);
+    abstract StreamsOuterClass.DeleteReq.Options.Builder applyOnWire(StreamsOuterClass.DeleteReq.Options.Builder options);
+    abstract StreamsOuterClass.TombstoneReq.Options.Builder applyOnWire(StreamsOuterClass.TombstoneReq.Options.Builder options);
 
     @Override
     public boolean equals(Object o) {

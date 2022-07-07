@@ -11,7 +11,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-public final class GrpcUtils {
+final class GrpcUtils {
     static public <ReqT, RespT> ClientResponseObserver<ReqT, RespT> convertSingleResponse(
             CompletableFuture<RespT> dest) {
 
@@ -59,23 +59,23 @@ public final class GrpcUtils {
         };
     }
 
-    static public StreamsOuterClass.ReadReq.Options.StreamOptions toStreamOptions(String streamName, StreamRevision revision) {
+    static public StreamsOuterClass.ReadReq.Options.StreamOptions toStreamOptions(String streamName, StreamPosition<Long> revision) {
         StreamsOuterClass.ReadReq.Options.StreamOptions.Builder builder = StreamsOuterClass.ReadReq.Options.StreamOptions.newBuilder()
                 .setStreamIdentifier(Shared.StreamIdentifier.newBuilder()
                         .setStreamName(ByteString.copyFromUtf8(streamName))
                         .build());
 
-        if (revision == StreamRevision.END) {
+        if (revision.isEnd()) {
             return builder.setEnd(Shared.Empty.getDefaultInstance())
                     .build();
         }
 
-        if (revision == StreamRevision.START) {
+        if (revision.isStart()) {
             return builder.setStart(Shared.Empty.getDefaultInstance())
                     .build();
         }
 
-        return builder.setRevision(revision.getValueUnsigned())
+        return builder.setRevision(revision.getPositionOrThrow())
                 .build();
     }
 

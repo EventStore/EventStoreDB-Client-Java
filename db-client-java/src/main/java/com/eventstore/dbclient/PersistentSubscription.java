@@ -9,35 +9,42 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 
+/**
+ * Persistent subscription handle.
+ */
 public class PersistentSubscription {
     private final ClientCallStreamObserver<Persistent.ReadReq> requestStream;
     private final String subscriptionId;
 
-    @Deprecated
-    public PersistentSubscription(ClientCallStreamObserver<Persistent.ReadReq> requestStream, String subscriptionId,
-                                  String streamName, String groupName, int bufferSize,
-                                  Persistent.ReadReq.Options.Builder options) {
+    PersistentSubscription(ClientCallStreamObserver<Persistent.ReadReq> requestStream, String subscriptionId) {
         this.requestStream = requestStream;
         this.subscriptionId = subscriptionId;
     }
 
-    public PersistentSubscription(ClientCallStreamObserver<Persistent.ReadReq> requestStream, String subscriptionId) {
-        this.requestStream = requestStream;
-        this.subscriptionId = subscriptionId;
-    }
-
+    /**
+     * Returns the persistent subscription's id.
+     */
     public String getSubscriptionId() {
         return subscriptionId;
     }
 
+    /**
+     * Stops the persistent subscription.
+     */
     public void stop() {
         this.requestStream.cancel("user-initiated", null);
     }
 
+    /**
+     * Acknowledges events have been successfully processed.
+     */
     public void ack(ResolvedEvent ...events) {
         this.ack(Arrays.stream(events).iterator());
     }
 
+    /**
+     * Acknowledges events have been successfully processed.
+     */
     public void ack(Iterator<ResolvedEvent> events) {
         Persistent.ReadReq.Ack.Builder ackBuilder = Persistent.ReadReq.Ack.newBuilder()
                 .setId(ByteString.copyFromUtf8(subscriptionId));
@@ -62,10 +69,16 @@ public class PersistentSubscription {
         requestStream.onNext(req);
     }
 
+    /**
+     * Acknowledges events failed processing.
+     */
     public void nack(NackAction action, String reason, ResolvedEvent...events) {
         this.nack(action, reason, Arrays.stream(events).iterator());
     }
 
+    /**
+     * Acknowledges events failed processing.
+     */
     public void nack(NackAction action, String reason, Iterator<ResolvedEvent> events) {
         Persistent.ReadReq.Nack.Builder nackBuilder = Persistent.ReadReq.Nack.newBuilder()
                 .setId(ByteString.copyFromUtf8(subscriptionId));
@@ -84,6 +97,9 @@ public class PersistentSubscription {
 
         nackBuilder.setReason(reason);
         switch (action) {
+            case Unknown:
+                nackBuilder.setAction(Persistent.ReadReq.Nack.Action.Unknown);
+                break;
             case Park:
                 nackBuilder.setAction(Persistent.ReadReq.Nack.Action.Park);
                 break;

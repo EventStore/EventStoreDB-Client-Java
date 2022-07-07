@@ -3,49 +3,89 @@ package com.eventstore.dbclient;
 import io.grpc.Metadata;
 
 class OptionsBase<T> {
-    protected final ConnectionMetadata metadata;
-    protected Long deadline;
-    protected OperationKind kind;
+    private final ConnectionMetadata metadata;
+    private Long deadline;
+    private final OperationKind kind;
     private UserCredentials credentials;
     private boolean requiresLeader;
 
     protected OptionsBase() {
-        this.metadata = new ConnectionMetadata();
-        this.kind = OperationKind.Regular;
+        this(OperationKind.Regular);
     }
 
-    public Metadata getMetadata() {
+    protected OptionsBase(OperationKind kind) {
+        this.metadata = new ConnectionMetadata();
+        this.kind = kind;
+    }
+
+    Metadata getMetadata() {
         return this.metadata.build();
     }
 
-    public boolean hasUserCredentials() {
+    boolean hasUserCredentials() {
         return this.metadata.hasUserCredentials();
     }
 
-    public String getUserCredentials() {
+    String getUserCredentials() {
         return this.metadata.getUserCredentials();
     }
 
+    /**
+     * Sets user credentials for the request
+
+     * @param credentials
+     * @see UserCredentials
+     * @return updated options
+     */
     @SuppressWarnings("unchecked")
     public T authenticated(UserCredentials credentials) {
         this.credentials = credentials;
         return (T)this;
     }
 
+    /**
+     * Sets user credentials for the request
+
+     * @param login
+     * @param password
+     * @return updated options
+     */
+    public T authenticated(String login, String password) {
+        return authenticated(new UserCredentials(login, password));
+    }
+
+    /**
+     * Requires the request to be performed by the leader of the cluster.
+     * @return updated options
+     */
     public T requiresLeader() {
         return requiresLeader(true);
     }
 
+    /**
+     * Do not require the request to be performed by the leader of the cluster.
+     * @return updated options
+     */
     public T notRequireLeader() {
         return requiresLeader(false);
     }
 
+    /**
+     * If true, requires the request to be performed by the leader of the cluster.
+     * @param value
+     * @return updated options
+     */
     @SuppressWarnings("unchecked")
     public T requiresLeader(boolean value) {
         this.requiresLeader = value;
         return (T)this;
     }
 
+    /**
+     * A length of time (in milliseconds) to use for gRPC deadlines.
+     * @param durationInMs
+     * @return
+     */
     @SuppressWarnings("unchecked")
     public T deadline(long durationInMs) {
         deadline = durationInMs;
@@ -53,19 +93,19 @@ class OptionsBase<T> {
         return (T)this;
     }
 
-    public Long getDeadline() {
+    Long getDeadline() {
         return deadline;
     }
 
-    public OperationKind getKind() {
+    OperationKind getKind() {
         return kind;
     }
 
-    public boolean isLeaderRequired() {
+    boolean isLeaderRequired() {
         return this.requiresLeader;
     }
 
-    public UserCredentials getCredentials() {
+    UserCredentials getCredentials() {
         return this.credentials;
     }
 }

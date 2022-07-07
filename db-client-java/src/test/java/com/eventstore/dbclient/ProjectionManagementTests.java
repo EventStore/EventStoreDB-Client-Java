@@ -360,10 +360,7 @@ public class ProjectionManagementTests extends ESDBTests {
     @Order(14)
     public void testListProjections() throws ExecutionException, InterruptedException {
 
-        ListProjectionsResult result = projectionClient.list().get();
-        Assertions.assertNotNull(result);
-
-        List<ProjectionDetails> projections = result.getProjections();
+        List<ProjectionDetails> projections = projectionClient.list().get();
         Assertions.assertTrue(projections.size() > 1);
     }
 

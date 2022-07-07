@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 
-public class StreamFilter implements EventFilter {
+class StreamFilter implements EventFilter {
     private final PrefixFilterExpression[] prefixFilterExpressions;
     private final RegularFilterExpression regularFilterExpression;
     @NotNull

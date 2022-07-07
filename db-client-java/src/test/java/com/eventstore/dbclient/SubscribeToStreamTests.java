@@ -54,7 +54,7 @@ public class SubscribeToStreamTests extends ESDBTests {
 
             @Override
             public void onEvent(Subscription subscription, ResolvedEvent event) {
-                assertEquals(new StreamRevision(current), event.getEvent().getStreamRevision());
+                assertEquals(current, event.getEvent().getRevision());
                 current += 1;
                 receivedEvents.countDown();
             }
@@ -100,7 +100,7 @@ public class SubscribeToStreamTests extends ESDBTests {
 
             @Override
             public void onEvent(Subscription subscription, ResolvedEvent event) {
-                assertEquals(new StreamRevision(current), event.getEvent().getStreamRevision());
+                assertEquals(current, event.getEvent().getRevision());
                 current += 1;
 
                 if (current <= 6000) {
@@ -111,7 +111,7 @@ public class SubscribeToStreamTests extends ESDBTests {
                     // Assert the event we appended has correct values
                     RecordedEvent e = event.getEvent();
                     assertEquals(eventId, e.getEventId().toString());
-                    assertEquals(new StreamRevision(6000), e.getStreamRevision());
+                    assertEquals(6000, e.getRevision());
                     assertEquals(testStreamName, e.getStreamId());
                     assertEquals(eventType, e.getEventType());
                     assertArrayEquals(eventMetaData, e.getUserMetadata());
@@ -150,7 +150,7 @@ public class SubscribeToStreamTests extends ESDBTests {
         WriteResult writeResult = client.appendToStream(testStreamName, options, event)
                 .get();
 
-        assertEquals(new StreamRevision(6000), writeResult.getNextExpectedRevision());
+        assertEquals(6000, writeResult.getNextExpectedRevision());
 
         // Assert the event was forwarded to the subscription
         appendedEvents.await();
