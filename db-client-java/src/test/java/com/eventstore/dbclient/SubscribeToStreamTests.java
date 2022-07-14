@@ -1,5 +1,7 @@
 package com.eventstore.dbclient;
 
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import org.junit.jupiter.api.Test;
 import testcontainers.module.ESDBTests;
 
@@ -10,6 +12,39 @@ import java.util.concurrent.ExecutionException;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SubscribeToStreamTests extends ESDBTests {
+
+    @Test
+    public void testStreamSubscriptionIsAbortedByShutdownOfClient() throws InterruptedException, ExecutionException {
+        EventStoreDBClient client = EventStoreDBClient.create(getPopulatedServer().getSettings());
+
+        final CountDownLatch aborted = new CountDownLatch(1);
+
+        SubscriptionListener listener = new SubscriptionListener() {
+            @Override
+            public void onEvent(Subscription subscription, ResolvedEvent event) {
+            }
+
+            @Override
+            public void onCancelled(Subscription subscription) {
+            }
+
+            @Override
+            public void onError(Subscription subscription, Throwable throwable) {
+                if (throwable instanceof StatusRuntimeException) {
+                    StatusRuntimeException statusRuntimeException = (StatusRuntimeException) throwable;
+                    if (statusRuntimeException.getStatus().getCode() == Status.Code.UNAVAILABLE) {
+                        aborted.countDown();
+                    }
+                }
+            }
+        };
+
+        client.subscribeToStream("dataset20M-0", listener).get();
+        client.shutdown();
+
+        aborted.await();
+    }
+
     @Test
     public void testStreamSubscriptionDeliversAllowsCancellationDuringStream() throws InterruptedException, ExecutionException {
         EventStoreDBClient client = getPopulatedServer().getClient();
