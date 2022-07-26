@@ -21,4 +21,29 @@ class ServerVersion {
     public int getPatch() {
         return patch;
     }
+
+    public boolean isGreaterThan(int major, int minor, int patch) {
+        return !isLessThan(major, minor, patch) &&
+                !equals(major, minor, patch);
+    }
+
+    public boolean equals(int major, int minor, int patch) {
+        return this.major == major
+                && this.minor == minor
+                && this.patch == patch;
+    }
+
+    public boolean isLessThan(int major, int minor, int patch) {
+        int cmp;
+        if ((cmp = Integer.compare(this.major, major)) != 0)
+            return cmp < 0;
+
+        if ((cmp = Integer.compare(this.minor, minor)) != 0)
+            return cmp < 0;
+
+        if ((cmp = Integer.compare(this.patch, patch)) != 0)
+            return cmp < 0;
+
+        return false;
+    }
 }

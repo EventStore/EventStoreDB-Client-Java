@@ -12,4 +12,5 @@ class ServerInfo {
     public boolean supportFeature(int feature) {
         return (features & feature) != 0;
     }
+    public ServerVersion getServerVersion() { return version; }
 }
