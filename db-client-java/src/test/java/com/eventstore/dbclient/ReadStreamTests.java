@@ -8,6 +8,7 @@ import testcontainers.module.ESDBTests;
 import testcontainers.module.EventStoreDB;
 
 import java.util.List;
+import java.util.Optional;
 
 public class ReadStreamTests extends ESDBTests {
     @Test
@@ -23,13 +24,15 @@ public class ReadStreamTests extends ESDBTests {
         ReadResult result = client.readStream("dataset20M-1800", options)
                 .get();
 
-        verifyAgainstTestData(result.getEvents(), "dataset20M-1800-e0-e10");
+        verifyAgainstTestData(
+                result.getEvents(),
+                "dataset20M-1800-e0-e10",
+                client.getGrpcClient().getServerVersion());
     }
 
     @Test
     public void testReadStreamBackward10EventsFromPositionEnd() throws Throwable {
         EventStoreDBClient client = getPopulatedServer().getClient();
-
         ReadStreamOptions options = ReadStreamOptions.get()
                 .backwards()
                 .fromEnd()
@@ -39,7 +42,10 @@ public class ReadStreamTests extends ESDBTests {
         ReadResult result = client.readStream("dataset20M-1800", options)
                 .get();
 
-        verifyAgainstTestData(result.getEvents(), "dataset20M-1800-e1999-e1990");
+        verifyAgainstTestData(
+                result.getEvents(),
+                "dataset20M-1800-e1999-e1990",
+                client.getGrpcClient().getServerVersion());
     }
 
     @Test
@@ -86,13 +92,20 @@ public class ReadStreamTests extends ESDBTests {
     }
 
 
-    private void verifyAgainstTestData(List<ResolvedEvent> actualEvents, String filenameStem) {
+    private void verifyAgainstTestData(List<ResolvedEvent> actualEvents, String filenameStem, Optional<ServerVersion> serverVersion) {
         ResolvedEvent[] actualEventsArray = actualEvents.toArray(new ResolvedEvent[0]);
 
         TestResolvedEvent[] expectedEvents = TestDataLoader.loadSerializedResolvedEvents(filenameStem);
         for (int i = 0; i < expectedEvents.length; i++) {
             TestResolvedEvent expected = expectedEvents[i];
             ResolvedEvent actual = actualEventsArray[i];
+
+            if (!serverVersion.isPresent() || serverVersion.get().isLessThan(22, 6, 0)) {
+                TestPosition notSet = new TestPosition();
+                notSet.setPrepare(-1);
+                notSet.setCommit(-1);
+                expected.getEvent().setPosition(notSet);
+            }
 
             expected.assertEquals(actual);
         }

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import testcontainers.module.ESDBTests;
 
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 
@@ -26,7 +27,10 @@ public class ReadStreamReactiveTests extends ESDBTests {
                 .collect(toList())
                 .blockingGet();
 
-        verifyAgainstTestData(events, "dataset20M-1800-e0-e10");
+        verifyAgainstTestData(
+                events,
+                "dataset20M-1800-e0-e10",
+                client.getGrpcClient().getServerVersion());
     }
 
     @Test
@@ -45,7 +49,10 @@ public class ReadStreamReactiveTests extends ESDBTests {
                 .collect(toList())
                 .blockingGet();
 
-        verifyAgainstTestData(events, "dataset20M-1800-e1999-e1990");
+        verifyAgainstTestData(
+                events,
+                "dataset20M-1800-e1999-e1990",
+                client.getGrpcClient().getServerVersion());
     }
 
     @Test
@@ -76,13 +83,20 @@ public class ReadStreamReactiveTests extends ESDBTests {
         Assertions.assertEquals(firstEvent1.getEventId(), firstEvent2.getEventId());
     }
 
-    private void verifyAgainstTestData(List<ResolvedEvent> actualEvents, String filenameStem) {
+    private void verifyAgainstTestData(List<ResolvedEvent> actualEvents, String filenameStem, Optional<ServerVersion> serverVersion) {
         ResolvedEvent[] actualEventsArray = actualEvents.toArray(new ResolvedEvent[0]);
 
         TestResolvedEvent[] expectedEvents = TestDataLoader.loadSerializedResolvedEvents(filenameStem);
         for (int i = 0; i < expectedEvents.length; i++) {
             TestResolvedEvent expected = expectedEvents[i];
             ResolvedEvent actual = actualEventsArray[i];
+
+            if (!serverVersion.isPresent() || serverVersion.get().isLessThan(22, 6, 0)) {
+                TestPosition notSet = new TestPosition();
+                notSet.setPrepare(-1);
+                notSet.setCommit(-1);
+                expected.getEvent().setPosition(notSet);
+            }
 
             expected.assertEquals(actual);
         }
