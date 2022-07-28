@@ -33,6 +33,7 @@ abstract class GrpcClient {
     protected UUID currentChannelId;
     protected Optional<ServerInfo> serverInfo = Optional.empty();
 
+    protected volatile boolean shutdownRequested = false;
     protected volatile boolean shutdown = false;
 
     protected GrpcClient(EventStoreDBClientSettings settings, SslContext sslContext) {
@@ -326,11 +327,16 @@ abstract class GrpcClient {
     }
 
     public void shutdown() throws ExecutionException, InterruptedException {
+        shutdownRequested = true;
         final CompletableFuture<Object> completion = new CompletableFuture<>();
 
         pushMsg(new Shutdown(completion::complete));
 
         completion.get();
+    }
+
+    public boolean isShutdown() {
+        return shutdown || shutdownRequested;
     }
 
     class WorkItemArgs {
