@@ -44,7 +44,7 @@ class ServerFeatures {
         stub.getSupportedMethods(Shared.Empty.getDefaultInstance(), convertSingleResponse(result, resp -> {
             int major = 0, minor = 0, patch = 0;
 
-            String[] splits = resp.getEventStoreServerVersion().split(".");
+            String[] splits = resp.getEventStoreServerVersion().split("\\.");
             for (int idx = 0; idx < splits.length; idx++) {
                 if (idx > 2) {
                     break;
