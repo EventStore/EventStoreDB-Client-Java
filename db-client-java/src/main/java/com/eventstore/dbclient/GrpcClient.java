@@ -17,7 +17,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -26,7 +26,7 @@ abstract class GrpcClient {
     protected final EventStoreDBClientSettings settings;
     protected final SslContext sslContext;
     private final Logger logger = LoggerFactory.getLogger(GrpcClient.class);
-    private final LinkedBlockingQueue<Msg> messages;
+    private final LinkedBlockingDeque<Msg> messages;
     protected ManagedChannel channel;
     protected Endpoint endpoint;
     protected Exception lastException;
@@ -40,7 +40,7 @@ abstract class GrpcClient {
     protected GrpcClient(EventStoreDBClientSettings settings, SslContext sslContext) {
         this.settings = settings;
         this.sslContext = sslContext;
-        this.messages = new LinkedBlockingQueue<>();
+        this.messages = new LinkedBlockingDeque<>();
         this.currentChannelId = UUID.randomUUID();
     }
 
@@ -73,8 +73,11 @@ abstract class GrpcClient {
 
                 return;
             }
-
-            this.messages.put(msg);
+            if (msg instanceof CreateChannel) {
+                this.messages.putFirst(msg);
+            } else {
+                this.messages.put(msg);
+            }
         } catch (InterruptedException e) {
             logger.error("Unexpected exception occurred when pushing a new message", e);
         }
