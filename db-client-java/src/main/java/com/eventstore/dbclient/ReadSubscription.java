@@ -28,10 +28,6 @@ class ReadSubscription implements Subscription {
         this.streamObserver = streamObserver;
     }
 
-    public void onStreamNotFound() {
-        subscriber.onError(new StreamNotFoundException());
-    }
-
     public void onError(Throwable error) {
         if (error instanceof StatusRuntimeException) {
             StatusRuntimeException statusRuntimeException = (StatusRuntimeException) error;
