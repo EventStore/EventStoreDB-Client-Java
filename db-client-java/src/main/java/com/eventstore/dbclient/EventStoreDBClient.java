@@ -352,7 +352,7 @@ public class EventStoreDBClient extends EventStoreDBClientBase {
      * @see DeleteResult
      * @return if successful, delete result.
      */
-    public CompletableFuture<DeleteResult> tombstoneStrSeam(String streamName, DeleteStreamOptions options) {
+    public CompletableFuture<DeleteResult> tombstoneStream(String streamName, DeleteStreamOptions options) {
         if (options == null)
             options = DeleteStreamOptions.get();
 
