@@ -32,8 +32,6 @@ abstract class GrpcClient {
     protected Exception lastException;
     protected UUID currentChannelId;
     protected Optional<ServerInfo> serverInfo = Optional.empty();
-    private volatile boolean serverInfoLoaded = false;
-
     protected volatile boolean shutdownRequested = false;
     protected volatile boolean shutdown = false;
 
@@ -197,7 +195,6 @@ abstract class GrpcClient {
     private boolean loadServerFeatures() {
         try {
             serverInfo = ServerFeatures.getSupportedFeatures(settings, channel);
-            serverInfoLoaded = true;
             return true;
         } catch (ServerFeatures.RetryableException e) {
             logger.warn("An exception happened when fetching server supported features. Retrying connection attempt.", e);
@@ -205,11 +202,8 @@ abstract class GrpcClient {
         }
     }
 
-    public Optional<ServerVersion> getServerVersion() {
-        if (!serverInfoLoaded)
-            throw new RuntimeException("server info not loaded");
-
-        return serverInfo.map(ServerInfo::getServerVersion);
+    public CompletableFuture<Optional<ServerVersion>> getServerVersion() {
+        return runWithArgs(args -> CompletableFuture.completedFuture(args.info.map(ServerInfo::getServerVersion)));
     }
 
     protected void sleep(long millis) {

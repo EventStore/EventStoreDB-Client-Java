@@ -27,7 +27,7 @@ public class ReadStreamTests extends ESDBTests {
         verifyAgainstTestData(
                 result.getEvents(),
                 "dataset20M-1800-e0-e10",
-                client.getGrpcClient().getServerVersion());
+                client.getGrpcClient().getServerVersion().get());
     }
 
     @Test
@@ -45,7 +45,7 @@ public class ReadStreamTests extends ESDBTests {
         verifyAgainstTestData(
                 result.getEvents(),
                 "dataset20M-1800-e1999-e1990",
-                client.getGrpcClient().getServerVersion());
+                client.getGrpcClient().getServerVersion().get());
     }
 
     @Test
