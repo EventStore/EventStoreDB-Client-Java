@@ -29,4 +29,9 @@ public class Endpoint {
            throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public String toString() {
+        return String.join(":", hostname, String.valueOf(port));
+    }
 }
