@@ -139,6 +139,7 @@ abstract class GrpcClient {
             return true;
 
         if (candidate.isPresent()) {
+            shutdownPreviousChannelIfExists();
             this.endpoint = candidate.get();
             this.channel = createChannel(this.endpoint);
 
@@ -155,6 +156,7 @@ abstract class GrpcClient {
 
         for (; ; ) {
             logger.debug("Start connection attempt ({}/{})", attempts, settings.getMaxDiscoverAttempts());
+            shutdownPreviousChannelIfExists();
             if (doConnect()) {
                 try {
                     if (loadServerFeatures()) {
@@ -176,6 +178,17 @@ abstract class GrpcClient {
 
             logger.warn("Unable to find a node. Retrying... ({}/{})", attempts, settings.getMaxDiscoverAttempts());
             sleep(settings.getDiscoveryInterval());
+        }
+    }
+
+    private void shutdownPreviousChannelIfExists() {
+        if (this.channel != null && !this.channel.isShutdown()) {
+            try {
+                this.channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                logger.error("Shutdown of existing channel has been interrupted.", e);
+                Thread.currentThread().interrupt();
+            }
         }
     }
 
