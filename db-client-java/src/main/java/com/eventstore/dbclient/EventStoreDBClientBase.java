@@ -63,4 +63,14 @@ public class EventStoreDBClientBase {
     public void shutdown() throws ExecutionException, InterruptedException {
         this.client.shutdown();
     }
+
+    /**
+     * Checks if this client instance has been shutdown.
+     * After shutdown a client instance can no longer process new operations and
+     * a new client instance has to be created.
+     * @return {@code true} if client instance has been shutdown.
+     */
+    public boolean isShutdown() {
+        return this.client.isShutdown();
+    }
 }
