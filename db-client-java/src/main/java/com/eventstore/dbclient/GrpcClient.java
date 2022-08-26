@@ -140,7 +140,7 @@ abstract class GrpcClient {
             return true;
 
         if (candidate.isPresent()) {
-            shutdownPreviousChannelIfExists();
+            closeChannel();
             this.endpoint = candidate.get();
             this.channel = createChannel(this.endpoint);
 
@@ -157,7 +157,7 @@ abstract class GrpcClient {
 
         for (; ; ) {
             logger.debug("Start connection attempt ({}/{})", attempts, settings.getMaxDiscoverAttempts());
-            shutdownPreviousChannelIfExists();
+            closeChannel();
             if (doConnect()) {
                 try {
                     if (loadServerFeatures()) {
@@ -179,17 +179,6 @@ abstract class GrpcClient {
 
             logger.warn("Unable to find a node. Retrying... ({}/{})", attempts, settings.getMaxDiscoverAttempts());
             sleep(settings.getDiscoveryInterval());
-        }
-    }
-
-    private void shutdownPreviousChannelIfExists() {
-        if (this.channel != null && !this.channel.isShutdown()) {
-            try {
-                this.channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                logger.error("Shutdown of existing channel has been interrupted.", e);
-                Thread.currentThread().interrupt();
-            }
         }
     }
 
@@ -251,7 +240,7 @@ abstract class GrpcClient {
         } else if (msg instanceof Shutdown) {
             if (!this.shutdown) {
                 logger.info("Received a shutdown request, closing...");
-                closeConnection();
+                closeChannel();
                 result = false;
                 logger.info("Connection was closed successfully");
             } else {
@@ -301,7 +290,7 @@ abstract class GrpcClient {
         logger.debug("Drainage completed successfully");
     }
 
-    private void closeConnection() {
+    private void closeChannel() {
         if (this.channel != null) {
             try {
                 this.channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
