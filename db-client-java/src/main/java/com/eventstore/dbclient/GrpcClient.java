@@ -152,7 +152,6 @@ abstract class GrpcClient {
             } catch (Exception e) {
                 logger.error("A fatal exception happened when fetching server supported features", e);
             }
-            return false;
         }
 
         for (; ; ) {
