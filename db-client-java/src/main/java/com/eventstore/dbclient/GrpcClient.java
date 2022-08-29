@@ -304,7 +304,10 @@ abstract class GrpcClient {
     private void closeConnection() {
         if (this.channel != null) {
             try {
-                this.channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+                boolean terminated = this.channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+                if (!terminated) {
+                    this.channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
+                }
             } catch (InterruptedException e) {
                 logger.error("Error when closing gRPC channel", e);
             } finally {
