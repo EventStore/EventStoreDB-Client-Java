@@ -78,6 +78,7 @@ public class EventStoreDBClusterClient extends GrpcClient {
                 .build();
         GossipClient client = new GossipClient(channel);
         return client.read()
+                .whenComplete((v, e) -> client.shutdown())
                 .thenApply(nodeSelector::determineBestFitNode);
     }
 

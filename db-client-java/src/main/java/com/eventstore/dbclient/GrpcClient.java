@@ -147,7 +147,7 @@ abstract class GrpcClient {
         }
 
         if (candidate.isPresent()) {
-            shutdownPreviousChannelIfExists();
+            closeChannel();
             this.endpoint = candidate.get();
             this.channel = createChannel(this.endpoint);
             logger.debug("Prepared channel to proposed leader candidate [{}]", endpoint);
@@ -167,7 +167,7 @@ abstract class GrpcClient {
 
         for (; ; ) {
             logger.debug("Start connection attempt ({}/{})", attempts, settings.getMaxDiscoverAttempts());
-            shutdownPreviousChannelIfExists();
+            closeChannel();
             if (doConnect()) {
                 logger.debug("Prepared channel to endpoint [{}]", endpoint);
                 try {
@@ -190,19 +190,6 @@ abstract class GrpcClient {
 
             logger.warn("Unable to find a node. Retrying... ({}/{})", attempts, settings.getMaxDiscoverAttempts());
             sleep(settings.getDiscoveryInterval());
-        }
-    }
-
-    private void shutdownPreviousChannelIfExists() {
-        if (this.channel != null && !this.channel.isShutdown()) {
-            logger.trace("Shutting down existing gRPC channel [{}]", this.channel);
-            try {
-                this.channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
-                logger.trace("Successful shutdown of gRPC channel [{}]", this.channel);
-            } catch (InterruptedException e) {
-                logger.error("Shutdown of existing channel has been interrupted.", e);
-                Thread.currentThread().interrupt();
-            }
         }
     }
 
@@ -265,7 +252,7 @@ abstract class GrpcClient {
         } else if (msg instanceof Shutdown) {
             if (!this.shutdown) {
                 logger.info("Received a shutdown request, closing connection to endpoint [{}]", endpoint);
-                closeConnection();
+                closeChannel();
                 result = false;
                 logger.info("Connection to endpoint [{}] was closed successfully", endpoint);
             } else {
@@ -315,11 +302,14 @@ abstract class GrpcClient {
         logger.debug("Drainage completed successfully");
     }
 
-    private void closeConnection() {
+    private void closeChannel() {
         if (this.channel != null) {
             try {
                 logger.trace("Shutting down existing gRPC channel [{}]", this.channel);
-                this.channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+                boolean terminated = this.channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+                if (!terminated) {
+                    this.channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
+                }
                 logger.trace("Successful shutdown of gRPC channel [{}]", this.channel);
             } catch (InterruptedException e) {
                 logger.error("Error when closing gRPC channel", e);

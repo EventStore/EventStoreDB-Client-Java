@@ -1,14 +1,57 @@
 package com.eventstore.dbclient;
 
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import org.junit.jupiter.api.Test;
 import testcontainers.module.ESDBTests;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class SubscribeToAllTests extends ESDBTests {
+
+    @Test
+    public void testStreamSubscriptionIsAbortedByShutdownOfClient() throws InterruptedException, ExecutionException {
+        EventStoreDBClient streams = EventStoreDBClient.create(getPopulatedServer().getSettings());
+
+        final CountDownLatch aborted = new CountDownLatch(1);
+
+        SubscriptionListener listener = new SubscriptionListener() {
+            @Override
+            public void onEvent(Subscription subscription, ResolvedEvent event) {
+            }
+
+            @Override
+            public void onCancelled(Subscription subscription) {
+            }
+
+            @Override
+            public void onError(Subscription subscription, Throwable throwable) {
+                if (throwable instanceof StatusRuntimeException) {
+                    StatusRuntimeException statusRuntimeException = (StatusRuntimeException) throwable;
+                    if (statusRuntimeException.getStatus().getCode() == Status.Code.UNAVAILABLE) {
+                        aborted.countDown();
+                    }
+                }
+            }
+        };
+
+        SubscribeToAllOptions options = SubscribeToAllOptions.get()
+                .fromStart();
+
+        streams.subscribeToAll(listener, options)
+                .get();
+        streams.shutdown();
+
+        aborted.await();
+    }
+
+
     @Test
     public void testAllSubscriptionDeliversAllowsCancellationDuringStream() throws InterruptedException, ExecutionException {
         EventStoreDBClient streams = getPopulatedServer().getClient();
