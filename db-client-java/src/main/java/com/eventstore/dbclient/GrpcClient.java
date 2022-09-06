@@ -161,8 +161,7 @@ abstract class GrpcClient {
             } catch (Exception e) {
                 logger.error("A fatal exception happened when fetching server supported features", e);
             }
-            logger.warn("Failed connection to proposed leader candidate [{}]. Shutting down client.", endpoint);
-            return false;
+            logger.warn("Failed connection to proposed leader candidate [{}]. Retrying with default leader discovery.", endpoint);
         }
 
         for (; ; ) {
