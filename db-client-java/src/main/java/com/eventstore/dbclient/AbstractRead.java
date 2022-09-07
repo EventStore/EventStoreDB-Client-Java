@@ -110,7 +110,7 @@ abstract class AbstractRead implements Publisher<ResolvedEvent> {
             });
             return result;
         }).exceptionally(t -> {
-            subscriber.onError(t);
+            readSubscription.onError(t);
             return readSubscription;
         });
     }
