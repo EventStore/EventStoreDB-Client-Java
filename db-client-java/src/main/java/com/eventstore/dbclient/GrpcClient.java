@@ -119,8 +119,7 @@ abstract class GrpcClient {
                         self.pushMsg(new CreateChannel(args.id));
                     }
                 }
-
-                logger.debug("RunWorkItem[{}] completed exceptionally: {}", msgId, error.getMessage());
+                logger.debug("RunWorkItem[{}] completed exceptionally: {}", msgId, error.toString());
 
                 result.completeExceptionally(error);
             });
