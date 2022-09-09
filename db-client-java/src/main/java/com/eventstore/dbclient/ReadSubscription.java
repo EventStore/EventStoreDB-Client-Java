@@ -35,8 +35,10 @@ class ReadSubscription implements Subscription {
                 return;
             }
         }
+        if (!terminated.get()) {
+            subscriber.onError(error);
+        }
         cancel();
-        subscriber.onError(error);
     }
 
     public void onNext(ResolvedEvent event) {
@@ -52,10 +54,9 @@ class ReadSubscription implements Subscription {
     }
 
     public void onCompleted() {
-        if (!terminated.get()) {
+        if (!terminated.compareAndSet(false, true)) {
             subscriber.onComplete();
         }
-        terminated.compareAndSet(false, true);
     }
 
     @Override
