@@ -169,6 +169,11 @@ Documentation for EventStoreDB can be found in the [docs].
 
 Bear in mind that this client is not yet properly documented. We are working hard on a new version of the documentation.
 
+## Security
+
+If you find a vulnerability in our software, please contact us. You can find how to reach out us and report it at https://www.eventstore.com/security#security
+Thank you very much for supporting our software.
+
 ## Community
 
 We have a community discussion space at [Event Store Discuss][discuss].
