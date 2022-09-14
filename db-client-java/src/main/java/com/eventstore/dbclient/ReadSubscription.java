@@ -54,7 +54,7 @@ class ReadSubscription implements Subscription {
     }
 
     public void onCompleted() {
-        if (!terminated.compareAndSet(false, true)) {
+        if (terminated.compareAndSet(false, true)) {
             subscriber.onComplete();
         }
     }
