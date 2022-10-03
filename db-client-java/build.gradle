@@ -97,6 +97,12 @@ def isSnapshot = project.version.toString().endsWith("-SNAPSHOT")
 def publishLogin = project.hasProperty("ossrhUsername") ? project.getProperties().get("ossrhUsername") : ""
 def publishPassword = project.hasProperty("ossrhPassword") ? project.getProperties().get("ossrhPassword") : ""
 
+javadoc {
+    doFirst {
+        options.addBooleanOption('-no-module-directories', true)
+    }
+}
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
