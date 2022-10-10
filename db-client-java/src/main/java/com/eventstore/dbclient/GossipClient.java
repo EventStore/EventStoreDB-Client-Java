@@ -4,8 +4,6 @@ import com.eventstore.dbclient.proto.gossip.GossipGrpc;
 import com.eventstore.dbclient.proto.gossip.GossipOuterClass;
 import com.eventstore.dbclient.proto.shared.Shared;
 import io.grpc.ManagedChannel;
-import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
-import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext;
 import io.grpc.stub.ClientCallStreamObserver;
 import io.grpc.stub.ClientResponseObserver;
 
@@ -25,8 +23,12 @@ class GossipClient {
         _stub = GossipGrpc.newStub(_channel);
     }
 
-    public void shutdown() throws InterruptedException {
-        _channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+    public void shutdown() {
+        try {
+            _channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     public CompletableFuture<ClusterInfo> read() {

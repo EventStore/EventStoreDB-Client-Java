@@ -7,7 +7,6 @@ import io.grpc.Metadata;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ClientCallStreamObserver;
 import io.grpc.stub.ClientResponseObserver;
-import io.grpc.stub.MetadataUtils;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
@@ -38,6 +37,7 @@ abstract class AbstractRead implements Publisher<ReadMessage> {
         ReadSubscription readSubscription = new ReadSubscription(subscriber);
         subscriber.onSubscribe(readSubscription);
 
+        CompletableFuture<ReadSubscription> result = new CompletableFuture<>();
         this.client.run(channel -> {
             StreamsOuterClass.ReadReq request = StreamsOuterClass.ReadReq.newBuilder()
                     .setOptions(createOptions())
@@ -55,17 +55,19 @@ abstract class AbstractRead implements Publisher<ReadMessage> {
 
                 @Override
                 public void onNext(StreamsOuterClass.ReadResp value) {
+                    if (this.completed) {
+                        return;
+                    }
                     if (value.hasStreamNotFound()) {
-                        readSubscription.onStreamNotFound();
-                        this.completed = true;
+                        StreamNotFoundException streamNotFoundException = new StreamNotFoundException();
+                        handleError(streamNotFoundException);
                         return;
                     }
 
                     try {
                         readSubscription.onNext(new ReadMessage(value));
                     } catch (Throwable t) {
-                        readSubscription.onError(t);
-                        this.completed = true;
+                        handleError(t);
                     }
                 }
 
@@ -74,7 +76,8 @@ abstract class AbstractRead implements Publisher<ReadMessage> {
                     if (this.completed) {
                         return;
                     }
-
+                    this.completed = true;
+                    result.complete(readSubscription);
                     readSubscription.onCompleted();
                 }
 
@@ -91,18 +94,24 @@ abstract class AbstractRead implements Publisher<ReadMessage> {
 
                         if (leaderHost != null && leaderPort != null) {
                             NotLeaderException reason = new NotLeaderException(leaderHost, Integer.valueOf(leaderPort));
-                            readSubscription.onError(reason);
+                            handleError(reason);
                             return;
                         }
                     }
 
+                    handleError(t);
+                }
+
+                private void handleError(Throwable t) {
+                    this.completed = true;
+                    result.completeExceptionally(t);
                     readSubscription.onError(t);
                 }
             });
-            return CompletableFuture.completedFuture(this);
+            return result;
         }).exceptionally(t -> {
-            subscriber.onError(t);
-            return this;
+            readSubscription.onError(t);
+            return readSubscription;
         });
     }
 }
