@@ -193,3 +193,5 @@ review our [Contributing Guide][contributing] and [Code of Conduct][code-of-cond
 [discuss]: https://discuss.eventstore.com/
 [Maven Central]: https://search.maven.org/artifact/com.eventstore/db-client-java
 [Event Store GRPC Docs]: https://developers.eventstore.com/clients/grpc
+
+CI test for QA 22.10
