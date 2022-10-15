@@ -49,7 +49,10 @@ class AppendToStream {
                         logPosition = new Position(p.getCommitPosition(), p.getPreparePosition());
                     }
 
-                    return new WriteResult(success.getCurrentRevision(), logPosition);
+                    ExpectedRevision nextExpectedRevision = success.hasNoStream() ? ExpectedRevision.noStream()
+                            : ExpectedRevision.expectedRevision(success.getCurrentRevision());
+
+                    return new WriteResult(nextExpectedRevision, logPosition);
                 }
                 if (resp.hasWrongExpectedVersion()) {
                     StreamsOuterClass.AppendResp.WrongExpectedVersion wev = resp.getWrongExpectedVersion();

@@ -6,10 +6,10 @@ import java.util.Objects;
  * Returned after writing to a stream.
  */
 public class WriteResult {
-    private final long nextExpectedRevision;
+    private final ExpectedRevision nextExpectedRevision;
     private final Position logPosition;
 
-    WriteResult(long nextExpectedRevision, Position logPosition) {
+    WriteResult(ExpectedRevision nextExpectedRevision, Position logPosition) {
         this.nextExpectedRevision = nextExpectedRevision;
         this.logPosition = logPosition;
     }
@@ -17,7 +17,7 @@ public class WriteResult {
     /**
      * Next expected version of the stream.
      */
-    public long getNextExpectedRevision() {
+    public ExpectedRevision getNextExpectedRevision() {
         return nextExpectedRevision;
     }
 

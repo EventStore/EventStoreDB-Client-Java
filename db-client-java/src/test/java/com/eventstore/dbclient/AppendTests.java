@@ -54,7 +54,7 @@ public class AppendTests extends ESDBTests {
         WriteResult appendResult = client.appendToStream(streamName, appendOptions, event)
                 .get();
 
-        Assertions.assertEquals(0, appendResult.getNextExpectedRevision());
+        Assertions.assertEquals(ExpectedRevision.expectedRevision(0), appendResult.getNextExpectedRevision());
 
         ReadStreamOptions readStreamOptions = ReadStreamOptions.get()
                 .fromEnd()

@@ -185,7 +185,7 @@ public class SubscribeToStreamTests extends ESDBTests {
         WriteResult writeResult = client.appendToStream(testStreamName, options, event)
                 .get();
 
-        assertEquals(6000, writeResult.getNextExpectedRevision());
+        assertEquals(ExpectedRevision.expectedRevision(6000), writeResult.getNextExpectedRevision());
 
         // Assert the event was forwarded to the subscription
         appendedEvents.await();
