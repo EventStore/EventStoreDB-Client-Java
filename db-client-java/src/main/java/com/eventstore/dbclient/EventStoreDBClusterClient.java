@@ -7,7 +7,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -42,11 +45,14 @@ class EventStoreDBClusterClient extends GrpcClient {
         }
 
         for (InetSocketAddress seed : candidates) {
+            logger.debug("Using seed node [{}] for cluster node discovery.", seed);
             try {
-                ClusterInfo.Endpoint endpoint = attemptDiscovery(seed).get(settings.getGossipTimeout(), TimeUnit.MILLISECONDS);
-
-                if (endpoint != null) {
+                Optional<ClusterInfo.Member> optionalMember = attemptDiscovery(seed).get(settings.getGossipTimeout(), TimeUnit.MILLISECONDS);
+                if (optionalMember.isPresent()) {
+                    ClusterInfo.Member member = optionalMember.get();
+                    ClusterInfo.Endpoint endpoint = member.getHttpEndpoint();
                     Endpoint result = new Endpoint(endpoint.getAddress(), endpoint.getPort());
+                    logger.debug("Selected cluster node [{}] in state [{}] for connection attempt.", result, member.getState());
                     return new Tuple<>(result, null);
                 }
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
@@ -57,7 +63,7 @@ class EventStoreDBClusterClient extends GrpcClient {
         return new Tuple<>(null, new NoClusterNodeFoundException());
     }
 
-    private CompletableFuture<ClusterInfo.Endpoint> attemptDiscovery(InetSocketAddress seed) {
+    private CompletableFuture<Optional<ClusterInfo.Member>> attemptDiscovery(InetSocketAddress seed) {
         NettyChannelBuilder builder = NettyChannelBuilder.forAddress(seed)
                 // FIXME - Find if we could get the version out the Gradle configuration file.
                 .userAgent("EventStoreDB Client (Java)");
@@ -72,8 +78,8 @@ class EventStoreDBClusterClient extends GrpcClient {
                 .build();
         GossipClient client = new GossipClient(channel);
         return client.read()
-                .thenApply(nodeSelector::determineBestFitNode)
-                .thenApply(m -> m.map(ClusterInfo.Member::getHttpEndpoint).orElse(null));
+                .whenComplete((v, e) -> client.shutdown())
+                .thenApply(nodeSelector::determineBestFitNode);
     }
 
     @Override
@@ -85,6 +91,7 @@ class EventStoreDBClusterClient extends GrpcClient {
             this.endpoint = result.get_1();
             this.channel = this.createChannel(this.endpoint);
         } else {
+            logger.warn("Could not determine cluster node for connection attempt.");
             this.lastException = result.get_2();
             return false;
         }

@@ -28,10 +28,6 @@ class ReadSubscription implements Subscription {
         this.streamObserver = streamObserver;
     }
 
-    public void onStreamNotFound() {
-        subscriber.onError(new StreamNotFoundException());
-    }
-
     public void onError(Throwable error) {
         if (error instanceof StatusRuntimeException) {
             StatusRuntimeException statusRuntimeException = (StatusRuntimeException) error;
@@ -39,8 +35,10 @@ class ReadSubscription implements Subscription {
                 return;
             }
         }
+        if (!terminated.get()) {
+            subscriber.onError(error);
+        }
         cancel();
-        subscriber.onError(error);
     }
 
     public void onNext(ReadMessage message) {
@@ -56,10 +54,9 @@ class ReadSubscription implements Subscription {
     }
 
     public void onCompleted() {
-        if (!terminated.get()) {
+        if (terminated.compareAndSet(false, true)) {
             subscriber.onComplete();
         }
-        terminated.compareAndSet(false, true);
     }
 
     @Override
