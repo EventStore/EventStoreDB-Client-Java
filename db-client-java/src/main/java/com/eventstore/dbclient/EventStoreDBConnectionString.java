@@ -388,6 +388,7 @@ public final class EventStoreDBConnectionString {
                             "integer"
                     );
                 }
+                break;
             default: {
                 logger.warn("Unknown option {}, setting will be ignored.", key);
             }
