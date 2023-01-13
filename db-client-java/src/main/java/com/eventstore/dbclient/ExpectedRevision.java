@@ -16,7 +16,7 @@ import java.util.Objects;
  */
 public abstract class ExpectedRevision {
     /**
-     * This write should not conflict with anything and should always succeed.
+     * This writes should not conflict with anything and should always succeed.
      */
     public static ExpectedRevision any() {
         return new AnyExpectedRevision();
@@ -75,6 +75,11 @@ public abstract class ExpectedRevision {
         public StreamsOuterClass.TombstoneReq.Options.Builder applyOnWire(StreamsOuterClass.TombstoneReq.Options.Builder options) {
             return options.setNoStream(Shared.Empty.getDefaultInstance());
         }
+
+        @Override
+        public String toString() {
+            return "ExpectedNoStream";
+        }
     }
 
     static class AnyExpectedRevision extends ExpectedRevision {
@@ -92,6 +97,11 @@ public abstract class ExpectedRevision {
         public StreamsOuterClass.TombstoneReq.Options.Builder applyOnWire(StreamsOuterClass.TombstoneReq.Options.Builder options) {
             return options.setAny(Shared.Empty.getDefaultInstance());
         }
+
+        @Override
+        public String toString() {
+            return "ExpectedAny";
+        }
     }
 
     static class StreamExistsExpectedRevision extends ExpectedRevision {
@@ -108,6 +118,11 @@ public abstract class ExpectedRevision {
         @Override
         public StreamsOuterClass.TombstoneReq.Options.Builder applyOnWire(StreamsOuterClass.TombstoneReq.Options.Builder options) {
             return options.setStreamExists(Shared.Empty.getDefaultInstance());
+        }
+
+        @Override
+        public String toString() {
+            return "ExpectedStreamExists";
         }
     }
 
@@ -144,6 +159,11 @@ public abstract class ExpectedRevision {
         @Override
         public StreamsOuterClass.TombstoneReq.Options.Builder applyOnWire(StreamsOuterClass.TombstoneReq.Options.Builder options) {
             return options.setRevision(version);
+        }
+
+        @Override
+        public String toString() {
+            return Long.toString(this.version);
         }
     }
 }
