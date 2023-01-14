@@ -15,7 +15,7 @@ public class ServerSideFiltering {
                         + "@" + event.getOriginalEvent().getStreamId());
             }
         };
-        String excludeSystemEventsRegex = "/^[^\\$].*/";
+        String excludeSystemEventsRegex = "^[^\\$].*";
 
         SubscriptionFilter filter = SubscriptionFilter.newBuilder()
                 .withEventTypeRegularExpression(excludeSystemEventsRegex)
