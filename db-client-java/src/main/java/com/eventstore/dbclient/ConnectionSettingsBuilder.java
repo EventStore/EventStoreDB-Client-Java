@@ -135,12 +135,13 @@ public class ConnectionSettingsBuilder {
     public ConnectionSettingsBuilder keepAliveTimeout(long value) {
         if (value >= 0 && value < Consts.DEFAULT_KEEP_ALIVE_TIMEOUT_IN_MS) {
             logger.warn("Specified keepAliveTimeout of {} is less than recommended {}", value, Consts.DEFAULT_KEEP_ALIVE_TIMEOUT_IN_MS);
-        } else {
-            if (value == -1)
-                value = Long.MAX_VALUE;
-
-            this._keepAliveTimeout = value;
         }
+
+        if (value == -1)
+            value = Long.MAX_VALUE;
+
+        this._keepAliveTimeout = value;
+
         return this;
     }
 
@@ -150,12 +151,12 @@ public class ConnectionSettingsBuilder {
     public ConnectionSettingsBuilder keepAliveInterval(long value) {
         if (value >= 0 && value < Consts.DEFAULT_KEEP_ALIVE_INTERVAL_IN_MS) {
             logger.warn("Specified keepAliveInterval of {} is less than recommended {}", value, Consts.DEFAULT_KEEP_ALIVE_INTERVAL_IN_MS);
-        } else {
-            if (value == -1)
-                value = Long.MAX_VALUE;
+        } 
 
-            this._keepAliveInterval = value;
-        }
+        if (value == -1)
+            value = Long.MAX_VALUE;
+
+        this._keepAliveInterval = value;
 
         return this;
     }
