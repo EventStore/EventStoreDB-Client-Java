@@ -43,6 +43,17 @@ public abstract class ExpectedRevision {
         return new SpecificExpectedRevision(revision);
     }
 
+    static ExpectedRevision fromRaw(long revision) {
+        if (revision == -1)
+            return ExpectedRevision.noStream();
+        if (revision == -2)
+            return ExpectedRevision.any();
+        if (revision == -4)
+            return ExpectedRevision.streamExists();
+
+        return ExpectedRevision.expectedRevision(revision);
+    }
+
     ExpectedRevision() {}
 
     abstract StreamsOuterClass.AppendReq.Options.Builder applyOnWire(StreamsOuterClass.AppendReq.Options.Builder options);

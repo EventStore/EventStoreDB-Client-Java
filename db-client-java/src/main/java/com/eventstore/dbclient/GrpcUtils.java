@@ -4,6 +4,7 @@ import com.eventstore.dbclient.proto.shared.Shared;
 import com.eventstore.dbclient.proto.streams.StreamsOuterClass;
 import com.google.protobuf.ByteString;
 import io.grpc.Metadata;
+import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.*;
 
@@ -40,6 +41,39 @@ final class GrpcUtils {
             public void onError(Throwable t) {
                 if (t instanceof StatusRuntimeException) {
                     StatusRuntimeException e = (StatusRuntimeException) t;
+
+                    if (e.getStatus().getCode().equals(Status.FAILED_PRECONDITION.getCode())) {
+                        String reason = e.getTrailers().get(Metadata.Key.of("exception", Metadata.ASCII_STRING_MARSHALLER));
+                        String streamName = e.getTrailers().get(Metadata.Key.of("stream-name", Metadata.ASCII_STRING_MARSHALLER));
+
+                        if (reason != null && reason.equals("stream-deleted")) {
+                            dest.completeExceptionally(new StreamDeletedException(streamName));
+                            return;
+                        }
+
+                        if (reason != null && reason.equals("wrong-expected-version")) {
+                            String expectedStr = e.getTrailers().get(Metadata.Key.of("expected-version", Metadata.ASCII_STRING_MARSHALLER));
+                            String actualStr = e.getTrailers().get(Metadata.Key.of("actual-version", Metadata.ASCII_STRING_MARSHALLER));
+
+                            // Some old versions of the server, actual-version is not provided.
+                            if (actualStr == null || actualStr.isEmpty()) {
+                                // Equivalent of NoStream internally.
+                                actualStr = "-1";
+                            }
+
+                            try {
+                                ExpectedRevision expected = ExpectedRevision.fromRaw(Long.parseLong(expectedStr));
+                                ExpectedRevision actual = ExpectedRevision.fromRaw(Long.parseLong(actualStr));
+
+                                dest.completeExceptionally(new WrongExpectedVersionException(streamName, expected, actual));
+                                return;
+                            } catch (NumberFormatException ex) {
+                                // Nothing to do here as it would mean the server sent
+                                // invalid expected version numbers.
+                            }
+                        }
+                    }
+
                     String leaderHost = e.getTrailers().get(Metadata.Key.of("leader-endpoint-host", Metadata.ASCII_STRING_MARSHALLER));
                     String leaderPort = e.getTrailers().get(Metadata.Key.of("leader-endpoint-port", Metadata.ASCII_STRING_MARSHALLER));
 
