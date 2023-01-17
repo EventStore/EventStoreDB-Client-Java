@@ -337,7 +337,7 @@ public class EventStoreDBClient extends EventStoreDBClientBase {
      * @return if successful, delete result.
      */
     public CompletableFuture<DeleteResult> tombstoneStream(String streamName) {
-        return this.deleteStream(streamName, DeleteStreamOptions.get());
+        return this.tombstoneStream(streamName, DeleteStreamOptions.get());
     }
 
     /**
