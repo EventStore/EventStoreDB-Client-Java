@@ -12,10 +12,11 @@ public class WrongExpectedVersionException extends RuntimeException {
 
     WrongExpectedVersionException(
             @NotNull String streamName,
-            @NotNull ExpectedRevision nextExpectedRevisionUnsigned,
+            @NotNull ExpectedRevision nextExpected,
             @NotNull ExpectedRevision actualRevision) {
+        super(String.format("Expected %s but got %s instead", nextExpected, actualRevision));
         this.streamName = streamName;
-        this.nextExpectedRevision = nextExpectedRevisionUnsigned;
+        this.nextExpectedRevision = nextExpected;
         this.actualRevision = actualRevision;
     }
 
