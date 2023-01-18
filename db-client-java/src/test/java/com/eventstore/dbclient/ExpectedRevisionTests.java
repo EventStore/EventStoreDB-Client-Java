@@ -32,4 +32,11 @@ public class ExpectedRevisionTests {
         Assertions.assertEquals(ExpectedRevision.expectedRevision(1L).hashCode(), ExpectedRevision.expectedRevision(1L).hashCode());
     }
 
+    @Test
+    public void testHumanRepresentation() {
+        Assertions.assertEquals("ExpectedAny", ExpectedRevision.any().toString());
+        Assertions.assertEquals("ExpectedStreamExists", ExpectedRevision.streamExists().toString());
+        Assertions.assertEquals("ExpectedNoStream", ExpectedRevision.noStream().toString());
+        Assertions.assertEquals("42", ExpectedRevision.expectedRevision(42).toString());
+    }
 }
