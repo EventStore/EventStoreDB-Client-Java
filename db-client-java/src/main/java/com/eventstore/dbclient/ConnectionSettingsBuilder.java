@@ -19,7 +19,7 @@ public class ConnectionSettingsBuilder {
     private boolean _tls = true;
     private boolean _tlsVerifyCert = true;
     private boolean _throwOnAppendFailure = true;
-    private EventStoreDBClientSettings.Credentials _defaultCredentials;
+    private UserCredentials _defaultCredentials;
     private LinkedList<Endpoint> _hosts = new LinkedList<>();
     private long _keepAliveTimeout = Consts.DEFAULT_KEEP_ALIVE_TIMEOUT_IN_MS;
     private long _keepAliveInterval = Consts.DEFAULT_KEEP_ALIVE_INTERVAL_IN_MS;
@@ -116,7 +116,7 @@ public class ConnectionSettingsBuilder {
      * Default credentials used to authenticate requests.
      */
     public ConnectionSettingsBuilder defaultCredentials(String username, String password) {
-        this._defaultCredentials = new EventStoreDBClientSettings.Credentials(username, password);
+        this._defaultCredentials = new UserCredentials(username, password);
         return this;
     }
 
