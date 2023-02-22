@@ -28,7 +28,7 @@ public class EventStoreDBClientSettings {
     private final boolean tls;
     private final boolean tlsVerifyCert;
     private final boolean throwOnAppendFailure;
-    private final Credentials defaultCredentials;
+    private final UserCredentials defaultCredentials;
     private final Endpoint[] hosts;
     private final long keepAliveTimeout;
     private final long keepAliveInterval;
@@ -94,10 +94,10 @@ public class EventStoreDBClientSettings {
 
     /**
      * Default credentials used to authenticate requests.
-     * @see Credentials
+     * @see UserCredentials
      * @return default credentials null if not defined
      */
-    public Credentials getDefaultCredentials() {
+    public UserCredentials getDefaultCredentials() {
         return defaultCredentials;
     }
 
@@ -144,7 +144,7 @@ public class EventStoreDBClientSettings {
             boolean tls,
             boolean tlsVerifyCert,
             boolean throwOnAppendFailure,
-            Credentials defaultCredentials,
+            UserCredentials defaultCredentials,
             Endpoint[] hosts,
             long keepAliveTimeout,
             long keepAliveInterval,
@@ -172,22 +172,5 @@ public class EventStoreDBClientSettings {
      */
     public static ConnectionSettingsBuilder builder() {
         return new ConnectionSettingsBuilder();
-    }
-
-    /**
-     * Holds credential information to authenticate requests.
-     */
-    protected static class Credentials {
-        private final String login;
-        private final String password;
-
-        Credentials(String login, String password) {
-            this.login = login;
-            this.password = password;
-        }
-
-        UserCredentials toUserCredentials() {
-            return new UserCredentials(login, password);
-        }
     }
 }

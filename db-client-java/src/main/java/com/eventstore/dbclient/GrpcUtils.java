@@ -134,7 +134,7 @@ final class GrpcUtils {
         if (options.hasUserCredentials()) {
             credentials = options.getCredentials();
         } else if (settings.getDefaultCredentials() != null) {
-            credentials = settings.getDefaultCredentials().toUserCredentials();
+            credentials = settings.getDefaultCredentials();
         }
 
         if (credentials != null) {

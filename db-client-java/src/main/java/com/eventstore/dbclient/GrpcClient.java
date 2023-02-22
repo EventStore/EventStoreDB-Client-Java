@@ -393,7 +393,7 @@ abstract class GrpcClient {
                 String creds = options.getUserCredentials();
 
                 if (creds == null && settings.getDefaultCredentials() != null) {
-                    creds = settings.getDefaultCredentials().toUserCredentials().basicAuthHeader();
+                    creds = settings.getDefaultCredentials().basicAuthHeader();
                 }
 
                 if (creds != null) {
