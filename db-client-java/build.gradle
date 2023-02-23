@@ -45,7 +45,7 @@ dependencies {
     implementation "io.grpc:grpc-netty-shaded:${grpcVersion}"
     implementation "io.grpc:grpc-stub:${grpcVersion}"
     implementation "io.grpc:grpc-protobuf:${grpcVersion}"
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.2'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.2'
     implementation 'org.slf4j:slf4j-api:1.7.36'
 
     testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
