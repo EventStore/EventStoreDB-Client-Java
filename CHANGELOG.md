@@ -12,6 +12,9 @@ All notable changes to this project will be documented in this file.
 - Fix `ConnectionSettingsBuilder` when dealing with keep-alive settings. [EventStoreDB-Client-Java#207](https://github.com/EventStore/EventStoreDB-Client-Java/pull/207)
 - Fix `tombstoneStream` overload. [EventStoreDB-Client-Java#205](https://github.com/EventStore/EventStoreDB-Client-Java/pull/205)
 
+### Changed
+- Update gRPC and protobuf version. [EventStoreDB-Client-Java#213](https://github.com/EventStore/EventStoreDB-Client-Java/pull/213)
+
 ## [4.0.0] - 2022-11-01
 
 ### Fixed
