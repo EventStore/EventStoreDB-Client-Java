@@ -3,6 +3,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [4.1.0] - 2023-02-24
+
 ### Added
 - Add specific exceptions when delete stream operation fails. [EventStoreDB-Client-Java#208](https://github.com/EventStore/EventStoreDB-Client-Java/pull/208)
 - Implement human-representation for `ExpectedVersion` types. [EventStoreDB-Client-Java#204](https://github.com/EventStore/EventStoreDB-Client-Java/pull/204)
@@ -11,6 +13,7 @@ All notable changes to this project will be documented in this file.
 - Fix server filtering sample code. [EventStoreDB-Client-Java#206](https://github.com/EventStore/EventStoreDB-Client-Java/pull/206)
 - Fix `ConnectionSettingsBuilder` when dealing with keep-alive settings. [EventStoreDB-Client-Java#207](https://github.com/EventStore/EventStoreDB-Client-Java/pull/207)
 - Fix `tombstoneStream` overload. [EventStoreDB-Client-Java#205](https://github.com/EventStore/EventStoreDB-Client-Java/pull/205)
+- No longer store credentials unprotected in memory. [EventStoreDB-Client-Java#214](https://github.com/EventStore/EventStoreDB-Client-Java/pull/214)
 
 ### Changed
 - Update gRPC and protobuf version. [EventStoreDB-Client-Java#213](https://github.com/EventStore/EventStoreDB-Client-Java/pull/213)
