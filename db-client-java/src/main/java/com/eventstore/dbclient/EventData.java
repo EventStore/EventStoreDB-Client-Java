@@ -84,7 +84,7 @@ public final class EventData {
      * @param eventData event's payload.
      * @return an event data builder.
      */
-    public static EventDataBuilder builderAsBinary(String eventType, byte[] eventData) {
+    public static EventDataBinaryBuilder builderAsBinary(String eventType, byte[] eventData) {
         return builderAsBinary(null, eventType, eventData);
     }
 
@@ -95,8 +95,7 @@ public final class EventData {
      * @param eventData event's payload.
      * @return an event data builder.
      */
-    public static EventDataBuilder builderAsBinary(UUID eventId, String eventType, byte[] eventData) {
-        return EventDataBuilder.binary(eventId, eventType, eventData);
+    public static EventDataBinaryBuilder builderAsBinary(UUID eventId, String eventType, byte[] eventData) {
+        return EventDataBinaryBuilder.binary(eventId, eventType, eventData);
     }
 }
-

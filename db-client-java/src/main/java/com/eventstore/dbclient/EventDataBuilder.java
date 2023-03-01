@@ -8,7 +8,7 @@ import java.util.UUID;
 /**
  * Utility class to help building an <i>EventData</i>.
  */
-public class EventDataBuilder {
+public class EventDataBuilder extends EventDataBinaryBuilder {
     private static final JsonMapper mapper = new JsonMapper();
     private byte[] eventData;
     private byte[] metadata;
@@ -72,34 +72,6 @@ public class EventDataBuilder {
     }
 
     /**
-     * Configures an event data builder to host a binary payload.
-     * @param eventType event's type.
-     * @param eventData event's payload.
-     * @return an event data builder.
-     */
-    public static EventDataBuilder binary(String eventType, byte[] eventData) {
-        return binary(null, eventType, eventData);
-    }
-
-    /**
-     * Configures an event data builder to host a binary payload.
-     * @param id event's id.
-     * @param eventType event's type.
-     * @param eventData event's payload.
-     * @return an event data builder.
-     */
-    public static EventDataBuilder binary(UUID id, String eventType, byte[] eventData) {
-        EventDataBuilder self = new EventDataBuilder();
-
-        self.eventData = eventData;
-        self.eventType = eventType;
-        self.isJson = false;
-        self.id = id;
-
-        return self;
-    }
-
-    /**
      * Sets event's unique identifier.
      */
     public EventDataBuilder eventId(UUID id) {
@@ -118,14 +90,6 @@ public class EventDataBuilder {
             throw new RuntimeException(e);
         }
 
-        return this;
-    }
-
-    /**
-     * Sets event's custom user metadata.
-     */
-    public EventDataBuilder metadataAsBytes(byte[] value) {
-        this.metadata = value;
         return this;
     }
 
