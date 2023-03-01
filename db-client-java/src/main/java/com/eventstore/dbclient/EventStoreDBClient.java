@@ -1,5 +1,6 @@
 package com.eventstore.dbclient;
 
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
@@ -179,8 +180,9 @@ public class EventStoreDBClient extends EventStoreDBClientBase {
             CompletableFuture<StreamMetadata> out = new CompletableFuture<>();
 
             try {
+                JsonMapper mapper = new JsonMapper();
                 @SuppressWarnings("unchecked")
-                HashMap<String, Object> source = event.getEventDataAs(HashMap.class);
+                HashMap<String, Object> source = mapper.readValue(event.getEventData(), HashMap.class);
 
                 out.complete(StreamMetadata.deserialize(source));
             } catch (Throwable e) {

@@ -35,8 +35,6 @@ public class RecordedEvent {
     @NotNull
     private final String contentType;
 
-    private static final JsonMapper mapper = new JsonMapper();
-
     RecordedEvent(
             @NotNull String eventStreamId,
             @NotNull long streamRevision,
@@ -111,7 +109,9 @@ public class RecordedEvent {
     /**
      * Deserialized representation of the event's payload. In this case, the payload is supposed to be JSON.
      */
+    @Deprecated
     public <A> A getEventDataAs(Class<A> clazz) throws IOException {
+        JsonMapper mapper = new JsonMapper();
         return mapper.readValue(this.getEventData(), clazz);
     }
 

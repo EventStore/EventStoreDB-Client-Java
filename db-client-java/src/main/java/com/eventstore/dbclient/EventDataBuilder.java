@@ -9,7 +9,6 @@ import java.util.UUID;
  * Utility class to help building an <i>EventData</i>.
  */
 public class EventDataBuilder {
-    private static final JsonMapper mapper = new JsonMapper();
     private byte[] eventData;
     private byte[] metadata;
     private String eventType;
@@ -37,8 +36,10 @@ public class EventDataBuilder {
      * @return an event data builder.
      * @param <A> a type that can be serialized in JSON.
      */
+    @Deprecated
     public static <A> EventDataBuilder json(UUID id, String eventType, A eventData) {
         try {
+            JsonMapper mapper = new JsonMapper();
             return json(id, eventType, mapper.writeValueAsBytes(eventData));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
@@ -111,8 +112,10 @@ public class EventDataBuilder {
      * Sets event's custom user metadata.
      * @param <A> an object that can be serialized in JSON.
      */
+    @Deprecated
     public <A> EventDataBuilder metadataAsJson(A value) {
         try {
+            JsonMapper mapper = new JsonMapper();
             this.metadata = mapper.writeValueAsBytes(value);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
