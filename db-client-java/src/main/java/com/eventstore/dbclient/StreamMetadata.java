@@ -177,4 +177,16 @@ public class StreamMetadata {
     public int hashCode() {
         return Objects.hash(maxAge, truncateBefore, cacheControl, acl, maxCount, customProperties);
     }
+
+    @Override
+    public String toString() {
+        return "StreamMetadata{" +
+                "maxAge=" + maxAge +
+                ", truncateBefore=" + truncateBefore +
+                ", cacheControl=" + cacheControl +
+                ", acl=" + acl +
+                ", maxCount=" + maxCount +
+                ", customProperties=" + customProperties +
+                '}';
+    }
 }

@@ -36,4 +36,9 @@ class UserStreamAcl implements Acl {
     public boolean equals(Object obj) {
         return (obj instanceof  UserStreamAcl);
     }
+
+    @Override
+    public String toString() {
+        return ACL_NAME;
+    }
 }

@@ -30,4 +30,16 @@ public class PersistentSubscriptionToStreamInfo extends PersistentSubscriptionIn
     void setStats(PersistentSubscriptionToStreamStats stats) {
         this.stats = stats;
     }
+
+    @Override
+    public String toString() {
+        return "PersistentSubscriptionToStreamInfo{" +
+                "settings=" + settings +
+                ", stats=" + stats +
+                ", eventSource='" + getEventSource() + '\'' +
+                ", groupName='" + getGroupName() + '\'' +
+                ", status='" + getStatus() + '\'' +
+                ", connections=" + getConnections() +
+                '}';
+    }
 }

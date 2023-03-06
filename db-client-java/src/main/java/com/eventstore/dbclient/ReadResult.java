@@ -46,4 +46,14 @@ public class ReadResult {
     public Position getLastAllStreamPosition() {
         return lastAllStreamPosition;
     }
+
+    @Override
+    public String toString() {
+        return "ReadResult{" +
+                "events=" + events +
+                ", firstStreamPosition=" + firstStreamPosition +
+                ", lastStreamPosition=" + lastStreamPosition +
+                ", lastAllStreamPosition=" + lastAllStreamPosition +
+                '}';
+    }
 }

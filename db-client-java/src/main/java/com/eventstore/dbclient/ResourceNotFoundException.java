@@ -5,5 +5,7 @@ package com.eventstore.dbclient;
  * through HTTP.
  */
 public class ResourceNotFoundException extends RuntimeException {
-    ResourceNotFoundException(){}
+    ResourceNotFoundException(){
+        super("Resource not found exception");
+    }
 }

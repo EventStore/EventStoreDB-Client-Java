@@ -117,4 +117,19 @@ public class PersistentSubscriptionConnectionInfo {
     void setExtraStatistics(Map<String, Long> extraStatistics) {
         this.extraStatistics = extraStatistics;
     }
+
+    @Override
+    public String toString() {
+        return "PersistentSubscriptionConnectionInfo{" +
+                "from='" + from + '\'' +
+                ", username='" + username + '\'' +
+                ", averageItemsPerSecond=" + averageItemsPerSecond +
+                ", totalItems=" + totalItems +
+                ", countSinceLastMeasurement=" + countSinceLastMeasurement +
+                ", availableSlots=" + availableSlots +
+                ", inFlightMessages=" + inFlightMessages +
+                ", connectionName='" + connectionName + '\'' +
+                ", extraStatistics=" + extraStatistics +
+                '}';
+    }
 }
