@@ -57,14 +57,26 @@ public class StreamPosition<A> {
     }
 
     /**
-     * Checks it it's a specific position and returns the value.
+     * Checks if it's a specific position and returns the value.
      */
     public A getPositionOrThrow() {
         return getPosition().get();
     }
 
-    final static class Start<A> extends StreamPosition<A> {}
-    final static class End<A> extends StreamPosition<A> {}
+    final static class Start<A> extends StreamPosition<A> {
+        @Override
+        public String toString() {
+            return "Start";
+        }
+    }
+
+    final static class End<A> extends StreamPosition<A> {
+        @Override
+        public String toString() {
+            return "End";
+        }
+    }
+
     final static class Position<A> extends StreamPosition<A> {
         private final A position;
 
@@ -74,6 +86,11 @@ public class StreamPosition<A> {
 
         public A getValue() {
             return position;
+        }
+
+        @Override
+        public String toString() {
+            return position.toString();
         }
     }
 }

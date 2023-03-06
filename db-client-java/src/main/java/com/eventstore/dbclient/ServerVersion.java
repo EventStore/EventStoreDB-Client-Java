@@ -46,4 +46,13 @@ class ServerVersion {
 
         return false;
     }
+
+    @Override
+    public String toString() {
+        return "ServerVersion{" +
+                "major=" + major +
+                ", minor=" + minor +
+                ", patch=" + patch +
+                '}';
+    }
 }

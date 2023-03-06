@@ -41,4 +41,12 @@ public class WriteResult {
     public int hashCode() {
         return Objects.hash(nextExpectedRevision, logPosition);
     }
+
+    @Override
+    public String toString() {
+        return "WriteResult{" +
+                "nextExpectedRevision=" + nextExpectedRevision +
+                ", logPosition=" + logPosition +
+                '}';
+    }
 }

@@ -210,4 +210,29 @@ public class ProjectionDetails {
     public int getWritePendingEventsAfterCheckpoint() {
         return writePendingEventsAfterCheckpoint;
     }
+
+    @Override
+    public String toString() {
+        return "ProjectionDetails{" +
+                "coreProcessingTime=" + coreProcessingTime +
+                ", version=" + version +
+                ", epoch=" + epoch +
+                ", effectiveName='" + effectiveName + '\'' +
+                ", writesInProgress=" + writesInProgress +
+                ", readsInProgress=" + readsInProgress +
+                ", partitionsCached=" + partitionsCached +
+                ", status='" + status + '\'' +
+                ", stateReason='" + stateReason + '\'' +
+                ", name='" + name + '\'' +
+                ", mode='" + mode + '\'' +
+                ", position='" + position + '\'' +
+                ", progress=" + progress +
+                ", lastCheckpoint='" + lastCheckpoint + '\'' +
+                ", eventsProcessedAfterRestart=" + eventsProcessedAfterRestart +
+                ", checkpointStatus='" + checkpointStatus + '\'' +
+                ", bufferedEvents=" + bufferedEvents +
+                ", writePendingEventsBeforeCheckpoint=" + writePendingEventsBeforeCheckpoint +
+                ", writePendingEventsAfterCheckpoint=" + writePendingEventsAfterCheckpoint +
+                '}';
+    }
 }
