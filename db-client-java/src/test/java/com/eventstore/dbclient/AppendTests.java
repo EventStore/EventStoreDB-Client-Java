@@ -1,5 +1,6 @@
 package com.eventstore.dbclient;
 
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import testcontainers.module.ESDBTests;
@@ -67,11 +68,12 @@ public class AppendTests extends ESDBTests {
 
         Assertions.assertEquals(1, result.getEvents().size());
         RecordedEvent first = result.getEvents().get(0).getEvent();
+        JsonMapper mapper = new JsonMapper();
 
         Assertions.assertEquals(streamName, first.getStreamId());
         Assertions.assertEquals(eventType, first.getEventType());
         Assertions.assertEquals(eventId, first.getEventId().toString());
         Assertions.assertArrayEquals(eventMetaData, first.getUserMetadata());
-        Assertions.assertEquals(new Foo(), first.getEventDataAs(Foo.class));
+        Assertions.assertEquals(new Foo(), mapper.readValue(first.getEventData(), Foo.class));
     }
 }
