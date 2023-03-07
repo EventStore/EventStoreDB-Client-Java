@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+- Stop using Jackson JsonMapper static instances. [EventStoreDB-Client-Java#217](https://github.com/EventStore/EventStoreDB-Client-Java/pull/217)
+
 ## [4.1.0] - 2023-02-24
 
 ### Added
