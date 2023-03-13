@@ -24,6 +24,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 abstract class GrpcClient {
+    private final static int MAX_INBOUND_MESSAGE_LENGTH = 17 * 1_024 * 1_024; // 17MiB
     protected final EventStoreDBClientSettings settings;
     protected final SslContext sslContext;
     private final Logger logger = LoggerFactory.getLogger(GrpcClient.class);
@@ -321,7 +322,8 @@ abstract class GrpcClient {
 
     protected ManagedChannel createChannel(Endpoint endpoint) {
         NettyChannelBuilder builder = NettyChannelBuilder
-                .forAddress(endpoint.getHostname(), endpoint.getPort());
+                .forAddress(endpoint.getHostname(), endpoint.getPort())
+                .maxInboundMessageSize(MAX_INBOUND_MESSAGE_LENGTH);
 
         if (this.sslContext == null) {
             builder.usePlaintext();
