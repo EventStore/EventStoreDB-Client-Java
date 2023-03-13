@@ -392,7 +392,7 @@ abstract class GrpcClient {
             try {
                 HttpURLConnection conn = (HttpURLConnection) this.endpoint.getURL(settings.isTls(), path).openConnection();
                 conn.setRequestProperty("Accept", "application/json");
-                String creds = options.getUserCredentials();
+                String creds = options.getHttpCredentialString();
 
                 if (creds == null && settings.getDefaultCredentials() != null) {
                     creds = settings.getDefaultCredentials().basicAuthHeader();
