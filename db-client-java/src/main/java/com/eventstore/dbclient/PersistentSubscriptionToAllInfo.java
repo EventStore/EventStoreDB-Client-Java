@@ -30,4 +30,16 @@ public class PersistentSubscriptionToAllInfo extends PersistentSubscriptionInfo 
     void setStats(PersistentSubscriptionToAllStats stats) {
         this.stats = stats;
     }
+
+    @Override
+    public String toString() {
+        return "PersistentSubscriptionToAllInfo{" +
+                "settings=" + settings +
+                ", stats=" + stats +
+                ", eventSource='" + getEventSource() + '\'' +
+                ", groupName='" + getGroupName() + '\'' +
+                ", status='" + getStatus() + '\'' +
+                ", connections=" + getConnections() +
+                '}';
+    }
 }

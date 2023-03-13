@@ -36,4 +36,21 @@ public class PersistentSubscriptionToStreamStats extends PersistentSubscriptionS
     void setLastKnownEventRevision(long lastKnownEventRevision) {
         this.lastKnownEventRevision = lastKnownEventRevision;
     }
+
+    @Override
+    public String toString() {
+        return "PersistentSubscriptionToStreamStats{" +
+                "lastCheckpointedEventRevision=" + lastCheckpointedEventRevision +
+                ", lastKnownEventRevision=" + lastKnownEventRevision +
+                ", averagePerSecond=" + getAveragePerSecond() +
+                ", totalItems=" + getTotalItems() +
+                ", countSinceLastMeasurement=" + getCountSinceLastMeasurement() +
+                ", readBufferCount=" + getReadBufferCount() +
+                ", liveBufferCount=" + getLiveBufferCount() +
+                ", retryBufferCount=" + getRetryBufferCount() +
+                ", totalInFlightMessages=" + getTotalInFlightMessages() +
+                ", outstandingMessagesCount=" + getOutstandingMessagesCount() +
+                ", parkedMessageCount=" + getParkedMessageCount() +
+                '}';
+    }
 }

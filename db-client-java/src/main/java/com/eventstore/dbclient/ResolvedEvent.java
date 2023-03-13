@@ -81,4 +81,13 @@ public class ResolvedEvent {
 
         return new ResolvedEvent(event, link, position);
     }
+
+    @Override
+    public String toString() {
+        return "ResolvedEvent{" +
+                "event=" + event +
+                ", link=" + link +
+                ", position=" + position +
+                '}';
+    }
 }

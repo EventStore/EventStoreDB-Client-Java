@@ -169,4 +169,15 @@ public class StreamAcl implements Acl {
     public int hashCode() {
         return Objects.hash(readRoles, writeRoles, deleteRoles, metaReadRoles, metaWriteRoles);
     }
+
+    @Override
+    public String toString() {
+        return "StreamAcl{" +
+                "readRoles=" + readRoles +
+                ", writeRoles=" + writeRoles +
+                ", deleteRoles=" + deleteRoles +
+                ", metaReadRoles=" + metaReadRoles +
+                ", metaWriteRoles=" + metaWriteRoles +
+                '}';
+    }
 }

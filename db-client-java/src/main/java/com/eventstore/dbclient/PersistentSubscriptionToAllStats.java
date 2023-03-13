@@ -38,4 +38,21 @@ public class PersistentSubscriptionToAllStats extends PersistentSubscriptionStat
     void setLastKnownEventPosition(Position lastKnownEventPosition) {
         this.lastKnownEventPosition = lastKnownEventPosition;
     }
+
+    @Override
+    public String toString() {
+        return "PersistentSubscriptionToAllStats{" +
+                "lastCheckpointedEventPosition=" + lastCheckpointedEventPosition +
+                ", lastKnownEventPosition=" + lastKnownEventPosition +
+                ", averagePerSecond=" + getAveragePerSecond() +
+                ", totalItems=" + getTotalItems() +
+                ", countSinceLastMeasurement=" + getCountSinceLastMeasurement() +
+                ", readBufferCount=" + getReadBufferCount() +
+                ", liveBufferCount=" + getLiveBufferCount() +
+                ", retryBufferCount=" + getRetryBufferCount() +
+                ", totalInFlightMessages=" + getTotalInFlightMessages() +
+                ", outstandingMessagesCount=" + getOutstandingMessagesCount() +
+                ", parkedMessageCount=" + getParkedMessageCount() +
+                '}';
+    }
 }

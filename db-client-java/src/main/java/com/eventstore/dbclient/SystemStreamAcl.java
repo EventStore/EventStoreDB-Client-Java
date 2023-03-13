@@ -36,4 +36,9 @@ class SystemStreamAcl implements Acl {
     public boolean equals(Object obj) {
         return (obj instanceof  SystemStreamAcl);
     }
+
+    @Override
+    public String toString() {
+        return ACL_NAME;
+    }
 }

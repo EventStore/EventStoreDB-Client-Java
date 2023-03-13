@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -195,5 +196,20 @@ public class RecordedEvent {
                 wireEvent.getMetadataMap(),
                 wireEvent.getData().toByteArray(),
                 wireEvent.getCustomMetadata().toByteArray());
+    }
+
+    @Override
+    public String toString() {
+        return "RecordedEvent{" +
+                "streamId='" + streamId + '\'' +
+                ", revision=" + revision +
+                ", eventId=" + eventId +
+                ", eventType='" + eventType + '\'' +
+                ", eventData=" + Arrays.toString(eventData) +
+                ", userMetadata=" + Arrays.toString(userMetadata) +
+                ", created=" + created +
+                ", position=" + position +
+                ", contentType='" + contentType + '\'' +
+                '}';
     }
 }

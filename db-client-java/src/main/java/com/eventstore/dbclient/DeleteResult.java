@@ -32,4 +32,11 @@ public class DeleteResult {
     public int hashCode() {
         return Objects.hash(logPosition);
     }
+
+    @Override
+    public String toString() {
+        return "DeleteResult{" +
+                "logPosition=" + logPosition +
+                '}';
+    }
 }

@@ -29,4 +29,24 @@ public class PersistentSubscriptionToAllSettings extends PersistentSubscriptionS
     void setStartFrom(StreamPosition<Position> startFrom) {
         this.startFrom = startFrom;
     }
+
+    @Override
+    public String toString() {
+        return "PersistentSubscriptionToAllSettings{" +
+                "startFrom=" + startFrom +
+                ", checkpointAfterInMs=" + getCheckpointAfterInMs() +
+                ", extraStatistics=" + isExtraStatistics() +
+                ", shouldResolveLinkTos=" + shouldResolveLinkTos() +
+                ", historyBufferSize=" + getHistoryBufferSize() +
+                ", liveBufferSize=" + getLiveBufferSize() +
+                ", checkpointUpperBound=" + getCheckpointUpperBound() +
+                ", maxRetryCount=" + getMaxRetryCount() +
+                ", maxSubscriberCount=" + getMaxSubscriberCount() +
+                ", messageTimeoutMs=" + getMessageTimeoutMs() +
+                ", checkpointLowerBound=" + getCheckpointLowerBound() +
+                ", readBatchSize=" + getReadBatchSize() +
+                ", namedConsumerStrategy=" + getNamedConsumerStrategy() +
+                ", resolveLinkTos=" + isResolveLinkTos() +
+                '}';
+    }
 }
