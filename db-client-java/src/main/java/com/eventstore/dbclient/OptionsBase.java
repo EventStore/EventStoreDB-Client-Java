@@ -1,9 +1,6 @@
 package com.eventstore.dbclient;
 
-import io.grpc.Metadata;
-
 class OptionsBase<T> {
-    private final ConnectionMetadata metadata;
     private Long deadline;
     private final OperationKind kind;
     private UserCredentials credentials;
@@ -14,20 +11,15 @@ class OptionsBase<T> {
     }
 
     protected OptionsBase(OperationKind kind) {
-        this.metadata = new ConnectionMetadata();
         this.kind = kind;
     }
 
-    Metadata getMetadata() {
-        return this.metadata.build();
-    }
-
     boolean hasUserCredentials() {
-        return this.metadata.hasUserCredentials();
+        return this.credentials != null;
     }
 
-    String getUserCredentials() {
-        return this.metadata.getUserCredentials();
+    String getHttpCredentialString() {
+        return this.credentials.basicAuthHeader();
     }
 
     /**
