@@ -6,6 +6,9 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Do not start discovery process on ABORT gRPC error. [EventStoreDB-Client-Java#219](https://github.com/EventStore/EventStoreDB-Client-Java/pull/219)
 
+### Added
+- Provide toString override for public types. [EventStoreDB-Client-Java#218](https://github.com/EventStore/EventStoreDB-Client-Java/pull/218)
+
 ## [4.1.1] - 2023-03-06
 
 ### Changed
