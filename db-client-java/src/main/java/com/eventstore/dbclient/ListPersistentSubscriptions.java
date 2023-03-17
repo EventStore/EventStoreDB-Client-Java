@@ -59,7 +59,7 @@ final class ListPersistentSubscriptions {
                     suffix = String.format("/%s", urlEncode(stream));
                 }
 
-                HttpURLConnection http = args.getHttpConnection(options, client.settings, String.format("/subscriptions%s", suffix));
+                HttpURLConnection http = args.getHttpConnection(options, client.getSettings(), String.format("/subscriptions%s", suffix));
                 try {
                     http.setRequestMethod("GET");
 

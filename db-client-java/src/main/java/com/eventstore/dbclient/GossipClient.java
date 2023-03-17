@@ -7,6 +7,7 @@ import io.grpc.ManagedChannel;
 import io.grpc.stub.ClientCallStreamObserver;
 import io.grpc.stub.ClientResponseObserver;
 
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -49,7 +50,7 @@ class GossipClient {
                 }
 
                 ClusterInfo.MemberState state = ClusterInfo.MemberState.fromWire(info.getState());
-                ClusterInfo.Endpoint endpoint = new ClusterInfo.Endpoint(info.getHttpEndPoint().getAddress(), info.getHttpEndPoint().getPort());
+                InetSocketAddress endpoint = new InetSocketAddress(info.getHttpEndPoint().getAddress(), info.getHttpEndPoint().getPort());
 
                 ClusterInfo.Member member = new ClusterInfo.Member(instanceId, info.getIsAlive(), state, endpoint);
                 members.add(member);

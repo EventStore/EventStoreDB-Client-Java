@@ -25,7 +25,7 @@ public class ClientLifecycleTests extends ESDBTests {
         EventStoreDBClientSettings settings = getEmptyServer().getSettings();
         EventStoreDBClient client = EventStoreDBClient.create(settings);
 
-        client.shutdown();
+        client.shutdown().get();
 
         assertTrue(client.isShutdown());
     }
@@ -33,7 +33,7 @@ public class ClientLifecycleTests extends ESDBTests {
     @Test
     public void testProvidesShutdownStatusAfterAutomaticShutdown() throws Throwable {
         EventStoreDBClientSettings settings = EventStoreDBClientSettings.builder()
-                .addHost(new Endpoint("unknown.host.name", 2113))
+                .addHost("unknown.host.name", 2113)
                 .buildConnectionSettings();
         EventStoreDBClient client = EventStoreDBClient.create(settings);
 

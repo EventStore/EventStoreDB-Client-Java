@@ -1,5 +1,7 @@
 package com.eventstore.dbclient;
 
+import java.net.InetSocketAddress;
+
 /**
  * Gathers all the settings related to a gRPC client with an EventStoreDB database.
  * <i>EventStoreDBClientSettings}</i> can only be created when parsing a connection string.
@@ -29,7 +31,7 @@ public class EventStoreDBClientSettings {
     private final boolean tlsVerifyCert;
     private final boolean throwOnAppendFailure;
     private final UserCredentials defaultCredentials;
-    private final Endpoint[] hosts;
+    private final InetSocketAddress[] hosts;
     private final long keepAliveTimeout;
     private final long keepAliveInterval;
     private final Long defaultDeadline;
@@ -103,10 +105,9 @@ public class EventStoreDBClientSettings {
 
     /**
      * The list of endpoints that the client uses to connect.
-     * @see Endpoint
      * @return hosts to connect to.
      */
-    public Endpoint[] getHosts() {
+    public InetSocketAddress[] getHosts() {
         return hosts;
     }
 
@@ -145,7 +146,7 @@ public class EventStoreDBClientSettings {
             boolean tlsVerifyCert,
             boolean throwOnAppendFailure,
             UserCredentials defaultCredentials,
-            Endpoint[] hosts,
+            InetSocketAddress[] hosts,
             long keepAliveTimeout,
             long keepAliveInterval,
             Long defaultDeadline

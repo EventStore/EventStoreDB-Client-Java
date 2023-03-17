@@ -3,8 +3,6 @@ package com.eventstore.dbclient;
 import com.eventstore.dbclient.proto.projections.Projectionmanagement;
 import com.eventstore.dbclient.proto.projections.ProjectionsGrpc;
 import com.eventstore.dbclient.proto.shared.Shared;
-import io.grpc.Metadata;
-import io.grpc.stub.MetadataUtils;
 import io.grpc.stub.StreamObserver;
 
 import java.util.ArrayList;

@@ -9,7 +9,7 @@ class CreatePersistentSubscriptionToStream extends AbstractCreatePersistentSubsc
     private final PersistentSubscriptionToStreamSettings settings;
 
     public CreatePersistentSubscriptionToStream(GrpcClient client, String stream, String group,
-                                        CreatePersistentSubscriptionToStreamOptions options) {
+                                                CreatePersistentSubscriptionToStreamOptions options) {
         super(client, group, options.getSettings(), options);
         this.stream = stream;
         this.settings = options.getSettings();

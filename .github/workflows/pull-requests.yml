@@ -39,7 +39,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-         version: [ 20.10.5-buster-slim, 21.10.1-buster-slim, ci ]
+         version: [ previous-lts, lts, ci ]
 
     runs-on: ubuntu-latest
     steps:

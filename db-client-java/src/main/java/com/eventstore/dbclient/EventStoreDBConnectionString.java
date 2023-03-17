@@ -159,8 +159,7 @@ public final class EventStoreDBConnectionString {
 
             try {
                 int port = parseInt(rawPort);
-                Endpoint host = new Endpoint(address, port);
-                this.settings.addHost(host);
+                this.settings.addHost(address, port);
             } catch (NumberFormatException e) {
                 throw new ConnectionStringParsingException(
                         this.connectionString,

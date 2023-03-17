@@ -4,7 +4,7 @@ class ServerInfo {
     private final ServerVersion version;
     private final int features;
 
-    public ServerInfo(ServerVersion version, int features) {
+    ServerInfo(ServerVersion version, int features) {
         this.version = version;
         this.features = features;
     }

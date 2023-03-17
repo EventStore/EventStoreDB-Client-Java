@@ -106,9 +106,9 @@ public class EventStoreDB extends GenericContainer<EventStoreDB> {
 
     public void shutdownClients() {
         try {
-            client.shutdown();
-            persistentSubscriptionsClient.shutdown();
-            projectionClient.shutdown();
+            client.shutdown().get();
+            persistentSubscriptionsClient.shutdown().get();
+            projectionClient.shutdown().get();
         } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
         }

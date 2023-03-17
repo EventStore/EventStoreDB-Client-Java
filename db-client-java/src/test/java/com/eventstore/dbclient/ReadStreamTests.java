@@ -1,7 +1,6 @@
 package com.eventstore.dbclient;
 
 import io.reactivex.rxjava3.core.Flowable;
-import org.junit.Ignore;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import testcontainers.module.ESDBTests;

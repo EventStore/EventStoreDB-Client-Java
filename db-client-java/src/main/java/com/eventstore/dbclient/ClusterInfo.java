@@ -31,7 +31,7 @@ class ClusterInfo {
             }
             boolean isAlive = member.getIsAlive();
             MemberState state = MemberState.fromWire(member.getState());
-            Endpoint httpEndpoint = new Endpoint(member.getHttpEndPoint().getAddress(), member.getHttpEndPoint().getPort());
+            InetSocketAddress httpEndpoint = new InetSocketAddress(member.getHttpEndPoint().getAddress(), member.getHttpEndPoint().getPort());
 
             members.add(new Member(instanceId, isAlive, state, httpEndpoint));
         }
@@ -81,35 +81,13 @@ class ClusterInfo {
         }
     }
 
-    static class Endpoint {
-        private final String address;
-        private final int port;
-
-        Endpoint(String address, int port) {
-            this.address = address;
-            this.port = port;
-        }
-
-        InetSocketAddress toInetSocketAddress() {
-            return new InetSocketAddress(this.address, this.port);
-        }
-
-        public String getAddress() {
-            return address;
-        }
-
-        public int getPort() {
-            return port;
-        }
-    }
-
     static class Member {
         private final UUID instanceId;
         private final boolean isAlive;
         private final MemberState state;
-        private final Endpoint httpEndpoint;
+        private final InetSocketAddress httpEndpoint;
 
-        Member(UUID instanceId, boolean isAlive, MemberState state, Endpoint httpEndpoint) {
+        Member(UUID instanceId, boolean isAlive, MemberState state, InetSocketAddress httpEndpoint) {
             this.instanceId = instanceId;
             this.isAlive = isAlive;
             this.state = state;
@@ -128,7 +106,7 @@ class ClusterInfo {
             return state;
         }
 
-        public Endpoint getHttpEndpoint() {
+        public InetSocketAddress getHttpEndpoint() {
             return httpEndpoint;
         }
     }
