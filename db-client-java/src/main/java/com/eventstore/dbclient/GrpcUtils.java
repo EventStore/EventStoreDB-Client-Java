@@ -10,7 +10,6 @@ import io.grpc.stub.*;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 
 final class GrpcUtils {
     static public <ReqT, RespT> ClientResponseObserver<ReqT, RespT> convertSingleResponse(
@@ -62,8 +61,8 @@ final class GrpcUtils {
                             }
 
                             try {
-                                ExpectedRevision expected = ExpectedRevision.fromRaw(Long.parseLong(expectedStr));
-                                ExpectedRevision actual = ExpectedRevision.fromRaw(Long.parseLong(actualStr));
+                                ExpectedRevision expected = ExpectedRevision.fromRawLong(Long.parseLong(expectedStr));
+                                ExpectedRevision actual = ExpectedRevision.fromRawLong(Long.parseLong(actualStr));
 
                                 dest.completeExceptionally(new WrongExpectedVersionException(streamName, expected, actual));
                                 return;
