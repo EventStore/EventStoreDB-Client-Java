@@ -39,4 +39,21 @@ public class ExpectedRevisionTests {
         Assertions.assertEquals("ExpectedNoStream", ExpectedRevision.noStream().toString());
         Assertions.assertEquals("42", ExpectedRevision.expectedRevision(42).toString());
     }
+
+    @Test
+    public void testRawLong() {
+        Assertions.assertEquals(-2, ExpectedRevision.any().toRawLong());
+        Assertions.assertEquals(-1, ExpectedRevision.noStream().toRawLong());
+        Assertions.assertEquals(-4, ExpectedRevision.streamExists().toRawLong());
+        Assertions.assertEquals(42, ExpectedRevision.expectedRevision(42).toRawLong());
+    }
+
+    @Test
+    public void testRawLongConversion() {
+        Assertions.assertEquals(ExpectedRevision.fromRawLong(-2), ExpectedRevision.any());
+        Assertions.assertEquals(ExpectedRevision.fromRawLong(-1), ExpectedRevision.noStream());
+        Assertions.assertEquals(ExpectedRevision.fromRawLong(-4), ExpectedRevision.streamExists());
+        Assertions.assertEquals(ExpectedRevision.fromRawLong(42), ExpectedRevision.expectedRevision(42));
+        Assertions.assertThrowsExactly(RuntimeException.class, () -> ExpectedRevision.fromRawLong(-5));
+    }
 }

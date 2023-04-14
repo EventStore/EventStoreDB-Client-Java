@@ -43,13 +43,16 @@ public abstract class ExpectedRevision {
         return new SpecificExpectedRevision(revision);
     }
 
-    static ExpectedRevision fromRaw(long revision) {
+    public static ExpectedRevision fromRawLong(long revision) {
         if (revision == -1)
             return ExpectedRevision.noStream();
         if (revision == -2)
             return ExpectedRevision.any();
         if (revision == -4)
             return ExpectedRevision.streamExists();
+
+        if (revision < 0)
+            throw new RuntimeException(String.format("Invalid expected revision long representation '%s'", revision));
 
         return ExpectedRevision.expectedRevision(revision);
     }
@@ -59,6 +62,21 @@ public abstract class ExpectedRevision {
     abstract StreamsOuterClass.AppendReq.Options.Builder applyOnWire(StreamsOuterClass.AppendReq.Options.Builder options);
     abstract StreamsOuterClass.DeleteReq.Options.Builder applyOnWire(StreamsOuterClass.DeleteReq.Options.Builder options);
     abstract StreamsOuterClass.TombstoneReq.Options.Builder applyOnWire(StreamsOuterClass.TombstoneReq.Options.Builder options);
+
+    public long toRawLong() {
+        if (this instanceof  NoStreamExpectedRevision)
+            return -1;
+
+        if (this instanceof AnyExpectedRevision)
+            return -2;
+
+        if (this instanceof StreamExistsExpectedRevision)
+            return -4;
+
+        SpecificExpectedRevision revision = (SpecificExpectedRevision) this;
+
+        return revision.version;
+    }
 
     @Override
     public boolean equals(Object o) {
