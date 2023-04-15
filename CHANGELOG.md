@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - Provide toString override for public types. [EventStoreDB-Client-Java#218](https://github.com/EventStore/EventStoreDB-Client-Java/pull/218)
+- Implement `ExpectedRevision` raw long representation. [EventStoreDB-Client-Java#230](https://github.com/EventStore/EventStoreDB-Client-Java/pull/230)
 
 ### Changed
 - Increase max inbound message length. [EventStoreDB-Client-Java#222](https://github.com/EventStore/EventStoreDB-Client-Java/pull/222)
