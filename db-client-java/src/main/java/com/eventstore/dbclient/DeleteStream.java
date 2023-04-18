@@ -5,7 +5,6 @@ import com.eventstore.dbclient.proto.streams.StreamsGrpc;
 import com.eventstore.dbclient.proto.streams.StreamsOuterClass;
 import com.google.protobuf.ByteString;
 import io.grpc.Metadata;
-import io.grpc.stub.MetadataUtils;
 
 import java.util.concurrent.CompletableFuture;
 

@@ -2,8 +2,6 @@ package com.eventstore.dbclient;
 
 import com.eventstore.dbclient.proto.projections.ProjectionsGrpc;
 import com.eventstore.dbclient.proto.shared.Shared;
-import io.grpc.Metadata;
-import io.grpc.stub.MetadataUtils;
 
 import java.util.concurrent.CompletableFuture;
 

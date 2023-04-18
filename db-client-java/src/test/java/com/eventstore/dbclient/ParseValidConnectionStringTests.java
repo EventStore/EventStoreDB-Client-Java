@@ -1,5 +1,6 @@
 package com.eventstore.dbclient;
 
+import java.net.InetSocketAddress;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -119,7 +120,7 @@ public class ParseValidConnectionStringTests {
 
         Assertions.assertEquals(settings.getHosts().length, other.getHosts().length);
         IntStream.range(0, settings.getHosts().length).forEach((i) -> {
-            Assertions.assertEquals(settings.getHosts()[i].getHostname(), other.getHosts()[i].getHostname());
+            Assertions.assertEquals(settings.getHosts()[i].getHostName(), other.getHosts()[i].getHostName());
             Assertions.assertEquals(settings.getHosts()[i].getPort(), other.getHosts()[i].getPort());
         });
     }
@@ -173,7 +174,7 @@ public class ParseValidConnectionStringTests {
         }
 
         tree.get("hosts").elements().forEachRemaining((host) -> {
-            builder.addHost(new Endpoint(host.get("address").asText(), host.get("port").asInt()));
+            builder.addHost(new InetSocketAddress(host.get("address").asText(), host.get("port").asInt()));
         });
 
 

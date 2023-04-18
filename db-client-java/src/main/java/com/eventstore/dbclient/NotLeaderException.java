@@ -1,18 +1,20 @@
 package com.eventstore.dbclient;
 
+import java.net.InetSocketAddress;
+
 /**
  * When a request needing a leader node was executed on a follower node.
  * In this case the connection will reconnect automatically to the leader node. However, the request causing that
  * exception needs to be retried if the user really wants it to be carried out.
  */
 public class NotLeaderException extends Exception {
-    private Endpoint leaderEndpoint;
+    private final InetSocketAddress leaderEndpoint;
 
     NotLeaderException(String host, int port) {
-        leaderEndpoint = new Endpoint(host, port);
+        leaderEndpoint = new InetSocketAddress(host, port);
     }
 
-    public Endpoint getLeaderEndpoint() {
+    public InetSocketAddress getLeaderEndpoint() {
         return leaderEndpoint;
     }
 }

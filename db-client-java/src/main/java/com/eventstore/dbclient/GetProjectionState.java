@@ -7,8 +7,6 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.google.protobuf.util.JsonFormat;
-import io.grpc.Metadata;
-import io.grpc.stub.MetadataUtils;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;

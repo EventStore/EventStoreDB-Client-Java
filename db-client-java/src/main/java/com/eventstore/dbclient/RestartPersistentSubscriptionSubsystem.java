@@ -2,7 +2,6 @@ package com.eventstore.dbclient;
 
 import com.eventstore.dbclient.proto.persistentsubscriptions.PersistentSubscriptionsGrpc;
 import com.eventstore.dbclient.proto.shared.Shared;
-import io.grpc.stub.MetadataUtils;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -22,7 +21,7 @@ class RestartPersistentSubscriptionSubsystem {
 
                 stub.restartSubsystem(Shared.Empty.getDefaultInstance(), GrpcUtils.convertSingleResponse(result, resp -> 42));
             } else {
-                HttpURLConnection http = args.getHttpConnection(options, client.settings, "/subscriptions/restart");
+                HttpURLConnection http = args.getHttpConnection(options, client.getSettings(), "/subscriptions/restart");
 
                 try {
                     http.setDoOutput(true);

@@ -54,7 +54,7 @@ final class ReplayParkedMessages {
                    query = "";
                }
 
-               HttpURLConnection http = args.getHttpConnection(options, client.settings, String.format("/subscriptions/%s/%s/replayParked%s", urlEncode(stream), urlEncode(groupName), query));
+               HttpURLConnection http = args.getHttpConnection(options, client.getSettings(), String.format("/subscriptions/%s/%s/replayParked%s", urlEncode(stream), urlEncode(groupName), query));
 
                try {
                    http.setDoOutput(true);

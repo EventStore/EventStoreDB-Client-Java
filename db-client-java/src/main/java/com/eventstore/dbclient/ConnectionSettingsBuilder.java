@@ -4,6 +4,7 @@ package com.eventstore.dbclient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.InetSocketAddress;
 import java.util.LinkedList;
 
 /**
@@ -20,7 +21,7 @@ public class ConnectionSettingsBuilder {
     private boolean _tlsVerifyCert = true;
     private boolean _throwOnAppendFailure = true;
     private UserCredentials _defaultCredentials;
-    private LinkedList<Endpoint> _hosts = new LinkedList<>();
+    private LinkedList<InetSocketAddress> _hosts = new LinkedList<>();
     private long _keepAliveTimeout = Consts.DEFAULT_KEEP_ALIVE_TIMEOUT_IN_MS;
     private long _keepAliveInterval = Consts.DEFAULT_KEEP_ALIVE_INTERVAL_IN_MS;
     private Long _defaultDeadline = null;
@@ -42,7 +43,7 @@ public class ConnectionSettingsBuilder {
                 _tlsVerifyCert,
                 _throwOnAppendFailure,
                 _defaultCredentials,
-                _hosts.toArray(new Endpoint[_hosts.size()]),
+                _hosts.toArray(new InetSocketAddress[0]),
                 _keepAliveTimeout,
                 _keepAliveInterval,
                 _defaultDeadline);
@@ -122,9 +123,15 @@ public class ConnectionSettingsBuilder {
 
     /**
      * Adds an endpoint the client will use to connect.
-     * @see Endpoint
      */
-    public ConnectionSettingsBuilder addHost(Endpoint host) {
+    public ConnectionSettingsBuilder addHost(String host, int port) {
+        return addHost(new InetSocketAddress(host, port));
+    }
+
+    /**
+     * Adds an endpoint the client will use to connect.
+     */
+    public ConnectionSettingsBuilder addHost(InetSocketAddress host) {
         this._hosts.push(host);
         return this;
     }

@@ -66,7 +66,7 @@ final class GetPersistentSubscriptionInfo {
                     result.complete(opt);
                 });
             } else {
-                HttpURLConnection http = args.getHttpConnection(options, client.settings, String.format("/subscriptions/%s/%s/info", urlEncode(stream), urlEncode(groupName)));
+                HttpURLConnection http = args.getHttpConnection(options, client.getSettings(), String.format("/subscriptions/%s/%s/info", urlEncode(stream), urlEncode(groupName)));
                 try {
                     http.setRequestMethod("GET");
                     int code = http.getResponseCode();
