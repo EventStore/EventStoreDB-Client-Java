@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - Increase max inbound message length. [EventStoreDB-Client-Java#222](https://github.com/EventStore/EventStoreDB-Client-Java/pull/222)
+- Improve internal gRPC connection management for better error propagation. [EventStoreDB-Client-Java#226](https://github.com/EventStore/EventStoreDB-Client-Java/pull/226)
 
 ## [4.1.1] - 2023-03-06
 
