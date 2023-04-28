@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+- Improve internal gRPC connection management for better error propagation. [EventStoreDB-Client-Java#226](https://github.com/EventStore/EventStoreDB-Client-Java/pull/226)
+
+## [4.2.0] - 2023-04-27
+
 ### Fixed
 - Do not start discovery process on ABORT gRPC error. [EventStoreDB-Client-Java#219](https://github.com/EventStore/EventStoreDB-Client-Java/pull/219)
 - Fix OptionBase authentication code. [EventStoreDB-Client-Java#221](https://github.com/EventStore/EventStoreDB-Client-Java/pull/221)
@@ -13,7 +18,6 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - Increase max inbound message length. [EventStoreDB-Client-Java#222](https://github.com/EventStore/EventStoreDB-Client-Java/pull/222)
-- Improve internal gRPC connection management for better error propagation. [EventStoreDB-Client-Java#226](https://github.com/EventStore/EventStoreDB-Client-Java/pull/226)
 
 ## [4.1.1] - 2023-03-06
 
