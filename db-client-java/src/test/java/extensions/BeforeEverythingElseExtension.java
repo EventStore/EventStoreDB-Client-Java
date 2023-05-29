@@ -11,6 +11,7 @@ public class BeforeEverythingElseExtension implements BeforeAllCallback, Extensi
     private static boolean started = false;
     private static EventStoreDB EMPTY_SERVER;
     private static EventStoreDB POPULATED_SERVER;
+    private static EventStoreDB SECURE_EMPTY_SERVER;
 
     final static Lock lock = new ReentrantLock();
 
@@ -19,8 +20,9 @@ public class BeforeEverythingElseExtension implements BeforeAllCallback, Extensi
         lock.lock();
         if (!started) {
             started = true;
-            EMPTY_SERVER = new EventStoreDB(true);
-            POPULATED_SERVER = new EventStoreDB(false);
+            EMPTY_SERVER = new EventStoreDB(true, true);
+            SECURE_EMPTY_SERVER = new EventStoreDB(true, false);
+            POPULATED_SERVER = new EventStoreDB(false, true);
             // Your "before all tests" startup logic goes here
             // The following line registers a callback hook when the root test context is
             // shut down
@@ -36,8 +38,10 @@ public class BeforeEverythingElseExtension implements BeforeAllCallback, Extensi
     public void close() throws Throwable {
         EMPTY_SERVER.shutdownClients();
         POPULATED_SERVER.shutdownClients();
+        SECURE_EMPTY_SERVER.shutdownClients();
         EMPTY_SERVER.stop();
         POPULATED_SERVER.stop();
+        SECURE_EMPTY_SERVER.stop();
     }
 
     public static EventStoreDB GetEmptyServer() {
@@ -46,5 +50,9 @@ public class BeforeEverythingElseExtension implements BeforeAllCallback, Extensi
 
     public static EventStoreDB GetPopulatedServer() {
         return POPULATED_SERVER;
+    }
+
+    public static EventStoreDB GetSecureServer() {
+        return SECURE_EMPTY_SERVER;
     }
 }

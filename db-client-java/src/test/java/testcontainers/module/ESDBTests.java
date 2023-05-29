@@ -21,6 +21,10 @@ public class ESDBTests {
         return BeforeEverythingElseExtension.GetPopulatedServer();
     }
 
+    public static EventStoreDB getSecureServer() {
+        return BeforeEverythingElseExtension.GetSecureServer();
+    }
+
     protected String generateName() {
         return String.format("%s-%s", faker.pokemon().name(), faker.pokemon().name());
     }

@@ -8,6 +8,8 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
+import static org.testcontainers.containers.BindMode.READ_WRITE;
+
 public class EventStoreDB extends GenericContainer<EventStoreDB> {
     public static final String NAME;
     public static final String IMAGE;
@@ -41,18 +43,26 @@ public class EventStoreDB extends GenericContainer<EventStoreDB> {
     }
 
     private final EventStoreDBClientSettings settings;
+    private final EventStoreDBClientSettings secureSettings;
     private final EventStoreDBClient client;
     private final EventStoreDBPersistentSubscriptionsClient persistentSubscriptionsClient;
+    private final EventStoreDBUserManagementClient userManagementClient;
     private final EventStoreDBProjectionManagementClient projectionClient;
 
-    public EventStoreDB(boolean emptyDatabase) {
+    public EventStoreDB(boolean emptyDatabase, boolean insecure) {
         super(getImageName());
 
         addExposedPorts(1113, 2113);
-
         withEnv("EVENTSTORE_RUN_PROJECTIONS", "ALL");
 
-        withEnv("EVENTSTORE_INSECURE", "true");
+        if (insecure) {
+            withEnv("EVENTSTORE_INSECURE", "true");
+        } else {
+            withEnv("EVENTSTORE_CERTIFICATE_FILE", "/etc/eventstore/certs/node/node.crt");
+            withEnv("EVENTSTORE_CERTIFICATE_PRIVATE_KEY_FILE", "/etc/eventstore/certs/node/node.key");
+            withEnv("EVENTSTORE_TRUSTED_ROOT_CERTIFICATES_PATH", "/etc/eventstore/certs/ca");
+            withClasspathResourceMapping("certs", "/etc/eventstore/certs", READ_WRITE);
+        }
         if (!emptyDatabase) {
             withEnv("EVENTSTORE_MEM_DB", "false");
             withEnv("EVENTSTORE_DB", "/data/integration-tests");
@@ -64,13 +74,19 @@ public class EventStoreDB extends GenericContainer<EventStoreDB> {
         start();
 
         settings = getEventStoreDBClientSettings();
+        secureSettings = getSecureEventStoreDBClientSettings();
         client = EventStoreDBClient.create(settings);
         persistentSubscriptionsClient = EventStoreDBPersistentSubscriptionsClient.create(settings);
         projectionClient = EventStoreDBProjectionManagementClient.create(settings);
+        userManagementClient = EventStoreDBUserManagementClient.create(secureSettings);
     }
 
     private EventStoreDBClientSettings getEventStoreDBClientSettings() {
         return EventStoreDBConnectionString.parseOrThrow(getConnectionString());
+    }
+
+    private EventStoreDBClientSettings getSecureEventStoreDBClientSettings() {
+        return EventStoreDBConnectionString.parseOrThrow(getSecureConnectionString());
     }
 
     private String getConnectionString() {
@@ -78,6 +94,12 @@ public class EventStoreDB extends GenericContainer<EventStoreDB> {
         final int port = getMappedPort(DB_HTTP_PORT);
 
         return String.format("esdb://%s:%d?tls=false&defaultdeadline=60000", address, port);
+    }
+
+    private String getSecureConnectionString() {
+        final String address = getContainerIpAddress();
+        final int port = getMappedPort(DB_HTTP_PORT);
+        return String.format("esdb://admin:changeit@%s:%d?TlsVerifyCert=false&defaultdeadline=60000", address, port);
     }
 
     public EventStoreDBClientSettings getSettings() {
@@ -100,6 +122,10 @@ public class EventStoreDB extends GenericContainer<EventStoreDB> {
         return persistentSubscriptionsClient;
     }
 
+    public EventStoreDBUserManagementClient getUserManagementClient() {
+        return userManagementClient;
+    }
+
     public EventStoreDBProjectionManagementClient getProjectionClient() {
         return projectionClient;
     }
@@ -109,6 +135,7 @@ public class EventStoreDB extends GenericContainer<EventStoreDB> {
             client.shutdown().get();
             persistentSubscriptionsClient.shutdown().get();
             projectionClient.shutdown().get();
+            userManagementClient.shutdown().get();
         } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
         }

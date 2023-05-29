@@ -73,7 +73,7 @@ class GrpcClient {
             }
 
             action.apply(args).whenComplete((outcome, error) -> {
-                if (outcome != null) {
+                if (error == null) {
                     result.complete(outcome);
                     return;
                 }
