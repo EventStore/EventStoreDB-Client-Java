@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [4.3.0] - 2023-07-03
+### Added
+- Support user-provided gRPC client interceptors. [EventStoreDB-Client-Java#233](https://github.com/EventStore/EventStoreDB-Client-Java/pull/233)
+
 ## [4.2.0] - 2023-04-27
 ### Fixed
 - Do not start discovery process on ABORT gRPC error. [EventStoreDB-Client-Java#219](https://github.com/EventStore/EventStoreDB-Client-Java/pull/219)
