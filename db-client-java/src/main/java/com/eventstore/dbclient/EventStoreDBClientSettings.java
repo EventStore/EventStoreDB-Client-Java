@@ -1,6 +1,9 @@
 package com.eventstore.dbclient;
 
+import io.grpc.ClientInterceptor;
+
 import java.net.InetSocketAddress;
+import java.util.List;
 
 /**
  * Gathers all the settings related to a gRPC client with an EventStoreDB database.
@@ -35,6 +38,7 @@ public class EventStoreDBClientSettings {
     private final long keepAliveTimeout;
     private final long keepAliveInterval;
     private final Long defaultDeadline;
+    private final List<ClientInterceptor> interceptors;
 
     /**
      * If the dns discovery is enabled.
@@ -136,6 +140,14 @@ public class EventStoreDBClientSettings {
         return defaultDeadline;
     }
 
+    /**
+     * Registered gRPC interceptors.
+     * @return list of registered gRPC client.
+     */
+    public List<ClientInterceptor> getInterceptors() {
+        return interceptors;
+    }
+
     EventStoreDBClientSettings(
             boolean dnsDiscover,
             int maxDiscoverAttempts,
@@ -149,7 +161,8 @@ public class EventStoreDBClientSettings {
             InetSocketAddress[] hosts,
             long keepAliveTimeout,
             long keepAliveInterval,
-            Long defaultDeadline
+            Long defaultDeadline,
+            List<ClientInterceptor> interceptors
     ) {
         this.dnsDiscover = dnsDiscover;
         this.maxDiscoverAttempts = maxDiscoverAttempts;
@@ -164,6 +177,7 @@ public class EventStoreDBClientSettings {
         this.keepAliveTimeout = keepAliveTimeout;
         this.keepAliveInterval = keepAliveInterval;
         this.defaultDeadline = defaultDeadline;
+        this.interceptors = interceptors;
     }
 
     /**

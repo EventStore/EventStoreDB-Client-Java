@@ -1,11 +1,14 @@
 package com.eventstore.dbclient;
 
 
+import io.grpc.ClientInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Utility to create client settings programmatically.
@@ -25,6 +28,7 @@ public class ConnectionSettingsBuilder {
     private long _keepAliveTimeout = Consts.DEFAULT_KEEP_ALIVE_TIMEOUT_IN_MS;
     private long _keepAliveInterval = Consts.DEFAULT_KEEP_ALIVE_INTERVAL_IN_MS;
     private Long _defaultDeadline = null;
+    private List<ClientInterceptor> _interceptors = new ArrayList<>();
 
     ConnectionSettingsBuilder() {}
 
@@ -46,7 +50,8 @@ public class ConnectionSettingsBuilder {
                 _hosts.toArray(new InetSocketAddress[0]),
                 _keepAliveTimeout,
                 _keepAliveInterval,
-                _defaultDeadline);
+                _defaultDeadline,
+                _interceptors);
     }
 
     /**
@@ -173,6 +178,15 @@ public class ConnectionSettingsBuilder {
      */
     public ConnectionSettingsBuilder defaultDeadline(long value) {
         this._defaultDeadline = value;
+        return this;
+    }
+
+    /**
+     * Register a gRPC interceptor every time a new gRPC channel is created.
+     * @param interceptor
+     */
+    public ConnectionSettingsBuilder addInterceptor(ClientInterceptor interceptor) {
+        this._interceptors.add(interceptor);
         return this;
     }
 }
