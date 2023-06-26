@@ -59,7 +59,8 @@ class ConnectionState {
 
         NettyChannelBuilder builder = NettyChannelBuilder
                 .forAddress(addr)
-                .maxInboundMessageSize(MAX_INBOUND_MESSAGE_LENGTH);
+                .maxInboundMessageSize(MAX_INBOUND_MESSAGE_LENGTH)
+                .intercept(settings.getInterceptors());
 
         if (this.sslContext == null) {
             builder.usePlaintext();
