@@ -6,6 +6,9 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Improve internal gRPC connection management for better error propagation. [EventStoreDB-Client-Java#226](https://github.com/EventStore/EventStoreDB-Client-Java/pull/226)
 
+### Added
+- Support user-provided gRPC client interceptors. [EventStoreDB-Client-Java#233](https://github.com/EventStore/EventStoreDB-Client-Java/pull/233)
+
 ## [4.2.0] - 2023-04-27
 
 ### Fixed
