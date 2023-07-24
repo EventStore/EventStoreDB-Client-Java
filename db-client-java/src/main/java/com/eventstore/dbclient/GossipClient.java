@@ -19,9 +19,9 @@ class GossipClient {
     private final ManagedChannel _channel;
     private final GossipGrpc.GossipStub _stub;
 
-    public GossipClient(ManagedChannel channel) {
+    public GossipClient(EventStoreDBClientSettings settings, ManagedChannel channel) {
         _channel = channel;
-        _stub = GossipGrpc.newStub(_channel);
+        _stub = GrpcUtils.configureStub(GossipGrpc.newStub(_channel), settings, new GossipOption());
     }
 
     public void shutdown() {
@@ -88,4 +88,6 @@ class GossipClient {
             }
         };
     }
+
+    class GossipOption extends OptionsBase<Void> {}
 }

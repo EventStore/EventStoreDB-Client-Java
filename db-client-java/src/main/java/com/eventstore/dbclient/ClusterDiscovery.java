@@ -27,7 +27,7 @@ class ClusterDiscovery implements Discovery {
 
     private static CompletableFuture<Optional<ClusterInfo.Member>> attemptDiscovery(NodeSelector selector, ConnectionState factory, InetSocketAddress seed) {
         factory.connect(seed);
-        GossipClient client = new GossipClient(factory.getCurrentChannel());
+        GossipClient client = new GossipClient(factory.getSettings(), factory.getCurrentChannel());
         return client.read().thenApply(info -> {
             if (factory.getLastConnectedEndpoint() != null) {
                 info.getMembers().removeIf(member -> member.getHttpEndpoint().equals(factory.getLastConnectedEndpoint()));
