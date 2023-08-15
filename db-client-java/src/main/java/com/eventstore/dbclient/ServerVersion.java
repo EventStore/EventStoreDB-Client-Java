@@ -1,5 +1,5 @@
 package com.eventstore.dbclient;
-class ServerVersion {
+public class ServerVersion {
     private final int major;
     private final int minor;
     private final int patch;
@@ -45,6 +45,17 @@ class ServerVersion {
             return cmp < 0;
 
         return false;
+    }
+
+    public boolean isLessOrEqualThan(int major, int minor) {
+        int cmp;
+        if ((cmp = Integer.compare(this.major, major)) != 0)
+            return cmp < 0;
+
+        if ((cmp = Integer.compare(this.minor, minor)) != 0)
+            return cmp < 0;
+
+        return true;
     }
 
     @Override

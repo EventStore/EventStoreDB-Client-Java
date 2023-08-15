@@ -21,7 +21,7 @@ class GossipClient {
 
     public GossipClient(EventStoreDBClientSettings settings, ManagedChannel channel) {
         _channel = channel;
-        _stub = GrpcUtils.configureStub(GossipGrpc.newStub(_channel), settings, new GossipOption());
+        _stub = GrpcUtils.configureStub(GossipGrpc.newStub(_channel), settings, new GossipOption(), (long)settings.getGossipTimeout());
     }
 
     public void shutdown() {

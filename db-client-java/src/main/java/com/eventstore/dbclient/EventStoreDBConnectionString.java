@@ -175,7 +175,7 @@ public final class EventStoreDBConnectionString {
         return this.parseSearchParams(true);
     }
 
-    static Optional<NodePreference> parseNodePreference(String value) {
+    public static Optional<NodePreference> parseNodePreference(String value) {
         switch (value.toLowerCase()) {
             case "leader":
                 return Optional.of(NodePreference.LEADER);

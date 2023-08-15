@@ -8,11 +8,14 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ClientCallStreamObserver;
 import io.grpc.stub.ClientResponseObserver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.validation.constraints.NotNull;
 import java.util.concurrent.CompletableFuture;
 
 abstract class AbstractRegularSubscription {
+    private static Logger logger = LoggerFactory.getLogger(AbstractRegularSubscription.class);
     protected static final StreamsOuterClass.ReadReq.Options.Builder defaultReadOptions;
     protected static final StreamsOuterClass.ReadReq.Options.Builder defaultSubscribeOptions;
 
@@ -86,9 +89,9 @@ abstract class AbstractRegularSubscription {
                     }
 
                     if (_confirmed && !readResp.hasEvent()) {
-                        onError(new IllegalStateException(
+                        logger.warn(
                                 String.format("Confirmed subscription %s received non-{event,checkpoint} variant",
-                                        _subscription.getSubscriptionId())));
+                                        _subscription.getSubscriptionId()));
                         return;
                     }
 

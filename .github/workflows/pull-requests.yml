@@ -6,61 +6,40 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        java: ["8", "11", "14"]
+        java: [8, 11, 17]
     runs-on: ubuntu-latest
 
     steps:
       - name: Check Out Sources
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3
 
-      - name: Install JDK ${{ matrix.java }}
-        uses: actions/setup-java@v1
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v3
         with:
           java-version: ${{ matrix.java }}
-      - name: Confirm Java Version
-        shell: bash
-        run: javac -version
+          distribution: 'temurin'
 
-      - name: Cache Gradle packages
-        uses: actions/cache@v2
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
         with:
-          path: ~/.gradle/caches
-          key: ubuntu-latest-${{ matrix.java }}-gradle-${{ hashFiles('**/*.gradle') }}
-          restore-keys: ubuntu-latest-${{ matrix.java }}-gradle
+          gradle-version: 7.4
 
-      - name: Build with JDK ${{ matrix.java }}
-        uses: eskatos/gradle-command-action@v1
-        with:
-          arguments: compileJava
+      - name: Build
+        run: ./gradlew compileTest
 
-  test:
-    name: Run tests
+      # Tests that do not require a database connection.
+      - name: Misc tests
+        run: ./gradlew ci --tests MiscTests
+
+  tests:
     needs: build
+    name: Tests
+
     strategy:
       fail-fast: false
       matrix:
-         version: [ previous-lts, lts, ci ]
+        version: [previous-lts, lts, latest, ci]
 
-    runs-on: ubuntu-latest
-    steps:
-     - name: Check Out Sources
-       uses: actions/checkout@v1
-
-     - name: Install JDK 8
-       uses: actions/setup-java@v1
-       with:
-         java-version: 8
-
-     - name: Login to GitHub Container Registry
-       uses: docker/login-action@v1
-       with:
-         registry: ghcr.io
-         username: ${{ github.actor }}
-         password: ${{ secrets.GITHUB_TOKEN }}
-
-     - name: Test on EventStoreDB version ${{ matrix.version }}
-       uses: eskatos/gradle-command-action@v1
-       env:
-         EVENTSTORE_DOCKER_TAG_ENV: ${{ matrix.version }}
-       with:
-         arguments: test :db-client-java:test --debug
+    uses: ./.github/workflows/tests.yml
+    with:
+      esdb_version: ${{ matrix.version }}

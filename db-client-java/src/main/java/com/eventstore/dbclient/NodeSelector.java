@@ -2,7 +2,7 @@ package com.eventstore.dbclient;
 
 import java.util.*;
 
-class NodeSelector {
+public class NodeSelector {
 
     private static final Random random = new Random();
     private static final Set<ClusterInfo.MemberState> invalidStates;
@@ -33,11 +33,11 @@ class NodeSelector {
 
     private final Comparator<ClusterInfo.Member> memberComparator;
 
-    NodeSelector(NodePreference nodePreference) {
+    public NodeSelector(NodePreference nodePreference) {
         this.memberComparator = memberComparators.get(nodePreference);
     }
 
-    Optional<ClusterInfo.Member> determineBestFitNode(ClusterInfo clusterInfo) {
+    public Optional<ClusterInfo.Member> determineBestFitNode(ClusterInfo clusterInfo) {
         return clusterInfo.getMembers()
                 .stream()
                 .filter(ClusterInfo.Member::isAlive)

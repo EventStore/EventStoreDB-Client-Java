@@ -21,7 +21,7 @@ public class Position implements Comparable<Position> {
         this.commit = commitUnsigned;
     }
 
-    Position(String prepare, String commit) {
+    public Position(String prepare, String commit) {
         this(Long.parseUnsignedLong(commit), Long.parseUnsignedLong(prepare));
     }
 

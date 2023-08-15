@@ -10,10 +10,15 @@ import java.util.function.Function;
  * Represents EventStoreDB client for persistent subscriptions management. A client instance maintains a two-way communication to EventStoreDB.
  * Many threads can use the EventStoreDB client simultaneously, or a single thread can make many asynchronous requests.
  */
-public class EventStoreDBPersistentSubscriptionsClient extends EventStoreDBClientBase {
+public class EventStoreDBPersistentSubscriptionsClient {
+    private final EventStoreDBClientBase inner;
 
     private EventStoreDBPersistentSubscriptionsClient(EventStoreDBClientSettings settings) {
-        super(settings);
+        inner = new EventStoreDBClientBase(settings);
+    }
+
+    private EventStoreDBPersistentSubscriptionsClient(EventStoreDBClientBase inner) {
+        this.inner = inner;
     }
 
     /**
@@ -23,6 +28,13 @@ public class EventStoreDBPersistentSubscriptionsClient extends EventStoreDBClien
         return new EventStoreDBPersistentSubscriptionsClient(settings);
     }
 
+    /**
+     * Returns a Persistent Subscription Management client based on existing client.
+     * @param existingClient Existing client.
+     */
+    public static EventStoreDBPersistentSubscriptionsClient from(EventStoreDBClientBase existingClient) {
+        return new EventStoreDBPersistentSubscriptionsClient(existingClient);
+    }
     /**
      * Creates a persistent subscription group on a stream.
      *
@@ -72,7 +84,7 @@ public class EventStoreDBPersistentSubscriptionsClient extends EventStoreDBClien
             options = CreatePersistentSubscriptionToStreamOptions.get();
         }
 
-        return new CreatePersistentSubscriptionToStream(this.getGrpcClient(), stream, group, options).execute();
+        return new CreatePersistentSubscriptionToStream(inner.getGrpcClient(), stream, group, options).execute();
     }
 
     /**
@@ -92,7 +104,7 @@ public class EventStoreDBPersistentSubscriptionsClient extends EventStoreDBClien
             options = CreatePersistentSubscriptionToAllOptions.get();
         }
 
-        return new CreatePersistentSubscriptionToAll(this.getGrpcClient(), group, options).execute();
+        return new CreatePersistentSubscriptionToAll(inner.getGrpcClient(), group, options).execute();
     }
 
     /**
@@ -123,7 +135,7 @@ public class EventStoreDBPersistentSubscriptionsClient extends EventStoreDBClien
             options = UpdatePersistentSubscriptionToStreamOptions.get();
         }
 
-        return new UpdatePersistentSubscriptionToStream(this.getGrpcClient(), stream, group, options).execute();
+        return new UpdatePersistentSubscriptionToStream(inner.getGrpcClient(), stream, group, options).execute();
     }
 
     /**
@@ -136,7 +148,7 @@ public class EventStoreDBPersistentSubscriptionsClient extends EventStoreDBClien
             options = UpdatePersistentSubscriptionToAllOptions.get();
         }
 
-        return new UpdatePersistentSubscriptionToAll(this.getGrpcClient(), group, options).execute();
+        return new UpdatePersistentSubscriptionToAll(inner.getGrpcClient(), group, options).execute();
     }
 
     /**
@@ -167,7 +179,7 @@ public class EventStoreDBPersistentSubscriptionsClient extends EventStoreDBClien
             options = DeletePersistentSubscriptionOptions.get();
         }
 
-        return new DeletePersistentSubscriptionToStream(this.getGrpcClient(), stream, group, options).execute();
+        return new DeletePersistentSubscriptionToStream(inner.getGrpcClient(), stream, group, options).execute();
     }
 
     /**
@@ -180,7 +192,7 @@ public class EventStoreDBPersistentSubscriptionsClient extends EventStoreDBClien
             options = DeletePersistentSubscriptionOptions.get();
         }
 
-        return new DeletePersistentSubscriptionToAll(this.getGrpcClient(), group, options).execute();
+        return new DeletePersistentSubscriptionToAll(inner.getGrpcClient(), group, options).execute();
     }
 
     /**
@@ -217,7 +229,7 @@ public class EventStoreDBPersistentSubscriptionsClient extends EventStoreDBClien
             options = SubscribePersistentSubscriptionOptions.get();
         }
 
-        return new SubscribePersistentSubscriptionToStream(this.getGrpcClient(), stream, group, options, listener).execute();
+        return new SubscribePersistentSubscriptionToStream(inner.getGrpcClient(), stream, group, options, listener).execute();
     }
 
     /**
@@ -232,7 +244,7 @@ public class EventStoreDBPersistentSubscriptionsClient extends EventStoreDBClien
             options = SubscribePersistentSubscriptionOptions.get();
         }
 
-        return new SubscribePersistentSubscriptionToAll(this.getGrpcClient(), group, options, listener).execute();
+        return new SubscribePersistentSubscriptionToAll(inner.getGrpcClient(), group, options, listener).execute();
     }
 
     /**
@@ -242,7 +254,7 @@ public class EventStoreDBPersistentSubscriptionsClient extends EventStoreDBClien
      * @see PersistentSubscriptionInfo
      */
     public CompletableFuture<List<PersistentSubscriptionInfo>> listAll(ListPersistentSubscriptionsOptions options) {
-        return ListPersistentSubscriptions.execute(this.getGrpcClient(), options, "", Function.identity());
+        return ListPersistentSubscriptions.execute(inner.getGrpcClient(), options, "", Function.identity());
     }
 
     /**
@@ -260,7 +272,7 @@ public class EventStoreDBPersistentSubscriptionsClient extends EventStoreDBClien
      * @param options list persistent subscriptions request's options.
      */
     public CompletableFuture<List<PersistentSubscriptionToStreamInfo>> listToStream(String stream, ListPersistentSubscriptionsOptions options) {
-        return ListPersistentSubscriptions.execute(this.getGrpcClient(), options, stream, info -> (PersistentSubscriptionToStreamInfo) info);
+        return ListPersistentSubscriptions.execute(inner.getGrpcClient(), options, stream, info -> (PersistentSubscriptionToStreamInfo) info);
     }
 
     /**
@@ -286,7 +298,7 @@ public class EventStoreDBPersistentSubscriptionsClient extends EventStoreDBClien
      * @see PersistentSubscriptionToAllInfo
      */
     public CompletableFuture<List<PersistentSubscriptionToAllInfo>> listToAll(ListPersistentSubscriptionsOptions options) {
-        return ListPersistentSubscriptions.execute(this.getGrpcClient(), options, "$all", info -> (PersistentSubscriptionToAllInfo) info);
+        return ListPersistentSubscriptions.execute(inner.getGrpcClient(), options, "$all", info -> (PersistentSubscriptionToAllInfo) info);
     }
 
     /**
@@ -297,7 +309,7 @@ public class EventStoreDBPersistentSubscriptionsClient extends EventStoreDBClien
      * @see PersistentSubscriptionInfo
      */
     public CompletableFuture<Optional<PersistentSubscriptionToStreamInfo>> getInfoToStream(String stream, String groupName, GetPersistentSubscriptionInfoOptions options) {
-        return GetPersistentSubscriptionInfo.execute(this.getGrpcClient(), options, stream, groupName).thenApply(res ->
+        return GetPersistentSubscriptionInfo.execute(inner.getGrpcClient(), options, stream, groupName).thenApply(res ->
             res.map(PersistentSubscriptionToStreamInfo.class::cast)
         );
     }
@@ -319,7 +331,7 @@ public class EventStoreDBPersistentSubscriptionsClient extends EventStoreDBClien
      * @see PersistentSubscriptionToAllInfo
      */
     public CompletableFuture<Optional<PersistentSubscriptionToAllInfo>> getInfoToAll(String groupName, GetPersistentSubscriptionInfoOptions options) {
-        return GetPersistentSubscriptionInfo.execute(this.getGrpcClient(), options, "$all", groupName).thenApply(res ->
+        return GetPersistentSubscriptionInfo.execute(inner.getGrpcClient(), options, "$all", groupName).thenApply(res ->
                 res.map(PersistentSubscriptionToAllInfo.class::cast)
         );
     }
@@ -340,7 +352,7 @@ public class EventStoreDBPersistentSubscriptionsClient extends EventStoreDBClien
      * @param options replay parked messages to stream request's options.
      */
     public CompletableFuture replayParkedMessagesToStream(String stream, String groupName, ReplayParkedMessagesOptions options) {
-        return ReplayParkedMessages.execute(this.getGrpcClient(), options, stream, groupName);
+        return ReplayParkedMessages.execute(inner.getGrpcClient(), options, stream, groupName);
     }
 
     /**
@@ -382,6 +394,23 @@ public class EventStoreDBPersistentSubscriptionsClient extends EventStoreDBClien
 
      */
     public CompletableFuture restartSubsystem(RestartPersistentSubscriptionSubsystemOptions options) {
-        return RestartPersistentSubscriptionSubsystem.execute(this.getGrpcClient(), options);
+        return RestartPersistentSubscriptionSubsystem.execute(inner.getGrpcClient(), options);
+    }
+
+    /**
+     * Closes a connection and cleans all its allocated resources.
+     */
+    public CompletableFuture<Void> shutdown() {
+        return inner.shutdown();
+    }
+
+    /**
+     * Checks if this client instance has been shutdown.
+     * After shutdown a client instance can no longer process new operations and
+     * a new client instance has to be created.
+     * @return {@code true} if client instance has been shutdown.
+     */
+    public boolean isShutdown() {
+        return inner.isShutdown();
     }
 }

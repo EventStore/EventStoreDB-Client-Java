@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-class ClusterInfo {
+public class ClusterInfo {
     private final List<Member> members;
 
     public ClusterInfo(List<Member> members) {
@@ -39,7 +39,7 @@ class ClusterInfo {
         return new ClusterInfo(members);
     }
 
-    enum MemberState {
+    public enum MemberState {
         INITIALIZING, DISCOVER_LEADER, UNKNOWN, PRE_REPLICA, CATCHING_UP, CLONE,
         FOLLOWER, PRE_LEADER, LEADER, MANAGER, SHUTTING_DOWN, SHUT_DOWN, READ_ONLY_LEADERLESS,
         PRE_READ_ONLY_REPLICA, READ_ONLY_REPLICA, RESIGNING_LEADER;
@@ -81,13 +81,13 @@ class ClusterInfo {
         }
     }
 
-    static class Member {
+    public static class Member {
         private final UUID instanceId;
         private final boolean isAlive;
         private final MemberState state;
         private final InetSocketAddress httpEndpoint;
 
-        Member(UUID instanceId, boolean isAlive, MemberState state, InetSocketAddress httpEndpoint) {
+        public Member(UUID instanceId, boolean isAlive, MemberState state, InetSocketAddress httpEndpoint) {
             this.instanceId = instanceId;
             this.isAlive = isAlive;
             this.state = state;

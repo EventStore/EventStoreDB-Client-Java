@@ -2,34 +2,37 @@ package com.eventstore.dbclient.samples.projection_management;
 
 import com.eventstore.dbclient.*;
 import org.junit.*;
-import testcontainers.module.ESDBTests;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-public class ProjectionManagement extends ESDBTests {
+public class ProjectionManagement {
 
-    private EventStoreDBProjectionManagementClient client;
-
-
+    @Test
     public void testProjectionManagementSamples() throws Throwable {
 
-        client = getEmptyServer().getProjectionClient();
-        disable(client);
-        disableNotFound(client);
-        enable(client);
-        enableNotFound(client);
-        delete(client);
-        deleteNotFound(client);
-        abort(client);
-        abortNotFound(client);
-        reset(client);
-        resetNotFound(client);
-        create(client);
-        createConflict(client);
-        update(client);
-        updateNotFound(client);
-        restartSubSystem(client);
+        Database database = DatabaseFactory.spawn();
+        try {
+            EventStoreDBProjectionManagementClient client = EventStoreDBProjectionManagementClient.from(database.defaultClient());
+            disable(client);
+            disableNotFound(client);
+            enable(client);
+            enableNotFound(client);
+            delete(client);
+            deleteNotFound(client);
+            abort(client);
+            abortNotFound(client);
+            reset(client);
+            resetNotFound(client);
+            create(client);
+            createConflict(client);
+            update(client);
+            updateNotFound(client);
+            restartSubSystem(client);
+        } finally {
+            database.dispose();
+        }
     }
 
     private static EventStoreDBProjectionManagementClient createClient(String connection) {

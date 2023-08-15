@@ -89,7 +89,7 @@ public abstract class ExpectedRevision {
         return Objects.hash(getClass());
     }
 
-    static class NoStreamExpectedRevision extends ExpectedRevision {
+    public static class NoStreamExpectedRevision extends ExpectedRevision {
         @Override
         public StreamsOuterClass.AppendReq.Options.Builder applyOnWire(StreamsOuterClass.AppendReq.Options.Builder options) {
             return options.setNoStream(Shared.Empty.getDefaultInstance());
@@ -111,7 +111,7 @@ public abstract class ExpectedRevision {
         }
     }
 
-    static class AnyExpectedRevision extends ExpectedRevision {
+    public static class AnyExpectedRevision extends ExpectedRevision {
         @Override
         public StreamsOuterClass.AppendReq.Options.Builder applyOnWire(StreamsOuterClass.AppendReq.Options.Builder options) {
             return options.setAny(Shared.Empty.getDefaultInstance());
@@ -133,7 +133,7 @@ public abstract class ExpectedRevision {
         }
     }
 
-    static class StreamExistsExpectedRevision extends ExpectedRevision {
+    public static class StreamExistsExpectedRevision extends ExpectedRevision {
         @Override
         public StreamsOuterClass.AppendReq.Options.Builder applyOnWire(StreamsOuterClass.AppendReq.Options.Builder options) {
             return options.setStreamExists(Shared.Empty.getDefaultInstance());
@@ -155,7 +155,7 @@ public abstract class ExpectedRevision {
         }
     }
 
-    static class SpecificExpectedRevision extends ExpectedRevision {
+    public static class SpecificExpectedRevision extends ExpectedRevision {
         final long version;
 
         SpecificExpectedRevision(long version) {
