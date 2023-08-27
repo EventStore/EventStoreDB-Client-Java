@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
-import java.util.StringJoiner;
 import java.util.UUID;
 
 public class RecordedEvent {
@@ -32,6 +31,8 @@ public class RecordedEvent {
     private final Position position;
     @NotNull
     private final String contentType;
+    
+    private final boolean json;
 
     private static final JsonMapper mapper = new JsonMapper();
 
@@ -53,6 +54,7 @@ public class RecordedEvent {
         this.eventType = systemMetadata.get(SystemMetadataKeys.TYPE);
         this.contentType = systemMetadata.get(SystemMetadataKeys.CONTENT_TYPE);
         this.created = systemMetadataDateToInstant(systemMetadata.get(SystemMetadataKeys.CREATED));
+        this.json = Boolean.valueOf(systemMetadata.get(SystemMetadataKeys.IS_JSON));
     }
 
     /**
@@ -112,6 +114,10 @@ public class RecordedEvent {
     @NotNull
     public String getContentType() {
         return contentType;
+    }
+    
+    public boolean isJson() {
+    	return json;
     }
 
     @Override
