@@ -11,9 +11,14 @@ import java.util.function.Function;
  * Represents EventStoreDB client for projections management. A client instance maintains a two-way communication to EventStoreDB.
  * Many threads can use the EventStoreDB client simultaneously, or a single thread can make many asynchronous requests.
  */
-public class EventStoreDBProjectionManagementClient extends EventStoreDBClientBase {
+public class EventStoreDBProjectionManagementClient {
+    final EventStoreDBClientBase inner;
     private EventStoreDBProjectionManagementClient(EventStoreDBClientSettings settings) {
-        super(settings);
+        inner = new EventStoreDBClientBase(settings);
+    }
+
+    private EventStoreDBProjectionManagementClient(EventStoreDBClientBase inner) {
+        this.inner = inner;
     }
 
     /**
@@ -22,6 +27,14 @@ public class EventStoreDBProjectionManagementClient extends EventStoreDBClientBa
      */
     public static EventStoreDBProjectionManagementClient create(EventStoreDBClientSettings settings) {
         return new EventStoreDBProjectionManagementClient(settings);
+    }
+
+    /**
+     * Returns a Projection Management client based on existing client.
+     * @param existingClient Existing client.
+     */
+    public static EventStoreDBProjectionManagementClient from(EventStoreDBClientBase existingClient) {
+        return new EventStoreDBProjectionManagementClient(existingClient);
     }
 
     /**
@@ -40,7 +53,7 @@ public class EventStoreDBProjectionManagementClient extends EventStoreDBClientBa
      * @param options Additional options.
      */
     public CompletableFuture abort(final String projectionName, AbortProjectionOptions options) {
-        return new AbortProjection(this.getGrpcClient(), projectionName, options).execute();
+        return new AbortProjection(inner.getGrpcClient(), projectionName, options).execute();
     }
 
     /**
@@ -62,7 +75,7 @@ public class EventStoreDBProjectionManagementClient extends EventStoreDBClientBa
         if (options == null)
             options = CreateProjectionOptions.get();
 
-        return new CreateProjection(this.getGrpcClient(), projectionName, query, options).execute();
+        return new CreateProjection(inner.getGrpcClient(), projectionName, query, options).execute();
     }
 
     /**
@@ -79,7 +92,7 @@ public class EventStoreDBProjectionManagementClient extends EventStoreDBClientBa
      * @param options Additional options.
      */
     public CompletableFuture enable(final String projectionName, EnableProjectionOptions options) {
-        return new EnableProjection(this.getGrpcClient(), projectionName, options).execute();
+        return new EnableProjection(inner.getGrpcClient(), projectionName, options).execute();
     }
 
     /**
@@ -96,7 +109,7 @@ public class EventStoreDBProjectionManagementClient extends EventStoreDBClientBa
      * @param options Additional options.
      */
     public CompletableFuture delete(final String projectionName, DeleteProjectionOptions options) {
-        return new DeleteProjection(this.getGrpcClient(), projectionName, options).execute();
+        return new DeleteProjection(inner.getGrpcClient(), projectionName, options).execute();
     }
 
     /**
@@ -113,7 +126,7 @@ public class EventStoreDBProjectionManagementClient extends EventStoreDBClientBa
      * @param options Additional options.
      */
     public CompletableFuture disable(final String projectionName, DisableProjectionOptions options) {
-        return new DisableProjection(this.getGrpcClient(), projectionName, options).execute();
+        return new DisableProjection(inner.getGrpcClient(), projectionName, options).execute();
     }
 
     /**
@@ -133,7 +146,7 @@ public class EventStoreDBProjectionManagementClient extends EventStoreDBClientBa
      * @param <TResult> The result type to return.
      */
     public <TResult> CompletableFuture<TResult>  getResult(final String projectionName, Class<TResult> type, GetProjectionResultOptions options) {
-        return new GetProjectionResult<>(this.getGrpcClient(), projectionName, options, type).execute();
+        return new GetProjectionResult<>(inner.getGrpcClient(), projectionName, options, type).execute();
     }
 
     /**
@@ -155,7 +168,7 @@ public class EventStoreDBProjectionManagementClient extends EventStoreDBClientBa
      */
     public <TResult> CompletableFuture<TResult> getResult(final String projectionName,
                                                           Function<TypeFactory, JavaType> javaTypeFunction, GetProjectionResultOptions options) {
-        return new GetProjectionResult<TResult>(this.getGrpcClient(), projectionName, options, javaTypeFunction).execute();
+        return new GetProjectionResult<TResult>(inner.getGrpcClient(), projectionName, options, javaTypeFunction).execute();
     }
 
     /**
@@ -175,7 +188,7 @@ public class EventStoreDBProjectionManagementClient extends EventStoreDBClientBa
      * @param <TResult> The result type to return.
      */
     public <TResult> CompletableFuture<TResult> getState(final String projectionName, Class<TResult> type, GetProjectionStateOptions options) {
-        return new GetProjectionState<>(this.getGrpcClient(), projectionName, options, type).execute();
+        return new GetProjectionState<>(inner.getGrpcClient(), projectionName, options, type).execute();
     }
 
     /**
@@ -197,7 +210,7 @@ public class EventStoreDBProjectionManagementClient extends EventStoreDBClientBa
      */
     public <TResult> CompletableFuture<TResult> getState(final String projectionName,
                                                          Function<TypeFactory, JavaType> javaTypeFunction, GetProjectionStateOptions options) {
-        return new GetProjectionState<TResult>(this.getGrpcClient(), projectionName, options, javaTypeFunction).execute();
+        return new GetProjectionState<TResult>(inner.getGrpcClient(), projectionName, options, javaTypeFunction).execute();
     }
 
     /**
@@ -214,7 +227,7 @@ public class EventStoreDBProjectionManagementClient extends EventStoreDBClientBa
      * @param options Additional options.
      */
     public CompletableFuture<ProjectionDetails> getStatistics(final String projectionName, GetProjectionStatisticsOptions options) {
-        return new GetProjectionStatistics(this.getGrpcClient(), projectionName, options).execute();
+        return new GetProjectionStatistics(inner.getGrpcClient(), projectionName, options).execute();
     }
 
     /**
@@ -231,7 +244,7 @@ public class EventStoreDBProjectionManagementClient extends EventStoreDBClientBa
      * @param options Additional options.
      */
     public CompletableFuture<ProjectionDetails> getStatus(final String projectionName, final GetProjectionStatusOptions options) {
-        return new GetProjectionStatus(this.getGrpcClient(), projectionName, options).execute();
+        return new GetProjectionStatus(inner.getGrpcClient(), projectionName, options).execute();
     }
 
     /**
@@ -246,7 +259,7 @@ public class EventStoreDBProjectionManagementClient extends EventStoreDBClientBa
      * @param options Additional options.
      */
     public CompletableFuture<List<ProjectionDetails>> list(ListProjectionsOptions options) {
-        return new ListProjections(this.getGrpcClient(), options).execute().thenApply(ListProjectionsResult::getProjections);
+        return new ListProjections(inner.getGrpcClient(), options).execute().thenApply(ListProjectionsResult::getProjections);
     }
 
     /**
@@ -265,7 +278,7 @@ public class EventStoreDBProjectionManagementClient extends EventStoreDBClientBa
      * @param options Additional options.
      */
     public CompletableFuture reset(final String projectionName, ResetProjectionOptions options) {
-        return new ResetProjection(this.getGrpcClient(), projectionName, options).execute();
+        return new ResetProjection(inner.getGrpcClient(), projectionName, options).execute();
     }
 
     /**
@@ -280,7 +293,7 @@ public class EventStoreDBProjectionManagementClient extends EventStoreDBClientBa
      * @param options Additional options.
      */
     public CompletableFuture restartSubsystem(RestartProjectionSubsystemOptions options) {
-        return new RestartProjectionSubsystem(this.getGrpcClient(), options).execute();
+        return new RestartProjectionSubsystem(inner.getGrpcClient(), options).execute();
     }
 
     /**
@@ -299,6 +312,23 @@ public class EventStoreDBProjectionManagementClient extends EventStoreDBClientBa
      * @param options Additional options.
      */
     public CompletableFuture update(final String projectionName, final String query, UpdateProjectionOptions options) {
-        return new UpdateProjection(this.getGrpcClient(), projectionName, query, options).execute();
+        return new UpdateProjection(inner.getGrpcClient(), projectionName, query, options).execute();
+    }
+
+    /**
+     * Closes a connection and cleans all its allocated resources.
+     */
+    public CompletableFuture<Void> shutdown() {
+        return inner.shutdown();
+    }
+
+    /**
+     * Checks if this client instance has been shutdown.
+     * After shutdown a client instance can no longer process new operations and
+     * a new client instance has to be created.
+     * @return {@code true} if client instance has been shutdown.
+     */
+    public boolean isShutdown() {
+        return inner.isShutdown();
     }
 }

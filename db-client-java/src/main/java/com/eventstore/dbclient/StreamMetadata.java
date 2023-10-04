@@ -108,7 +108,7 @@ public class StreamMetadata {
         }
     }
 
-    Object serialize() {
+    public Object serialize() {
         HashMap<String, Object> output = new HashMap<>();
 
         insertValue(output, "$maxAge", this.maxAge);
@@ -132,7 +132,7 @@ public class StreamMetadata {
         return output;
     }
 
-     static StreamMetadata deserialize(HashMap<String, Object> source) {
+     public static StreamMetadata deserialize(HashMap<String, Object> source) {
         StreamMetadata metadata = new StreamMetadata();
         HashMap<String, Object> customProperties = null;
 

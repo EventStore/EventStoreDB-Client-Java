@@ -113,13 +113,19 @@ final class GrpcUtils {
     }
 
     static public <S extends AbstractAsyncStub<S>, O> S configureStub(S stub, EventStoreDBClientSettings settings, OptionsBase<O> options) {
+        return configureStub(stub, settings, options, null);
+    }
+
+    static public <S extends AbstractAsyncStub<S>, O> S configureStub(S stub, EventStoreDBClientSettings settings, OptionsBase<O> options, Long forceDeadlineInMs) {
         S finalStub = stub;
         ConnectionMetadata metadata = new ConnectionMetadata();
 
         if (options.getKind() != OperationKind.Streaming) {
             long deadlineInMs = 10_000;
 
-            if (options.getDeadline() != null) {
+            if (forceDeadlineInMs != null) {
+               deadlineInMs = forceDeadlineInMs;
+            } else if (options.getDeadline() != null) {
                 deadlineInMs = options.getDeadline();
             } else if (settings.getDefaultDeadline() != null) {
                 deadlineInMs = settings.getDefaultDeadline();
