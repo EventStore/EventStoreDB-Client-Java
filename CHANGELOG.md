@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - Improve internal gRPC connection management for better error propagation. [EventStoreDB-Client-Java#226](https://github.com/EventStore/EventStoreDB-Client-Java/pull/226)
+- Add secure and cluster tests. [EventStoreDB-Client-Java#236](https://github.com/EventStore/EventStoreDB-Client-Java/pull/236)
 
 ### Added
 - Support authenticated gossip read request. [EventStoreDB-Client-Java#235](https://github.com/EventStore/EventStoreDB-Client-Java/pull/235)
