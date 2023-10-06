@@ -4,7 +4,7 @@ package com.eventstore.dbclient;
  * Admin stream access control list (ACL).
  */
 class SystemStreamAcl implements Acl {
-    private static final String ACL_NAME = "$systemStreamAcl";
+    public static final String ACL_NAME = "$systemStreamAcl";
     private static final SystemStreamAcl SINGLETON = new SystemStreamAcl();
 
     private SystemStreamAcl() {}
@@ -20,11 +20,6 @@ class SystemStreamAcl implements Acl {
 
     static SystemStreamAcl getInstance() {
         return SINGLETON;
-    }
-
-    @Override
-    public Object serialize() {
-        return ACL_NAME;
     }
 
     @Override

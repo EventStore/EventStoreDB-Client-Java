@@ -1,16 +1,14 @@
 package com.eventstore.dbclient;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
 
 /**
  * Represents EventStoreDB client for stream operations. A client instance maintains a two-way communication to EventStoreDB.
@@ -97,9 +95,14 @@ public class EventStoreDBClient extends EventStoreDBClientBase {
      * @return a write result if successful.
      */
     public CompletableFuture<WriteResult> setStreamMetadata(String streamName, AppendToStreamOptions options, StreamMetadata metadata) {
-        EventData event = EventDataBuilder.json("$metadata", metadata.serialize()).build();
+        JsonMapper mapper = new JsonMapper();
 
-        return appendToStream("$$" + streamName, options, event);
+        try {
+            EventData event = EventDataBuilder.json("$metadata", mapper.writeValueAsBytes(metadata)).build();
+            return appendToStream("$$" + streamName, options, event);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
      }
 
     /**
@@ -132,32 +135,6 @@ public class EventStoreDBClient extends EventStoreDBClientBase {
         return new ReadStream(this.getGrpcClient(), streamName, options);
     }
 
-    private static <A, B> Publisher<B> publisherMap(final Publisher<A> parent, Function<A, B> fun) {
-        return sub -> {
-            parent.subscribe(new Subscriber<A>() {
-                @Override
-                public void onSubscribe(org.reactivestreams.Subscription s) {
-                    sub.onSubscribe(s);
-                }
-
-                @Override
-                public void onNext(A a) {
-                    sub.onNext(fun.apply(a));
-                }
-
-                @Override
-                public void onError(Throwable t) {
-                    sub.onError(t);
-                }
-
-                @Override
-                public void onComplete() {
-                    sub.onComplete();
-                }
-            });
-        };
-    }
-
     /**
      * Reads stream's metadata.
      * @param streamName stream's name.
@@ -181,10 +158,8 @@ public class EventStoreDBClient extends EventStoreDBClientBase {
 
             try {
                 JsonMapper mapper = new JsonMapper();
-                @SuppressWarnings("unchecked")
-                HashMap<String, Object> source = mapper.readValue(event.getEventData(), HashMap.class);
-
-                out.complete(StreamMetadata.deserialize(source));
+                StreamMetadata metadata = mapper.readValue(event.getEventData(), StreamMetadata.class);
+                out.complete(metadata);
             } catch (Throwable e) {
                 out.completeExceptionally(e);
             }

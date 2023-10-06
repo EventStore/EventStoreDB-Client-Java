@@ -4,7 +4,7 @@ package com.eventstore.dbclient;
  * Default user stream access control list (ACL).
  */
 class UserStreamAcl implements Acl {
-    private static final String ACL_NAME = "$userStreamAcl";
+    public static final String ACL_NAME = "$userStreamAcl";
     private static final UserStreamAcl SINGLETON = new UserStreamAcl();
 
     private UserStreamAcl() {}
@@ -20,11 +20,6 @@ class UserStreamAcl implements Acl {
 
     static UserStreamAcl getInstance() {
         return SINGLETON;
-    }
-
-    @Override
-    public Object serialize() {
-        return ACL_NAME;
     }
 
     @Override
