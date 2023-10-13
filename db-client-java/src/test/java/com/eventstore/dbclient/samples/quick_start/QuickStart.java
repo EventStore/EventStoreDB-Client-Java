@@ -10,7 +10,7 @@ import java.util.concurrent.ExecutionException;
 public class QuickStart {
     public static void Run() throws ConnectionStringParsingException, ExecutionException, InterruptedException {
         // region createClient
-        EventStoreDBClientSettings settings = EventStoreDBConnectionString.parse("{connectionString}");
+        EventStoreDBClientSettings settings = EventStoreDBConnectionString.parseOrThrow("{connectionString}");
         EventStoreDBClient client = EventStoreDBClient.create(settings);
         // endregion createClient
 
