@@ -13,10 +13,10 @@ public interface MetadataTests extends ConnectionAware {
 
         StreamMetadata metadata = new StreamMetadata();
 
-        metadata.setMaxAge(2);
-        metadata.setCacheControl(15);
-        metadata.setTruncateBefore(1);
-        metadata.setMaxCount(12);
+        metadata.setMaxAge(2L);
+        metadata.setCacheControl(15L);
+        metadata.setTruncateBefore(1L);
+        metadata.setMaxCount(12L);
 
         Acl acl = Acls.newStreamAcl()
                 .addReadRoles("admin")
@@ -48,5 +48,15 @@ public interface MetadataTests extends ConnectionAware {
         StreamMetadata got = client.getStreamMetadata(streamName).get();
 
         Assertions.assertEquals(new StreamMetadata(), got);
+    }
+
+    @Test
+    default void testReadMetadataAfterStreamDeletion() throws Throwable {
+        EventStoreDBClient client = getDatabase().defaultClient();
+        String streamName = generateName();
+        client.appendToStream(streamName, EventDataBuilder.json("bar", new HashMap<String, Object>()).build()).get();
+
+        client.deleteStream(streamName).get();
+        client.getStreamMetadata(streamName).get();
     }
 }

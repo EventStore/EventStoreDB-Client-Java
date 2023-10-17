@@ -1,16 +1,41 @@
 package com.eventstore.dbclient;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import java.util.*;
 
 /**
  * Stream-related access control list (ACL).
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class StreamAcl implements Acl {
-    private ArrayList<String> readRoles;
-    private ArrayList<String> writeRoles;
-    private ArrayList<String> deleteRoles;
-    private ArrayList<String> metaReadRoles;
-    private ArrayList<String> metaWriteRoles;
+    @JsonProperty("$r")
+    @JsonSerialize(using = CustomAclCodec.ListSerializer.class)
+    @JsonDeserialize(using = CustomAclCodec.ListDeserializer.class)
+    private List<String> readRoles;
+
+    @JsonProperty("$w")
+    @JsonSerialize(using = CustomAclCodec.ListSerializer.class)
+    @JsonDeserialize(using = CustomAclCodec.ListDeserializer.class)
+    private List<String> writeRoles;
+
+    @JsonProperty("$d")
+    @JsonSerialize(using = CustomAclCodec.ListSerializer.class)
+    @JsonDeserialize(using = CustomAclCodec.ListDeserializer.class)
+    private List<String> deleteRoles;
+
+    @JsonProperty("$mr")
+    @JsonSerialize(using = CustomAclCodec.ListSerializer.class)
+    @JsonDeserialize(using = CustomAclCodec.ListDeserializer.class)
+    private List<String> metaReadRoles;
+
+    @JsonProperty("$mw")
+    @JsonSerialize(using = CustomAclCodec.ListSerializer.class)
+    @JsonDeserialize(using = CustomAclCodec.ListDeserializer.class)
+    private List<String> metaWriteRoles;
 
     /**
      * Adds read roles.
@@ -67,93 +92,38 @@ public class StreamAcl implements Acl {
         return this;
     }
 
-    private static void serializeRoles(HashMap<String, Object> output, String key, ArrayList<String> target) {
-        if (target == null)
-            return;
-
-        if (target.size() == 1) {
-            output.put(key, target.get(0));
-        } else {
-            output.put(key, target);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private static ArrayList<String> deserializeRoles(HashMap<String, Object> source, String key) {
-        ArrayList<String> list = null;
-        Object value = source.get(key);
-
-        if (value != null) {
-            list = new ArrayList<>();
-
-            if (value instanceof String) {
-                list.add((String) value);
-            } else if (value instanceof ArrayList) {
-                list.addAll((ArrayList<String>) value);
-            } else {
-                throw new RuntimeException("Unsupported role type: " + value.getClass());
-            }
-        }
-
-        return list;
-    }
-
-    @Override
-    public Object serialize() {
-        HashMap<String, Object> output = new HashMap<>();
-        serializeRoles(output, "$r", this.readRoles);
-        serializeRoles(output, "$w", this.writeRoles);
-        serializeRoles(output, "$d", this.deleteRoles);
-        serializeRoles(output, "$mr", this.metaReadRoles);
-        serializeRoles(output, "$mw", this.metaWriteRoles);
-
-        return output;
-    }
-
-     static StreamAcl deserialize(HashMap<String, Object> source) {
-        StreamAcl acl = new StreamAcl();
-
-        acl.readRoles = deserializeRoles(source, "$r");
-        acl.writeRoles = deserializeRoles(source, "$w");
-        acl.deleteRoles = deserializeRoles(source, "$d");
-        acl.metaReadRoles = deserializeRoles(source, "$mr");
-        acl.metaWriteRoles = deserializeRoles(source, "$mw");
-
-        return acl;
-    }
-
     /**
      * Returns read roles.
      */
-    public ArrayList<String> getReadRoles() {
+    public List<String> getReadRoles() {
         return readRoles;
     }
 
     /**
      * Returns write roles.
      */
-    public ArrayList<String> getWriteRoles() {
+    public List<String> getWriteRoles() {
         return writeRoles;
     }
 
     /**
      * Returns delete roles.
      */
-    public ArrayList<String> getDeleteRoles() {
+    public List<String> getDeleteRoles() {
         return deleteRoles;
     }
 
     /**
      * Return metadata read roles.
      */
-    public ArrayList<String> getMetaReadRoles() {
+    public List<String> getMetaReadRoles() {
         return metaReadRoles;
     }
 
     /**
      * Return metadata write roles.
      */
-    public ArrayList<String> getMetaWriteRoles() {
+    public List<String> getMetaWriteRoles() {
         return metaWriteRoles;
     }
 

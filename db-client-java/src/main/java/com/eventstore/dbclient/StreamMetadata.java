@@ -1,6 +1,9 @@
 package com.eventstore.dbclient;
 
-import java.util.HashMap;
+import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import java.util.Map;
 import java.util.Objects;
 
@@ -8,25 +11,39 @@ import java.util.Objects;
  * Represents stream metadata with strongly typed properties for system values and a dictionary-like interface for
  * custom values.
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class StreamMetadata {
-    private Integer maxAge;
-    private Integer truncateBefore;
-    private Integer cacheControl;
+    @JsonProperty("$maxAge")
+    private Long maxAge;
+
+    @JsonProperty("$tb")
+    private Long truncateBefore;
+
+    @JsonProperty("$cacheControl")
+    private Long cacheControl;
+
+    @JsonProperty("$acl")
+    @JsonSerialize(using = CustomAclCodec.Serializer.class)
+    @JsonDeserialize(using = CustomAclCodec.Deserializer.class)
     private Acl acl;
-    private Integer maxCount;
-    private HashMap<String, Object> customProperties;
+
+    @JsonProperty("$maxCount")
+    private Long maxCount;
+
+    @JsonAnySetter
+    private Map<String, Object> customProperties;
 
     /**
      * The maximum age of events allowed in the stream.
      */
-    public Integer getMaxAge() {
+    public Long getMaxAge() {
         return maxAge;
     }
 
     /**
      * The maximum age of events allowed in the stream.
      */
-    public void setMaxAge(Integer maxAge) {
+    public void setMaxAge(Long maxAge) {
         this.maxAge = maxAge;
     }
 
@@ -34,7 +51,7 @@ public class StreamMetadata {
      * The event number from which previous events can be scavenged. This is used to implement deletion of
      * streams.
      */
-    public Integer getTruncateBefore() {
+    public Long getTruncateBefore() {
         return truncateBefore;
     }
 
@@ -42,21 +59,21 @@ public class StreamMetadata {
      * The event number from which previous events can be scavenged. This is used to implement deletion of
      * streams.
      */
-    public void setTruncateBefore(Integer truncateBefore) {
+    public void setTruncateBefore(Long truncateBefore) {
         this.truncateBefore = truncateBefore;
     }
 
     /**
      * The amount of time for which the stream head is cacheable (in seconds).
      */
-    public Integer getCacheControl() {
+    public Long getCacheControl() {
         return cacheControl;
     }
 
     /**
      * The amount of time for which the stream head is cacheable (in seconds).
      */
-    public void setCacheControl(Integer cacheControl) {
+    public void setCacheControl(Long cacheControl) {
         this.cacheControl = cacheControl;
     }
 
@@ -77,92 +94,30 @@ public class StreamMetadata {
     /**
      * The maximum number of events allowed in the stream.
      */
-    public Integer getMaxCount() {
+    public Long getMaxCount() {
         return maxCount;
     }
 
     /**
      * The maximum number of events allowed in the stream.
      */
-    public void setMaxCount(Integer maxCount) {
+    public void setMaxCount(Long maxCount) {
         this.maxCount = maxCount;
     }
 
     /**
      * An enumerable of key-value pairs of keys to JSON text for user-provider metadata.
      */
-    public HashMap<String, Object> getCustomProperties() {
+    @JsonAnyGetter
+    public Map<String, Object> getCustomProperties() {
         return customProperties;
     }
 
     /**
      * An enumerable of key-value pairs of keys to JSON text for user-provider metadata.
      */
-    public void setCustomProperties(HashMap<String, Object> customProperties) {
+    public void setCustomProperties(Map<String, Object> customProperties) {
         this.customProperties = customProperties;
-    }
-
-    static private void insertValue(HashMap<String, Object> output, String key, Object value) {
-        if (value != null) {
-            output.put(key, value);
-        }
-    }
-
-    public Object serialize() {
-        HashMap<String, Object> output = new HashMap<>();
-
-        insertValue(output, "$maxAge", this.maxAge);
-        insertValue(output, "$maxCount", this.maxCount);
-        insertValue(output, "$tb", this.truncateBefore);
-        insertValue(output, "$cacheControl", this.cacheControl);
-
-        if (this.acl != null) {
-            insertValue(output, "$acl", this.acl.serialize());
-        }
-
-        if (this.customProperties != null) {
-            this.customProperties.forEach((key, value) -> {
-                if (key.startsWith("$"))
-                    return;
-
-                insertValue(output, key, value);
-            });
-        }
-
-        return output;
-    }
-
-     public static StreamMetadata deserialize(HashMap<String, Object> source) {
-        StreamMetadata metadata = new StreamMetadata();
-        HashMap<String, Object> customProperties = null;
-
-        for (Map.Entry<String, Object> entry : source.entrySet()) {
-            switch (entry.getKey()) {
-                case "$maxAge":
-                    metadata.setMaxAge((Integer) entry.getValue());
-                    break;
-                case "$maxCount":
-                    metadata.setMaxCount((Integer) entry.getValue());
-                    break;
-                case "$tb":
-                    metadata.setTruncateBefore((Integer) entry.getValue());
-                    break;
-                case "$cacheControl":
-                    metadata.setCacheControl((Integer) entry.getValue());
-                    break;
-                case "$acl":
-                    metadata.setAcl(Acls.deserialize(entry.getValue()));
-                    break;
-                default:
-                    customProperties = customProperties == null ? new HashMap<>() : customProperties;
-                    customProperties.put(entry.getKey(), entry.getValue());
-                    break;
-            }
-        }
-
-        metadata.setCustomProperties(customProperties);
-
-        return metadata;
     }
 
     @Override

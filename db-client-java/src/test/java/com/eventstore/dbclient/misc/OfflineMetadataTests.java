@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 
-@SuppressWarnings("unchecked")
 public class OfflineMetadataTests {
     @Test
     public void testSerializationIsoMorphism() throws Throwable {
@@ -18,10 +17,10 @@ public class OfflineMetadataTests {
 
         custom.put("foo", "bar");
 
-        expected.setMaxAge(2);
-        expected.setCacheControl(15);
-        expected.setTruncateBefore(1);
-        expected.setMaxCount(12);
+        expected.setMaxAge(2L);
+        expected.setCacheControl(15L);
+        expected.setTruncateBefore(1L);
+        expected.setMaxCount(12L);
 
         Acl acl = Acls.newStreamAcl()
                 .addReadRoles("admin")
@@ -34,9 +33,7 @@ public class OfflineMetadataTests {
         expected.setCustomProperties(custom);
 
         ObjectMapper mapper = new ObjectMapper();
-        HashMap<String, Object> source = mapper.readValue(mapper.writeValueAsString(expected.serialize()), HashMap.class);
-        StreamMetadata actual = StreamMetadata.deserialize(source);
-
+        StreamMetadata actual = mapper.readValue(mapper.writeValueAsString(expected), StreamMetadata.class);
 
         Assertions.assertEquals(expected, actual);
     }
@@ -45,15 +42,13 @@ public class OfflineMetadataTests {
     public void testNullAcl() throws Throwable {
         StreamMetadata expected = new StreamMetadata();
 
-        expected.setMaxAge(2);
-        expected.setCacheControl(15);
-        expected.setTruncateBefore(1);
-        expected.setMaxCount(12);
+        expected.setMaxAge(2L);
+        expected.setCacheControl(15L);
+        expected.setTruncateBefore(1L);
+        expected.setMaxCount(12L);
 
         ObjectMapper mapper = new ObjectMapper();
-        HashMap<String, Object> source = mapper.readValue(mapper.writeValueAsString(expected.serialize()), HashMap.class);
-        StreamMetadata actual = StreamMetadata.deserialize(source);
-
+        StreamMetadata actual = mapper.readValue(mapper.writeValueAsString(expected), StreamMetadata.class);
 
         Assertions.assertEquals(expected, actual);
     }
