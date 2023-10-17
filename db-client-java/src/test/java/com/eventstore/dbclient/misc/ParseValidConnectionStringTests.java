@@ -4,10 +4,7 @@ import java.net.InetSocketAddress;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import com.eventstore.dbclient.ConnectionSettingsBuilder;
-import com.eventstore.dbclient.ConnectionStringParsingException;
-import com.eventstore.dbclient.EventStoreDBClientSettings;
-import com.eventstore.dbclient.EventStoreDBConnectionString;
+import com.eventstore.dbclient.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.json.JsonMapper;
@@ -117,7 +114,6 @@ public class ParseValidConnectionStringTests {
         Assertions.assertEquals(settings.getNodePreference(), other.getNodePreference());
         Assertions.assertEquals(settings.isTls(), other.isTls());
         Assertions.assertEquals(settings.isTlsVerifyCert(), other.isTlsVerifyCert());
-        Assertions.assertEquals(settings.isThrowOnAppendFailure(), other.isThrowOnAppendFailure());
         Assertions.assertEquals(settings.getKeepAliveTimeout(), other.getKeepAliveTimeout());
         Assertions.assertEquals(settings.getKeepAliveInterval(), other.getKeepAliveInterval());
         Assertions.assertEquals(settings.getDefaultDeadline(), other.getDefaultDeadline());
@@ -134,7 +130,7 @@ public class ParseValidConnectionStringTests {
     public void test(String connectionString, String json) throws ConnectionStringParsingException, JsonProcessingException {
 
         EventStoreDBClientSettings expectedSettings = this.parseJson(json);
-        EventStoreDBClientSettings parsedSettings = EventStoreDBConnectionString.parse(connectionString);
+        EventStoreDBClientSettings parsedSettings = EventStoreDBConnectionString.parseOrThrow(connectionString);
 
         this.assertEquals(expectedSettings, parsedSettings);
     }
@@ -161,17 +157,34 @@ public class ParseValidConnectionStringTests {
         if (tree.get("tlsVerifyCert") != null)
             builder.tlsVerifyCert(tree.get("tlsVerifyCert").asBoolean());
 
-        if (tree.get("throwOnAppendFailure") != null)
-            builder.throwOnAppendFailure(tree.get("throwOnAppendFailure").asBoolean());
-
         if (tree.get("keepAliveTimeout") != null)
             builder.keepAliveTimeout(Long.parseLong(tree.get("keepAliveTimeout").asText()));
 
         if (tree.get("keepAliveInterval") != null)
             builder.keepAliveInterval(Long.parseLong(tree.get("keepAliveInterval").asText()));
 
-        if (tree.get("nodePreference") != null)
-            builder.nodePreference(EventStoreDBConnectionString.parseNodePreference(tree.get("nodePreference").asText()).get());
+        if (tree.get("nodePreference") != null) {
+            NodePreference pref;
+
+            switch (tree.get("nodePreference").asText().toLowerCase()) {
+                case "leader":
+                    pref = NodePreference.LEADER;
+                    break;
+                case "follower":
+                    pref = NodePreference.FOLLOWER;
+                    break;
+                case "random":
+                    pref = NodePreference.RANDOM;
+                    break;
+                case "readonlyreplica":
+                    pref = NodePreference.READ_ONLY_REPLICA;
+                    break;
+                default:
+                    throw new RuntimeException(String.format("Unsupported node pref value: '%s'", tree.get("nodePreference").asText()));
+            }
+
+            builder.nodePreference(pref);
+        }
 
         if (tree.get("defaultDeadline") != null) {
             builder.defaultDeadline(tree.get("defaultDeadline").asLong());

@@ -19,7 +19,6 @@ import java.util.List;
  *     <li>nodePreference: leader</li>
  *     <li>tls: true</li>
  *     <li>tlsVerifyCert: true</li>
- *     <li>throwOnAppendFailure: true</li>
  *     <li>keepAliveTimeout: 10000</li>
  *     <li>keepAliveInterval: 10000</li>
  * </ul>
@@ -32,7 +31,6 @@ public class EventStoreDBClientSettings {
     private final NodePreference nodePreference;
     private final boolean tls;
     private final boolean tlsVerifyCert;
-    private final boolean throwOnAppendFailure;
     private final UserCredentials defaultCredentials;
     private final InetSocketAddress[] hosts;
     private final long keepAliveTimeout;
@@ -89,13 +87,6 @@ public class EventStoreDBClientSettings {
      */
     public boolean isTlsVerifyCert() {
         return tlsVerifyCert;
-    }
-
-    /**
-     * If an exception is thrown, whether an append operation fails on optimistic concurrency error.
-     */
-    public boolean isThrowOnAppendFailure() {
-        return throwOnAppendFailure;
     }
 
     /**
@@ -156,7 +147,6 @@ public class EventStoreDBClientSettings {
             NodePreference nodePreference,
             boolean tls,
             boolean tlsVerifyCert,
-            boolean throwOnAppendFailure,
             UserCredentials defaultCredentials,
             InetSocketAddress[] hosts,
             long keepAliveTimeout,
@@ -171,7 +161,6 @@ public class EventStoreDBClientSettings {
         this.nodePreference = nodePreference;
         this.tls = tls;
         this.tlsVerifyCert = tlsVerifyCert;
-        this.throwOnAppendFailure = throwOnAppendFailure;
         this.defaultCredentials = defaultCredentials;
         this.hosts = hosts;
         this.keepAliveTimeout = keepAliveTimeout;
