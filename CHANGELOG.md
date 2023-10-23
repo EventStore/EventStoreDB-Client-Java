@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [5.0.0] - 2023-10-23
 ### Changed
 - Improve internal gRPC connection management for better error propagation. [EventStoreDB-Client-Java#226](https://github.com/EventStore/EventStoreDB-Client-Java/pull/226)
 - Add secure and cluster tests. [EventStoreDB-Client-Java#236](https://github.com/EventStore/EventStoreDB-Client-Java/pull/236)
