@@ -22,15 +22,7 @@ public interface SubscribeToStreamTests extends Expectations {
 
         SubscriptionListener listener = new SubscriptionListener() {
             @Override
-            public void onEvent(Subscription subscription, ResolvedEvent event) {
-            }
-
-            @Override
-            public void onCancelled(Subscription subscription) {
-            }
-
-            @Override
-            public void onError(Subscription subscription, Throwable throwable) {
+            public void onCancelled(Subscription subscription, Throwable throwable) {
                 if (throwable instanceof StatusRuntimeException) {
                     StatusRuntimeException statusRuntimeException = (StatusRuntimeException) throwable;
                     if (statusRuntimeException.getStatus().getCode() == Status.Code.UNAVAILABLE) {
@@ -60,12 +52,12 @@ public interface SubscribeToStreamTests extends Expectations {
             }
 
             @Override
-            public void onCancelled(Subscription subscription) {
-                cancellation.countDown();
-            }
+            public void onCancelled(Subscription subscription, Throwable throwable) {
+                if (throwable == null) {
+                    cancellation.countDown();
+                    return;
+                }
 
-            @Override
-            public void onError(Subscription subscription, Throwable throwable) {
                 fail(throwable.getMessage());
             }
         };
@@ -96,12 +88,12 @@ public interface SubscribeToStreamTests extends Expectations {
             }
 
             @Override
-            public void onCancelled(Subscription subscription) {
-                cancellation.countDown();
-            }
+            public void onCancelled(Subscription subscription, Throwable throwable) {
+                if (throwable == null) {
+                    cancellation.countDown();
+                    return;
+                }
 
-            @Override
-            public void onError(Subscription subscription, Throwable throwable) {
                 fail(throwable.getMessage());
             }
         }
@@ -156,12 +148,12 @@ public interface SubscribeToStreamTests extends Expectations {
             }
 
             @Override
-            public void onCancelled(Subscription subscription) {
-                cancellation.countDown();
-            }
+            public void onCancelled(Subscription subscription, Throwable throwable) {
+                if (throwable == null) {
+                    cancellation.countDown();
+                    return;
+                }
 
-            @Override
-            public void onError(Subscription subscription, Throwable throwable) {
                 fail(throwable.getMessage());
             }
         }

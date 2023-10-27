@@ -59,8 +59,12 @@ public class SubscribingToStream {
                     }
 
                     @Override
-                    public void onError(Subscription subscription, Throwable throwable) {
-                        System.out.println("Subscription was dropped due to " + throwable.getMessage());
+                    public void onCancelled(Subscription subscription, Throwable exception) {
+                        // Subscription was dropped by the user.
+                        if (exception == null)
+                            return;
+
+                        System.out.println("Subscription was dropped due to " + exception.getMessage());
                         Resubscribe(checkpoint);
                     }
                 },
@@ -111,8 +115,12 @@ public class SubscribingToStream {
                     }
 
                     @Override
-                    public void onError(Subscription subscription, Throwable throwable) {
-                        System.out.println("Subscription was dropped due to " + throwable.getMessage());
+                    public void onCancelled(Subscription subscription, Throwable exception) {
+                        // Subscription was dropped by the user.
+                        if (exception == null)
+                            return;
+
+                        System.out.println("Subscription was dropped due to " + exception.getMessage());
                         Resubscribe(checkpoint);
                     }
                 },

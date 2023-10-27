@@ -9,25 +9,18 @@ public abstract class SubscriptionListener {
      * @param subscription handle to the subscription.
      * @param event a resolved event.
      */
-    public void onEvent(Subscription subscription, ResolvedEvent event) {
-    }
-
-    /**
-     * Called when an exception was raised when processing an event.
-     * @param subscription handle to the subscription.
-     * @param throwable an exception.
-     */
-    public void onError(Subscription subscription, Throwable throwable) {
-    }
+    public void onEvent(Subscription subscription, ResolvedEvent event) {}
 
     /**
      * Called when the subscription is cancelled or dropped.
      * @param subscription handle to the subscription.
+     * @param exception an exception. null if the user initiated the cancellation.
      */
-    public void onCancelled(Subscription subscription) {
-    }
+    public void onCancelled(Subscription subscription, Throwable exception) {}
 
-    public void onConfirmation(Subscription subscription) {
-
-    }
+    /**
+     * Called when the subscription is confirmed by the server.
+     * @param subscription handle to the subscription.
+     */
+    public void onConfirmation(Subscription subscription) {}
 }

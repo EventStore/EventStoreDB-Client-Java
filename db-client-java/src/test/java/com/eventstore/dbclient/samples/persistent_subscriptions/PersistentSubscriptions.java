@@ -31,13 +31,13 @@ public class PersistentSubscriptions {
                 }
 
                 @Override
-                public void onError(PersistentSubscription subscription, Throwable throwable) {
-                    System.out.println("Subscription was dropped due to " + throwable.getMessage());
-                }
+                public void onCancelled(PersistentSubscription subscription, Throwable exception) {
+                    if (exception == null) {
+                        System.out.println("Subscription is cancelled");
+                        return;
+                    }
 
-                @Override
-                public void onCancelled(PersistentSubscription subscription) {
-                    System.out.println("Subscription is cancelled");
+                    System.out.println("Subscription was dropped due to " + exception.getMessage());
                 }
             });
         // endregion subscribe-to-persistent-subscription-to-stream
@@ -94,14 +94,13 @@ public class PersistentSubscriptions {
                     }
                 }
 
-                @Override
-                public void onError(PersistentSubscription subscription, Throwable throwable) {
-                    System.out.println("Subscription was dropped due to " + throwable.getMessage());
-                }
+                public void onCancelled(PersistentSubscription subscription, Throwable exception) {
+                    if (exception == null) {
+                        System.out.println("Subscription is cancelled");
+                        return;
+                    }
 
-                @Override
-                public void onCancelled(PersistentSubscription subscription) {
-                    System.out.println("Subscription is cancelled");
+                    System.out.println("Subscription was dropped due to " + exception.getMessage());
                 }
             });
         // endregion subscribe-to-persistent-subscription-to-all

@@ -95,7 +95,11 @@ abstract class AbstractRegularSubscription {
                         return;
                     }
 
-                    listener.onEvent(this._subscription, ResolvedEvent.fromWire(readResp.getEvent()));
+                    try {
+                        listener.onEvent(this._subscription, ResolvedEvent.fromWire(readResp.getEvent()));
+                    } catch (Exception e) {
+                        onError(e);
+                    }
                 }
 
                 @Override
@@ -108,7 +112,8 @@ abstract class AbstractRegularSubscription {
                     if (error instanceof StatusRuntimeException) {
                         StatusRuntimeException sre = (StatusRuntimeException) error;
                         if (sre.getStatus().getCode() == Status.Code.CANCELLED) {
-                            listener.onCancelled(this._subscription);
+                            listener.onCancelled(this._subscription, null);
+                            _requestStream.onCompleted();
                             return;
                         }
 
@@ -120,7 +125,8 @@ abstract class AbstractRegularSubscription {
                         }
                     }
 
-                    listener.onError(this._subscription, error);
+                    listener.onCancelled(this._subscription, error);
+                    _requestStream.onError(Status.fromThrowable(error).asRuntimeException());
                 }
 
                 @Override

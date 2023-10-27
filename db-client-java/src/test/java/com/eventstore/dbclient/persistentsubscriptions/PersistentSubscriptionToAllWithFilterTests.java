@@ -40,12 +40,12 @@ public interface PersistentSubscriptionToAllWithFilterTests extends ConnectionAw
             }
 
             @Override
-            public void onCancelled(PersistentSubscription subscription) {
-                cancellation.countDown();
-            }
+            public void onCancelled(PersistentSubscription subscription, Throwable throwable) {
+                if (throwable == null) {
+                    cancellation.countDown();
+                    return;
+                }
 
-            @Override
-            public void onError(PersistentSubscription subscription, Throwable throwable) {
                 Assertions.fail(throwable.getMessage());
             }
         };
