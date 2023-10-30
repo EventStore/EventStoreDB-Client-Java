@@ -51,11 +51,10 @@ public interface SubscriptionTests extends ConnectionAware {
             }
 
             @Override
-            public void onCancelled(Subscription subscription) {
-            }
+            public void onCancelled(Subscription subscription, Throwable throwable) {
+                if (throwable == null)
+                    return;
 
-            @Override
-            public void onError(Subscription subscription, Throwable throwable) {
                 getLogger().error("Error when running subscription", throwable);
                 Assertions.fail(throwable);
             }
@@ -114,11 +113,10 @@ public interface SubscriptionTests extends ConnectionAware {
             }
 
             @Override
-            public void onCancelled(Subscription subscription) {
-            }
+            public void onCancelled(Subscription subscription, Throwable throwable) {
+                if (throwable == null)
+                    return;
 
-            @Override
-            public void onError(Subscription subscription, Throwable throwable) {
                 Assertions.fail(throwable);
             }
         }, SubscribeToAllOptions.get()

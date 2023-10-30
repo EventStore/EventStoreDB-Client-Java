@@ -44,13 +44,13 @@ public interface SubscribePersistentSubscriptionToStreamTests extends Connection
             }
 
             @Override
-            public void onError(PersistentSubscription subscription, Throwable throwable) {
-                result.completeExceptionally(throwable);
-            }
+            public void onCancelled(PersistentSubscription subscription, Throwable throwable) {
+                if (throwable == null) {
+                    result.complete(count);
+                    return;
+                }
 
-            @Override
-            public void onCancelled(PersistentSubscription subscription) {
-                result.complete(count);
+                result.completeExceptionally(throwable);
             }
         }).get();
 
@@ -101,13 +101,13 @@ public interface SubscribePersistentSubscriptionToStreamTests extends Connection
             }
 
             @Override
-            public void onError(PersistentSubscription subscription, Throwable throwable) {
-                result.completeExceptionally(throwable);
-            }
+            public void onCancelled(PersistentSubscription subscription, Throwable throwable) {
+                if (throwable == null) {
+                    result.complete(count);
+                    return;
+                }
 
-            @Override
-            public void onCancelled(PersistentSubscription subscription) {
-                result.complete(count);
+                result.completeExceptionally(throwable);
             }
         }).get();
 
