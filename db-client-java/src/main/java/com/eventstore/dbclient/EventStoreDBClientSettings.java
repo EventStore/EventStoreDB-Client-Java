@@ -37,6 +37,7 @@ public class EventStoreDBClientSettings {
     private final long keepAliveInterval;
     private final Long defaultDeadline;
     private final List<ClientInterceptor> interceptors;
+    private final String tlsCaFile;
 
     /**
      * If the dns discovery is enabled.
@@ -139,6 +140,14 @@ public class EventStoreDBClientSettings {
         return interceptors;
     }
 
+    /**
+     * Client certificate for secure connection.
+     * @return tls CA file if it was provided, otherwise null.
+     */
+    public String getTlsCaFile() {
+        return tlsCaFile;
+    }
+
     EventStoreDBClientSettings(
             boolean dnsDiscover,
             int maxDiscoverAttempts,
@@ -152,7 +161,8 @@ public class EventStoreDBClientSettings {
             long keepAliveTimeout,
             long keepAliveInterval,
             Long defaultDeadline,
-            List<ClientInterceptor> interceptors
+            List<ClientInterceptor> interceptors,
+            String tlsCaFile
     ) {
         this.dnsDiscover = dnsDiscover;
         this.maxDiscoverAttempts = maxDiscoverAttempts;
@@ -167,6 +177,7 @@ public class EventStoreDBClientSettings {
         this.keepAliveInterval = keepAliveInterval;
         this.defaultDeadline = defaultDeadline;
         this.interceptors = interceptors;
+        this.tlsCaFile = tlsCaFile;
     }
 
     /**

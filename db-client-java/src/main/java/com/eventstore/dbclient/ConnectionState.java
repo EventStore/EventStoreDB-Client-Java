@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLException;
+import java.io.File;
 import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 
@@ -28,9 +29,11 @@ class ConnectionState {
             try {
                 SslContextBuilder sslContextBuilder = GrpcSslContexts.forClient();
 
-                if (!settings.isTlsVerifyCert()) {
+                if (settings.getTlsCaFile() != null)
+                    sslContextBuilder.trustManager(new File(settings.getTlsCaFile()));
+
+                if (!settings.isTlsVerifyCert())
                     sslContextBuilder.trustManager(InsecureTrustManagerFactory.INSTANCE);
-                }
 
                 this.sslContext = sslContextBuilder.build();
             } catch (SSLException e) {

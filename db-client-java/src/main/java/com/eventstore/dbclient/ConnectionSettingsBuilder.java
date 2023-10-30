@@ -11,8 +11,6 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.*;
 
-import static java.lang.Integer.parseInt;
-
 /**
  * Utility to create client settings programmatically.
  */
@@ -31,6 +29,7 @@ public class ConnectionSettingsBuilder {
     private long _keepAliveInterval = Consts.DEFAULT_KEEP_ALIVE_INTERVAL_IN_MS;
     private Long _defaultDeadline = null;
     private List<ClientInterceptor> _interceptors = new ArrayList<>();
+    private String _tlsCaFile = null;
 
     ConnectionSettingsBuilder() {}
 
@@ -52,7 +51,8 @@ public class ConnectionSettingsBuilder {
                 _keepAliveTimeout,
                 _keepAliveInterval,
                 _defaultDeadline,
-                _interceptors);
+                _interceptors,
+                _tlsCaFile);
     }
 
     /**
@@ -180,6 +180,16 @@ public class ConnectionSettingsBuilder {
      */
     public ConnectionSettingsBuilder addInterceptor(ClientInterceptor interceptor) {
         this._interceptors.add(interceptor);
+        return this;
+    }
+
+    /**
+     * Client certificate for secure connection. Not required for enabling secure connection. Useful for self-signed
+     * certificate that are not installed on the system trust store.
+     * @param filepath path to a certificate file.
+     */
+    public ConnectionSettingsBuilder tlsCaFile(String filepath) {
+        this._tlsCaFile = filepath;
         return this;
     }
 
@@ -375,6 +385,13 @@ public class ConnectionSettingsBuilder {
                     } catch (NumberFormatException e) {
                         invalidParamFormat(entry[0], value);
                     }
+                    break;
+
+                case "tlscafile":
+                    if (entry[1].isEmpty())
+                        invalidParamFormat(entry[0], entry[1]);
+
+                    builder._tlsCaFile = entry[1];
                     break;
 
                 default:
