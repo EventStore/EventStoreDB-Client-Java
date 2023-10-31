@@ -3,6 +3,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- Support certificate file input in connection string and builder. [EventStoreDB-Client-Java#247](https://github.com/EventStore/EventStoreDB-Client-Java/pull/247)
+
+### Changed
+- Improve error reporting in SubscriptionListener. [EventStoreDB-Client-Java#245](https://github.com/EventStore/EventStoreDB-Client-Java/pull/245)
+- Update dependencies. [EventStoreDB-Client-Java#246](https://github.com/EventStore/EventStoreDB-Client-Java/pull/246)
+
 ## [5.0.0] - 2023-10-23
 ### Changed
 - Improve internal gRPC connection management for better error propagation. [EventStoreDB-Client-Java#226](https://github.com/EventStore/EventStoreDB-Client-Java/pull/226)
