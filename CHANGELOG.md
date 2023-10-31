@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [5.1.0] - 2023-10-31
 ### Added
 - Support certificate file input in connection string and builder. [EventStoreDB-Client-Java#247](https://github.com/EventStore/EventStoreDB-Client-Java/pull/247)
 
