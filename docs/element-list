@@ -1,1 +1,8 @@
 com.eventstore.dbclient
+com.eventstore.dbclient.proto.gossip
+com.eventstore.dbclient.proto.persistentsubscriptions
+com.eventstore.dbclient.proto.projections
+com.eventstore.dbclient.proto.serverfeatures
+com.eventstore.dbclient.proto.shared
+com.eventstore.dbclient.proto.streams
+com.google.rpc
