@@ -42,7 +42,7 @@ dependencies {
     implementation "com.google.protobuf:protobuf-java:${protobufVersion}"
     implementation "com.google.protobuf:protobuf-java-util:${protobufVersion}"
     implementation 'com.google.errorprone:error_prone_annotations:2.23.0'
-    implementation "io.grpc:grpc-netty-shaded:${grpcVersion}"
+//    implementation "io.grpc:grpc-netty-shaded:${grpcVersion}"
     implementation "io.grpc:grpc-stub:${grpcVersion}"
     implementation "io.grpc:grpc-protobuf:${grpcVersion}"
     implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
