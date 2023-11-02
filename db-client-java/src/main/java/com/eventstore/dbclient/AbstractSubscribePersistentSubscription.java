@@ -106,9 +106,9 @@ abstract class AbstractSubscribePersistentSubscription {
                         Throwable error = throwable;
                         if (error instanceof StatusRuntimeException) {
                             StatusRuntimeException sre = (StatusRuntimeException) error;
-                            if (sre.getStatus().getCode() == Status.Code.CANCELLED) {
+                            String desc = sre.getStatus().getDescription();
+                            if (sre.getStatus().getCode() == Status.Code.CANCELLED && desc != null && desc.equals("user-initiated")) {
                                 listener.onCancelled(this._subscription, null);
-                                _requestStream.onCompleted();
                                 return;
                             }
 
@@ -121,7 +121,6 @@ abstract class AbstractSubscribePersistentSubscription {
                         }
 
                         listener.onCancelled(this._subscription, error);
-                        _requestStream.onError(Status.fromThrowable(error).asRuntimeException());
                     }
 
                     @Override
