@@ -133,4 +133,23 @@ public interface SubscriptionTests extends ConnectionAware {
         Assertions.assertEquals(expected.size(), count.get());
         subscription.stop();
     }
+
+    @Test
+    default void testCancellingSubscriptionShouldNotRaiseAnException() throws Throwable {
+        EventStoreDBClient client = getDefaultClient();
+        String streamName = generateName();
+        String eventType = generateName();
+
+        client.appendToStream(streamName, EventData.builderAsJson(eventType, "Hello World").build()).get(60, TimeUnit.SECONDS);
+
+        Subscription sub = client.subscribeToAll(new SubscriptionListener() {
+            @Override
+            public void onCancelled(Subscription subscription, Throwable exception) {
+                if (exception != null)
+                    Assertions.fail(exception);
+            }
+        }).get(60, TimeUnit.SECONDS);
+
+        sub.stop();
+    }
 }
