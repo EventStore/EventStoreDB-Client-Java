@@ -8,7 +8,7 @@ import io.grpc.TlsChannelCredentials;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.X509TrustManager;
+import javax.net.ssl.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -32,11 +32,21 @@ class ConnectionState {
                 if (settings.getTlsCaFile() != null)
                     builder.trustManager(new File(settings.getTlsCaFile()));
 
-                if (!settings.isTlsVerifyCert())
+                if (!settings.isTlsVerifyCert()) {
                     builder.trustManager(new InsecureTrustManager());
+                    SSLContext sc = SSLContext.getInstance("TLS");
+                    sc.init(null, new TrustManager[] {new InsecureTrustManager()}, new java.security.SecureRandom());
+                    HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+                    HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
+                        @Override
+                        public boolean verify(String hostname, SSLSession session) {
+                            return true;
+                        }
+                    });
+                }
 
                 this.channelCredentials = builder.build();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 logger.error("Exception when creating SSL context", e);
                 throw new RuntimeException(e);
             }
@@ -62,7 +72,6 @@ class ConnectionState {
 
         long keepAliveTimeoutInMs = settings.getKeepAliveTimeout() <= 0 ? Long.MAX_VALUE : settings.getKeepAliveTimeout();
         long keepAliveIntervalInMs = settings.getKeepAliveInterval() <= 0 ? Long.MAX_VALUE : settings.getKeepAliveInterval();
-
         this.currentChannel = Grpc.newChannelBuilderForAddress(addr.getHostName(), addr.getPort(), this.channelCredentials)
                 .maxInboundMessageSize(MAX_INBOUND_MESSAGE_LENGTH)
                 .intercept(settings.getInterceptors())
