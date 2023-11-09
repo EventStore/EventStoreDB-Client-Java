@@ -88,6 +88,16 @@ abstract class AbstractRegularSubscription {
                         return;
                     }
 
+                    if (_confirmed && readResp.hasCaughtUp()) {
+                        listener.onCaughtUp(_subscription);
+                        return;
+                    }
+
+                    if (_confirmed && readResp.hasFellBehind()) {
+                        listener.onFellBehind(_subscription);
+                        return;
+                    }
+
                     if (_confirmed && !readResp.hasEvent()) {
                         logger.warn(
                                 String.format("Confirmed subscription %s received non-{event,checkpoint} variant",

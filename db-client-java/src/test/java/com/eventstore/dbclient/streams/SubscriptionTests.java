@@ -2,11 +2,13 @@ package com.eventstore.dbclient.streams;
 
 import com.eventstore.dbclient.*;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -151,5 +153,31 @@ public interface SubscriptionTests extends ConnectionAware {
         }).get(60, TimeUnit.SECONDS);
 
         sub.stop();
+    }
+
+    @Test
+    @Timeout(value = 5, unit = TimeUnit.MINUTES)
+    default void testCaughtUpMessageIsReceived() throws Throwable {
+        EventStoreDBClient client = getDefaultClient();
+        Optional<ServerVersion> version = client.getServerVersion().get();
+
+        Assumptions.assumeTrue(version.isPresent());
+        Assumptions.assumeFalse(version.get().isLessThan(23, 10, 0));
+
+        String streamName = generateName();
+
+        ArrayList<EventData> events = serializeBazEvents(generateBazEvent(20));
+        client.appendToStream(streamName, events.iterator()).get();
+        final CountDownLatch caughtUp = new CountDownLatch(1);
+
+        Subscription subscription = client.subscribeToStream(streamName, new SubscriptionListener() {
+            @Override
+            public void onCaughtUp(Subscription subscription) {
+                caughtUp.countDown();
+            }
+        }, SubscribeToStreamOptions.get().fromStart()).get();
+
+        caughtUp.await();
+        subscription.stop();
     }
 }
