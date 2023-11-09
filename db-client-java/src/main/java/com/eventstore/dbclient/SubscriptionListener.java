@@ -23,4 +23,17 @@ public abstract class SubscriptionListener {
      * @param subscription handle to the subscription.
      */
     public void onConfirmation(Subscription subscription) {}
+
+    /**
+     * Called when the subscription has reached the head of the stream.
+     * @param subscription handle to the subscription.
+     */
+    public void onCaughtUp(Subscription subscription) {}
+
+    /**
+     * Called when the subscription has fallen behind, meaning it's no longer keeping up with the
+     * stream's pace.
+     * @param subscription handle to the subscription.
+     */
+    public void onFellBehind(Subscription subscription) {}
 }
