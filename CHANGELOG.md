@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- Support new subscription messages. [EventStoreDB-Client-Java#254](https://github.com/EventStore/EventStoreDB-Client-Java/pull/254)
+
 ## [5.1.1] - 2023-11-03
 ### Fixed
 - Fix IllegalStateException when stopping a subscription. [EventStoreDB-Client-Java#250](https://github.com/EventStore/EventStoreDB-Client-Java/pull/250)
