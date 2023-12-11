@@ -57,6 +57,10 @@ public class ReadStreamOptions extends OptionsWithStartRevisionAndResolveLinkTos
      * The maximum event count EventStoreDB will return.
      */
     public ReadStreamOptions maxCount(long maxCount) {
+        if (maxCount <= 0) {
+            throw new IllegalArgumentException("MaxCount must be greater than 0");
+        }
+
         this.maxCount = maxCount;
         return this;
     }

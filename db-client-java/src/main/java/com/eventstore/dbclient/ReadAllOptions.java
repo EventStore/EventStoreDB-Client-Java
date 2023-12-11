@@ -54,7 +54,12 @@ public class ReadAllOptions extends OptionsWithPositionAndResolveLinkTosBase<Rea
      * The maximum event count EventStoreDB will return.
      */
     public ReadAllOptions maxCount(long maxCount) {
+        if (maxCount <= 0) {
+            throw new IllegalArgumentException("MaxCount must be greater than 0");
+        }
+
         this.maxCount = maxCount;
+
         return this;
     }
 }
