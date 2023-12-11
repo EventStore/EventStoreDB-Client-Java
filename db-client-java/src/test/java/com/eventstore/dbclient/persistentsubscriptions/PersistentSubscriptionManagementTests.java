@@ -1,6 +1,7 @@
 package com.eventstore.dbclient.persistentsubscriptions;
 
 import com.eventstore.dbclient.*;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import org.junit.jupiter.api.*;
@@ -138,6 +139,7 @@ public interface PersistentSubscriptionManagementTests extends ConnectionAware {
         Exceptions exceptions = new Exceptions().registerGoAwayError();
         EventStoreDBPersistentSubscriptionsClient client = EventStoreDBPersistentSubscriptionsClient.from(getDatabase().defaultClient());
         final EventStoreDBClient streamClient = getDatabase().defaultClient();
+        final JsonMapper jsonMapper = new JsonMapper();
         final String streamName = generateName();
         final String groupName = generateName();
 
@@ -169,7 +171,7 @@ public interface PersistentSubscriptionManagementTests extends ConnectionAware {
         }).get();
 
         for (int i = 0; i < 2; i++) {
-            EventData data = EventData.builderAsJson("foobar", new Foo()).build();
+            EventData data = EventData.builderAsJson("foobar", jsonMapper.writeValueAsBytes(new Foo())).build();
             streamClient.appendToStream(streamName, data).get();
         }
 
@@ -196,6 +198,7 @@ public interface PersistentSubscriptionManagementTests extends ConnectionAware {
         Exceptions exceptions = new Exceptions().registerGoAwayError();
         EventStoreDBPersistentSubscriptionsClient client = EventStoreDBPersistentSubscriptionsClient.from(getDatabase().defaultClient());
         final EventStoreDBClient streamClient = getDatabase().defaultClient();
+        final JsonMapper jsonMapper = new JsonMapper();
         String streamName = generateName();
         String groupName = generateName();
 
@@ -228,7 +231,7 @@ public interface PersistentSubscriptionManagementTests extends ConnectionAware {
         }).get();
 
         for (int i = 0; i < 2; i++) {
-            EventData data = EventData.builderAsJson("foobar", new Foo()).build();
+            EventData data = EventData.builderAsJson("foobar", jsonMapper.writeValueAsBytes(new Foo())).build();
             streamClient.appendToStream(streamName, data).get();
         }
 

@@ -1,6 +1,7 @@
 package com.eventstore.dbclient.persistentsubscriptions;
 
 import com.eventstore.dbclient.*;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -14,11 +15,12 @@ public interface SubscribePersistentSubscriptionToStreamTests extends Connection
         String streamName = generateName();
         EventStoreDBPersistentSubscriptionsClient client = EventStoreDBPersistentSubscriptionsClient.from(getDatabase().defaultClient());
         EventStoreDBClient streamsClient = getDatabase().defaultClient();
+        JsonMapper jsonMapper = new JsonMapper();
 
         flaky(10, exceptions, () -> client.createToStream(streamName, "aGroup")
                 .get());
 
-        EventDataBuilder builder = EventData.builderAsJson("foobar", new Foo());
+        EventDataBuilder builder = EventData.builderAsJson("foobar", jsonMapper.writeValueAsBytes(new Foo()));
 
         streamsClient.appendToStream(streamName, builder.build(), builder.build(), builder.build())
                 .get();
@@ -66,11 +68,12 @@ public interface SubscribePersistentSubscriptionToStreamTests extends Connection
         String streamName = generateName();
         EventStoreDBPersistentSubscriptionsClient client = EventStoreDBPersistentSubscriptionsClient.from(getDatabase().defaultClient());
         EventStoreDBClient streamsClient = getDatabase().defaultClient();
+        final JsonMapper jsonMapper = new JsonMapper();
 
         flaky(10, exceptions, () -> client.createToAll("aGroup")
                 .get());
 
-        EventDataBuilder builder = EventData.builderAsJson("foobar", new Foo());
+        EventDataBuilder builder = EventData.builderAsJson("foobar", jsonMapper.writeValueAsBytes(new Foo()));
 
         streamsClient.appendToStream(streamName, builder.build(), builder.build(), builder.build())
                 .get();

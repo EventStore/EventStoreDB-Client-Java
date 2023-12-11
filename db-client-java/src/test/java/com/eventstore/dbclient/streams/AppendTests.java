@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.Objects;
 import java.util.UUID;
 
 public interface AppendTests extends ConnectionAware {
@@ -17,8 +16,9 @@ public interface AppendTests extends ConnectionAware {
         final String eventType = "TestEvent";
         final String eventId = "38fffbc2-339e-11ea-8c7b-784f43837872";
         final byte[] eventMetaData = new byte[]{0xd, 0xe, 0xa, 0xd};
+        final JsonMapper jsonMapper = new JsonMapper();
 
-        EventData event = EventData.builderAsJson(eventType, new Foo())
+        EventData event = EventData.builderAsJson(eventType, jsonMapper.writeValueAsBytes(new Foo()))
                 .metadataAsBytes(eventMetaData)
                 .eventId(UUID.fromString(eventId))
                 .build();

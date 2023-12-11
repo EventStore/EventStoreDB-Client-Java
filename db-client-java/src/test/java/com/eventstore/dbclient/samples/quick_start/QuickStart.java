@@ -2,13 +2,15 @@ package com.eventstore.dbclient.samples.quick_start;
 
 import com.eventstore.dbclient.*;
 import com.eventstore.dbclient.samples.TestEvent;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 public class QuickStart {
-    public static void Run() throws ConnectionStringParsingException, ExecutionException, InterruptedException {
+    public static void Run() throws ConnectionStringParsingException, ExecutionException, InterruptedException, JsonProcessingException {
         // region createClient
         EventStoreDBClientSettings settings = EventStoreDBConnectionString.parseOrThrow("{connectionString}");
         EventStoreDBClient client = EventStoreDBClient.create(settings);
@@ -16,11 +18,12 @@ public class QuickStart {
 
         // region createEvent
         TestEvent event = new TestEvent();
+        JsonMapper jsonMapper = new JsonMapper();
         event.setId(UUID.randomUUID().toString());
         event.setImportantData("I wrote my first event!");
 
         EventData eventData = EventData
-                .builderAsJson("TestEvent", event)
+                .builderAsJson("TestEvent", jsonMapper.writeValueAsBytes(event))
                 .build();
         // endregion createEvent
 
