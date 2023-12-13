@@ -1,6 +1,7 @@
 package com.eventstore.dbclient.streams;
 
 import com.eventstore.dbclient.*;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
@@ -142,7 +143,11 @@ public interface SubscriptionTests extends ConnectionAware {
         String streamName = generateName();
         String eventType = generateName();
 
-        client.appendToStream(streamName, EventData.builderAsJson(eventType, "Hello World").build()).get(60, TimeUnit.SECONDS);
+        client.appendToStream(
+            streamName,
+            EventData.builderAsJson(eventType, "Hello World".getBytes())
+                .build()
+        ).get(60, TimeUnit.SECONDS);
 
         Subscription sub = client.subscribeToAll(new SubscriptionListener() {
             @Override
