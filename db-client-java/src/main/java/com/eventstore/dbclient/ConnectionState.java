@@ -1,47 +1,57 @@
 package com.eventstore.dbclient;
 
+import io.grpc.ChannelCredentials;
+import io.grpc.Grpc;
+import io.grpc.InsecureChannelCredentials;
 import io.grpc.ManagedChannel;
-import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
-import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
-import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext;
-import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
-import io.grpc.netty.shaded.io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+import io.grpc.TlsChannelCredentials;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.SSLException;
+import javax.net.ssl.*;
 import java.io.File;
+import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.security.cert.X509Certificate;
 import java.util.concurrent.TimeUnit;
 
 class ConnectionState {
     private final static Logger logger = LoggerFactory.getLogger(ConnectionState.class);
     private final static int MAX_INBOUND_MESSAGE_LENGTH = 17 * 1_024 * 1_024; // 17MiB
     private final EventStoreDBClientSettings settings;
-    private final SslContext sslContext;
+    private final ChannelCredentials channelCredentials;
     private InetSocketAddress previous;
     private ManagedChannel currentChannel;
 
     ConnectionState(EventStoreDBClientSettings settings) {
         this.settings = settings;
-
         if (settings.isTls()) {
             try {
-                SslContextBuilder sslContextBuilder = GrpcSslContexts.forClient();
+                TlsChannelCredentials.Builder builder = TlsChannelCredentials.newBuilder();
 
                 if (settings.getTlsCaFile() != null)
-                    sslContextBuilder.trustManager(new File(settings.getTlsCaFile()));
+                    builder.trustManager(new File(settings.getTlsCaFile()));
 
-                if (!settings.isTlsVerifyCert())
-                    sslContextBuilder.trustManager(InsecureTrustManagerFactory.INSTANCE);
+                if (!settings.isTlsVerifyCert()) {
+                    builder.trustManager(new InsecureTrustManager());
+                    SSLContext sc = SSLContext.getInstance("TLS");
+                    sc.init(null, new TrustManager[] {new InsecureTrustManager()}, new java.security.SecureRandom());
+                    HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+                    HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
+                        @Override
+                        public boolean verify(String hostname, SSLSession session) {
+                            return true;
+                        }
+                    });
+                }
 
-                this.sslContext = sslContextBuilder.build();
-            } catch (SSLException e) {
+                this.channelCredentials = builder.build();
+            } catch (Exception e) {
                 logger.error("Exception when creating SSL context", e);
                 throw new RuntimeException(e);
             }
         } else {
-            this.sslContext = null;
+            this.channelCredentials = InsecureChannelCredentials.create();
         }
     }
 
@@ -60,28 +70,15 @@ class ConnectionState {
     void connect(InetSocketAddress addr) {
         this.closeChannel();
 
-        NettyChannelBuilder builder = NettyChannelBuilder
-                .forAddress(addr)
+        long keepAliveTimeoutInMs = settings.getKeepAliveTimeout() <= 0 ? Long.MAX_VALUE : settings.getKeepAliveTimeout();
+        long keepAliveIntervalInMs = settings.getKeepAliveInterval() <= 0 ? Long.MAX_VALUE : settings.getKeepAliveInterval();
+        this.currentChannel = Grpc.newChannelBuilderForAddress(addr.getHostName(), addr.getPort(), this.channelCredentials)
                 .maxInboundMessageSize(MAX_INBOUND_MESSAGE_LENGTH)
-                .intercept(settings.getInterceptors());
+                .intercept(settings.getInterceptors())
+                .keepAliveTime(keepAliveIntervalInMs, TimeUnit.MILLISECONDS)
+                .keepAliveTimeout(keepAliveTimeoutInMs, TimeUnit.MILLISECONDS)
+                .build();
 
-        if (this.sslContext == null) {
-            builder.usePlaintext();
-        } else {
-            builder.sslContext(this.sslContext);
-        }
-
-        if (settings.getKeepAliveTimeout() <= 0)
-            builder.keepAliveTimeout(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
-        else
-            builder.keepAliveTimeout(settings.getKeepAliveTimeout(), TimeUnit.MILLISECONDS);
-
-        if (settings.getKeepAliveInterval() <= 0)
-            builder.keepAliveTime(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
-        else
-            builder.keepAliveTime(settings.getKeepAliveInterval(), TimeUnit.MILLISECONDS);
-
-        this.currentChannel = builder.build();
         this.previous = addr;
     }
 
@@ -108,5 +105,20 @@ class ConnectionState {
 
     public void clear() {
         this.previous = null;
+    }
+
+    public static class InsecureTrustManager implements X509TrustManager {
+
+        public void checkClientTrusted(X509Certificate[] x509Certificates, String s) {
+            // No need to implement
+        }
+
+        public void checkServerTrusted(X509Certificate[] x509Certificates, String s) {
+            // Trust all certificates
+        }
+
+        public X509Certificate[] getAcceptedIssuers() {
+            return new X509Certificate[0]; // Accept any issuer
+        }
     }
 }
