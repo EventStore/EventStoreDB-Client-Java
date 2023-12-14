@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- Expose building a JSON payload event with raw bytes [EventStoreDB-Client-Java#258](https://github.com/EventStore/EventStoreDB-Client-Java/pull/258)
+
 ## [5.2.0] - 2023-11-10
 ### Added
 - Support new subscription messages. [EventStoreDB-Client-Java#254](https://github.com/EventStore/EventStoreDB-Client-Java/pull/254)
