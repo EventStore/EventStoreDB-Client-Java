@@ -16,7 +16,7 @@ public class EventStoreDBClientBase {
     EventStoreDBClientBase(EventStoreDBClientSettings settings) {
         Discovery discovery;
 
-        if (settings.getHosts().length == 1) {
+        if (settings.getHosts().length == 1 && !settings.isDnsDiscover()) {
             discovery = new SingleNodeDiscovery(settings.getHosts()[0]);
         } else {
             discovery = new ClusterDiscovery(settings);

@@ -15,9 +15,8 @@ public class ExternallyCreatedCluster implements Database {
     public ConnectionSettingsBuilder defaultSettingsBuilder() {
         return EventStoreDBClientSettings
                 .builder()
+                .dnsDiscover(true)
                 .defaultCredentials("admin", "changeit")
-                .addHost("localhost", 2_111)
-                .addHost("localhost", 2_112)
                 .addHost("localhost", 2_113)
                 .tls(secure)
                 .tlsVerifyCert(false)

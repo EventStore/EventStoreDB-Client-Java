@@ -142,6 +142,7 @@ class ConnectionService implements Runnable, MsgHandler {
 
             if (this.loadServerFeatures()) {
                 this.channelId = UUID.randomUUID();
+                this.connection.confirmChannel();
                 logger.info("Connection to endpoint [{}] created successfully", this.connection.getLastConnectedEndpoint());
                 break;
             }
