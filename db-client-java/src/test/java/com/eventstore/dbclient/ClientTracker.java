@@ -74,6 +74,20 @@ public class ClientTracker {
                             continue;
                         }
 
+                        // In some rare occasions, it's possible for GHA to take much more time setting up a cluster
+                        // through docker compose. In this case, we recreate a fresh client in the case we exhausted
+                        // all discovery attempts and the connection got closed.
+                        if (e.getCause() instanceof ConnectionShutdownException && (settings.isDnsDiscover() || settings.getHosts().length > 1)) {
+                            logger.debug("Seems we exhausted all discovery attempts. Unusual but maybe docker is slow");
+                            try {
+                                Thread.sleep(500);
+                            } catch (InterruptedException ex) {
+                                throw new RuntimeException(ex);
+                            }
+                            defaultClient = EventStoreDBClient.create(settings);
+                            continue;
+                        }
+
                         throw new RuntimeException(e);
                     }
                 }

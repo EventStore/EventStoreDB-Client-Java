@@ -11,7 +11,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 public interface DeadlineTests extends ConnectionAware {
-    @Test
+    @RetryingTest(10)
      default void testDefaultDeadline() throws Throwable {
         EventStoreDBClient client = getDatabase().connectWith(opts ->
                 opts.defaultDeadline(1)

@@ -22,6 +22,12 @@ class ConnectionState {
     private InetSocketAddress previous;
     private ManagedChannel currentChannel;
 
+    // Indicates if the current channel passed all the connection pre-requisites to be used by the user
+    // Not exhaustive list includes:
+    // * If we managed to get a gossip seed from the channel
+    // * If we managed to read the server features (if not, it was a not found error then it's not fatal, just old node version)
+    private boolean confirmedChannel;
+
     ConnectionState(EventStoreDBClientSettings settings) {
         this.settings = settings;
 
@@ -46,7 +52,11 @@ class ConnectionState {
     }
 
     InetSocketAddress getLastConnectedEndpoint() {
-        return this.previous;
+        return this.confirmedChannel ? this.previous : null;
+    }
+
+    void confirmChannel() {
+        this.confirmedChannel = true;
     }
 
     ManagedChannel getCurrentChannel() {
@@ -82,6 +92,7 @@ class ConnectionState {
             builder.keepAliveTime(settings.getKeepAliveInterval(), TimeUnit.MILLISECONDS);
 
         this.currentChannel = builder.build();
+        this.confirmedChannel = false;
         this.previous = addr;
     }
 
@@ -108,5 +119,6 @@ class ConnectionState {
 
     public void clear() {
         this.previous = null;
+        this.confirmedChannel = false;
     }
 }
