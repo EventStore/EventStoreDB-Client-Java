@@ -91,6 +91,8 @@ public class ProjectionManagement {
         String name = "to-be-deleted-projection";
         client.create(name, "fromAll().when()").get();
 
+        client.create(name, "fromAll().when()", CreateProjectionOptions.get().enabled(true)).get();
+
         // region Delete
         // A projection must be disabled to allow it to be deleted.
         client.disable(name).get();

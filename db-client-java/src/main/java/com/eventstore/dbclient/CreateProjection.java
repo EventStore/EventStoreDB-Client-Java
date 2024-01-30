@@ -11,6 +11,8 @@ class CreateProjection {
     private final String projectionName;
     private final String query;
     private final boolean trackEmittedStreams;
+    private final boolean checkpointsEnabled;
+    private final boolean enabled;
     private final boolean emitEnabled;
     private final CreateProjectionOptions options;
 
@@ -21,6 +23,8 @@ class CreateProjection {
         this.projectionName = projectionName;
         this.query = query;
         this.trackEmittedStreams = options.isTrackingEmittedStreams();
+        this.checkpointsEnabled = options.isCheckpointsEnabled();
+        this.enabled = options.isEnabled();
         this.emitEnabled = options.isEmitEnabled();
         this.options = options;
     }
@@ -31,7 +35,9 @@ class CreateProjection {
             Projectionmanagement.CreateReq.Options.Continuous.Builder continuousBuilder =
                     Projectionmanagement.CreateReq.Options.Continuous.newBuilder()
                             .setName(projectionName)
-                            .setTrackEmittedStreams(trackEmittedStreams);
+                            .setTrackEmittedStreams(trackEmittedStreams)
+                            .setCheckpointsEnabled(checkpointsEnabled)
+                            .setEnabled(enabled);
 
             Projectionmanagement.CreateReq.Options.Builder optionsBuilder =
                 Projectionmanagement.CreateReq.Options.newBuilder()
