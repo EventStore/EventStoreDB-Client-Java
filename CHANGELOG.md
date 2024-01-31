@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [5.3.0] - 2024-01-31
 ### Added
 - Expose building a JSON payload event with raw bytes [EventStoreDB-Client-Java#258](https://github.com/EventStore/EventStoreDB-Client-Java/pull/258)
 
