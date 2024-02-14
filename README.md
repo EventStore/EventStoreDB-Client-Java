@@ -1,5 +1,6 @@
 # EventStoreDB Client SDK for Java
 
+git
 This repository contains an [EventStoreDB][es] Client SDK written in Java for use with languages on the JVM. It is
 compatible with Java 8 and above.
 
