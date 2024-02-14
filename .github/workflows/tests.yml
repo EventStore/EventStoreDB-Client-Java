@@ -31,6 +31,13 @@ jobs:
         with:
           gradle-version: 7.4
 
+      - name: Login to Cloudsmith
+        uses: docker/login-action@v3
+        with:
+          registry: docker.eventstore.com
+          username: ${{ secrets.CLOUDSMITH_CICD_USER }}
+          password: ${{ secrets.CLOUDSMITH_CICD_TOKEN }}
+
       - name: Execute Gradle build
         run: ./gradlew ci --tests ${{ matrix.test }}Tests
         env:
@@ -54,6 +61,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
+      - name: Login to Cloudsmith
+        uses: docker/login-action@v3
+        with:
+          registry: docker.eventstore.com
+          username: ${{ secrets.CLOUDSMITH_CICD_USER }}
+          password: ${{ secrets.CLOUDSMITH_CICD_TOKEN }}
 
       - name: Generate certificates
         run: docker compose --file configure-tls-for-tests.yml up
@@ -92,6 +106,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
+      - name: Login to Cloudsmith
+        uses: docker/login-action@v3
+        with:
+          registry: docker.eventstore.com
+          username: ${{ secrets.CLOUDSMITH_CICD_USER }}
+          password: ${{ secrets.CLOUDSMITH_CICD_TOKEN }}
 
       - name: Set up cluster with Docker Compose
         run: docker compose up -d

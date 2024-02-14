@@ -9,12 +9,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class DockerContainerDatabase extends GenericContainer<DockerContainerDatabase> implements Database {
-    public static final String DEFAULT_REGISTRY = "ghcr.io/eventstore";
-    public static final String DEFAULT_IMAGE = "eventstore";
+    public static final String DEFAULT_REGISTRY = "docker.eventstore.com/eventstore-ce";
+    public static final String DEFAULT_IMAGE = "eventstoredb-ce";
     public static final String DEFAULT_VERSION = "latest";
 
     public static class Builder {
