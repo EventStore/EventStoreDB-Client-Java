@@ -26,7 +26,7 @@ services:
       - volumes-provisioner
 
   esdb-node1:
-    image: ghcr.io/eventstore/eventstore:${CONTAINER_IMAGE_VERSION:-latest}
+    image: docker.eventstore.com/eventstore-ce/eventstoredb-ce:${CONTAINER_IMAGE_VERSION:-latest}
     env_file:
       - vars.env
     environment:
@@ -47,7 +47,7 @@ services:
       - cert-gen
 
   esdb-node2:
-    image: ghcr.io/eventstore/eventstore:${CONTAINER_IMAGE_VERSION:-latest}
+    image: docker.eventstore.com/eventstore-ce/eventstoredb-ce:${CONTAINER_IMAGE_VERSION:-latest}
     env_file:
       - vars.env
     environment:
@@ -68,7 +68,7 @@ services:
       - cert-gen
 
   esdb-node3:
-    image: ghcr.io/eventstore/eventstore:${CONTAINER_IMAGE_VERSION:-latest}
+    image: docker.eventstore.com/eventstore-ce/eventstoredb-ce:${CONTAINER_IMAGE_VERSION:-latest}
     env_file:
       - vars.env
     environment:
