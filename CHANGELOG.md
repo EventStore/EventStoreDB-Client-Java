@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+- Updated protobuf & protoc to 3.25.3 [EventStoreDB-Client-Java#268](https://github.com/EventStore/EventStoreDB-Client-Java/pull/268)
+
+### Fixed
+- https://github.com/EventStore/EventStoreDB-Client-Java/issues/267 [EventStoreDB-Client-Java#268](https://github.com/EventStore/EventStoreDB-Client-Java/pull/268)
+
 ## [5.3.1] - 2024-02-29
 ### Changed
 - Updated gRPC client and Protoc to latest, which come with arm64 binaries, enabling compile on arm64 [EventStoreDB-Client-Java#265](https://github.com/EventStore/EventStoreDB-Client-Java/pull/265)
