@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [5.3.2] - 2024-03-05
 ### Changed
 - Updated protobuf & protoc to 3.25.3 [EventStoreDB-Client-Java#268](https://github.com/EventStore/EventStoreDB-Client-Java/pull/268)
 
