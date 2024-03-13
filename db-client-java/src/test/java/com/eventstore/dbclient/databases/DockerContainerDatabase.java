@@ -10,11 +10,9 @@ import java.io.FileNotFoundException;
 import java.nio.file.Paths;
 
 public class DockerContainerDatabase extends GenericContainer<DockerContainerDatabase> implements Database {
-    private static final String REGISTRY;
     private static final HealthCheck HEALTH_CHECK;
 
     static {
-        REGISTRY = "ghcr.io/eventstore";
         HEALTH_CHECK = new HealthCheck()
                 .withInterval(1000000000L)
                 .withTimeout(1000000000L)
@@ -28,7 +26,7 @@ public class DockerContainerDatabase extends GenericContainer<DockerContainerDat
         boolean anonymous;
 
         public Builder() {
-            this.image = "eventstore";
+            this.image = "docker.eventstore.com/eventstore-ce/eventstoredb-ce";
             this.version = "latest";
         }
 
@@ -48,7 +46,7 @@ public class DockerContainerDatabase extends GenericContainer<DockerContainerDat
         }
 
         public Builder grpcTestDataImage() {
-            return this.image("testdata");
+            return this.image("docker.eventstore.com/eventstore-utils/testdata");
         }
 
         public Builder image(String image) {
@@ -65,7 +63,7 @@ public class DockerContainerDatabase extends GenericContainer<DockerContainerDat
     private final ClientTracker clientTracker;
 
     public DockerContainerDatabase(Builder builder) {
-        super(String.format("%s/%s:%s", REGISTRY, builder.image, builder.version));
+        super(String.format("%s:%s", builder.image, builder.version));
         addExposedPorts(1113, 2113);
 
         withEnv("EVENTSTORE_RUN_PROJECTIONS", "ALL");
@@ -94,7 +92,8 @@ public class DockerContainerDatabase extends GenericContainer<DockerContainerDat
 
     @Override
     public ConnectionSettingsBuilder defaultSettingsBuilder() {
-        ConnectionSettingsBuilder settingsBuilder = EventStoreDBClientSettings.builder().addHost(getHost(), getMappedPort(2113));
+        ConnectionSettingsBuilder settingsBuilder = EventStoreDBClientSettings.builder().addHost(getHost(),
+                getMappedPort(2113));
 
         if (!builder.anonymous)
             settingsBuilder.defaultCredentials("admin", "changeit");
@@ -134,8 +133,8 @@ public class DockerContainerDatabase extends GenericContainer<DockerContainerDat
 
     private static void verifyCertificatesExist() {
         String currentDir = System.getProperty("user.dir");
-        String[][] files =  {
-                 { "ca", "ca.crt" },
+        String[][] files = {
+                { "ca", "ca.crt" },
                 { "ca", "ca.key" },
                 { "node", "node.crt" },
                 { "node", "node.key" },
