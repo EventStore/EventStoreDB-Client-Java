@@ -38,7 +38,7 @@ jobs:
         run: ./gradlew ci --tests ${{ matrix.test }}Tests
         env:
           EVENTSTORE_DOCKER_REGISTRY_ENV: docker.eventstore.com
-          EVENTSTORE_DOCKER_IMAGE_ENV: eventstore-staging-ee/eventstoredb-commercial
+          EVENTSTORE_DOCKER_IMAGE_ENV: eventstore-ee/eventstoredb-commercial
           EVENTSTORE_DOCKER_TAG_ENV: 24.2.0-jammy
 
       - uses: actions/upload-artifact@v3
