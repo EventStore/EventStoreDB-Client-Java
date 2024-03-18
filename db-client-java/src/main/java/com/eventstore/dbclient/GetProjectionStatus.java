@@ -18,7 +18,7 @@ class GetProjectionStatus {
     }
 
     public CompletableFuture<ProjectionDetails> execute() {
-        return this.client.run(channel -> {
+        return this.client.run(options, channel -> {
             Projectionmanagement.StatisticsReq.Options.Builder optionsBuilder =
                     Projectionmanagement.StatisticsReq.Options.newBuilder()
                             .setName(this.projectionName);

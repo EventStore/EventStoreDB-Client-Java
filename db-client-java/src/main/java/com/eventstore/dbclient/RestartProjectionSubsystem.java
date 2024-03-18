@@ -15,7 +15,7 @@ class RestartProjectionSubsystem {
     }
 
     public CompletableFuture execute() {
-        return this.client.run(channel -> {
+        return this.client.run(options, channel -> {
             ProjectionsGrpc.ProjectionsStub client =
                     GrpcUtils.configureStub(ProjectionsGrpc.newStub(channel), this.client.getSettings(), this.options);
 

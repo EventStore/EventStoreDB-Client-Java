@@ -32,6 +32,7 @@ public class EventStoreDBClientSettings {
     private final boolean tls;
     private final boolean tlsVerifyCert;
     private final UserCredentials defaultCredentials;
+    private final UserCertificate defaultUserCertificate;
     private final InetSocketAddress[] hosts;
     private final long keepAliveTimeout;
     private final long keepAliveInterval;
@@ -69,8 +70,9 @@ public class EventStoreDBClientSettings {
 
     /**
      * Preferred node type when picking a node within a cluster.
-     * @see NodePreference
+     *
      * @return selected node preference.
+     * @see NodePreference
      */
     public NodePreference getNodePreference() {
         return nodePreference;
@@ -92,15 +94,29 @@ public class EventStoreDBClientSettings {
 
     /**
      * Default credentials used to authenticate requests.
-     * @see UserCredentials
+     * User credentials take precedence over any configured {@link UserCertificate}.
+     *
      * @return default credentials null if not defined
+     * @see UserCredentials
      */
     public UserCredentials getDefaultCredentials() {
         return defaultCredentials;
     }
 
     /**
+     * Default certificate for user authentication.
+     * If any {@link UserCredentials} are configured, the server will ignore the user certificate.
+     *
+     * @return user certificate, otherwise null.
+     * @see UserCertificate
+     */
+    public UserCertificate getDefaultUserCertificate() {
+        return defaultUserCertificate;
+    }
+
+    /**
      * The list of endpoints that the client uses to connect.
+     *
      * @return hosts to connect to.
      */
     public InetSocketAddress[] getHosts() {
@@ -118,6 +134,7 @@ public class EventStoreDBClientSettings {
     /**
      * The amount of time (in milliseconds) to wait after which a keepalive ping is sent on the transport.
      * Use -1 to disable.
+     *
      * @return keepalive value in milliseconds.
      */
     public long getKeepAliveInterval() {
@@ -126,6 +143,7 @@ public class EventStoreDBClientSettings {
 
     /**
      * An optional length of time (in milliseconds) to use for gRPC deadlines.
+     *
      * @return deadline value in milliseconds or null if not set.
      */
     public Long getDefaultDeadline() {
@@ -134,6 +152,7 @@ public class EventStoreDBClientSettings {
 
     /**
      * Registered gRPC interceptors.
+     *
      * @return list of registered gRPC client.
      */
     public List<ClientInterceptor> getInterceptors() {
@@ -142,6 +161,7 @@ public class EventStoreDBClientSettings {
 
     /**
      * Client certificate for secure connection.
+     *
      * @return tls CA file if it was provided, otherwise null.
      */
     public String getTlsCaFile() {
@@ -157,6 +177,7 @@ public class EventStoreDBClientSettings {
             boolean tls,
             boolean tlsVerifyCert,
             UserCredentials defaultCredentials,
+            UserCertificate defaultUserCertificate,
             InetSocketAddress[] hosts,
             long keepAliveTimeout,
             long keepAliveInterval,
@@ -172,6 +193,7 @@ public class EventStoreDBClientSettings {
         this.tls = tls;
         this.tlsVerifyCert = tlsVerifyCert;
         this.defaultCredentials = defaultCredentials;
+        this.defaultUserCertificate = defaultUserCertificate;
         this.hosts = hosts;
         this.keepAliveTimeout = keepAliveTimeout;
         this.keepAliveInterval = keepAliveInterval;
@@ -182,8 +204,9 @@ public class EventStoreDBClientSettings {
 
     /**
      * Return a connection settings builder configured with default properties.
-     * @see ConnectionSettingsBuilder
+     *
      * @return a builder.
+     * @see ConnectionSettingsBuilder
      */
     public static ConnectionSettingsBuilder builder() {
         return new ConnectionSettingsBuilder();

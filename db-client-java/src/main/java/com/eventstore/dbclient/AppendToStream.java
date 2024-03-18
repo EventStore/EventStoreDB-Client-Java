@@ -30,7 +30,7 @@ class AppendToStream {
     }
 
     public CompletableFuture<WriteResult> execute() {
-        return this.client.run(channel -> {
+        return this.client.run(options, channel -> {
             CompletableFuture<WriteResult> result = new CompletableFuture<>();
             StreamsOuterClass.AppendReq.Options.Builder options = this.options.getExpectedRevision().applyOnWire(StreamsOuterClass.AppendReq.Options.newBuilder()
                     .setStreamIdentifier(Shared.StreamIdentifier.newBuilder()

@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Main gRPC connection management service.
  */
-class ConnectionService implements Runnable, MsgHandler {
+class ConnectionService implements Runnable {
     private final Logger logger = LoggerFactory.getLogger(ConnectionService.class);
     private final GrpcClient client;
     private final AtomicBoolean closed;
@@ -63,10 +63,10 @@ class ConnectionService implements Runnable, MsgHandler {
         }
     }
 
-    private boolean loadServerFeatures() {
+    private boolean loadServerFeatures(AuthOptionsBase authOptions) {
         try {
             this.serverInfo = ServerFeatures
-                    .getSupportedFeatures(this.settings, this.connection.getCurrentChannel())
+                    .getSupportedFeatures(this.settings, authOptions, this.connection.getCurrentChannel())
                     .orElse(null);
 
             return true;
@@ -99,14 +99,24 @@ class ConnectionService implements Runnable, MsgHandler {
         this.forceExit(null);
     }
 
-    @Override
-    public void createChannel(UUID previousId, InetSocketAddress candidate) {
+    private void tryCreateChannel(InetSocketAddress endpoint, WorkItem workItem, AuthOptionsBase authOptions) {
+        try {
+            this.createChannel(this.channelId, endpoint, authOptions);
+        } catch (RuntimeException e) {
+            workItem.accept(null, e);
+            throw e;
+        }
+    }
+
+    public void createChannel(UUID previousId, InetSocketAddress candidate, AuthOptionsBase authOptions) {
         if (this.closed.get()) {
             logger.warn("Channel creation request ignored, the connection to endpoint [{}] is already closed", this.connection.getLastConnectedEndpoint());
             return;
         }
 
-        if (!this.channelId.equals(previousId)) {
+        // Skip creating channel if a new one has already been created
+        // unless a new ssl context must be created (new user certificate).
+        if (!this.channelId.equals(previousId) && !this.connection.shouldRecreateSslContext(authOptions)) {
             logger.debug("Skipping connection attempt as new connection to endpoint [{}] has already been created.", this.connection.getLastConnectedEndpoint());
             return;
         }
@@ -122,12 +132,12 @@ class ConnectionService implements Runnable, MsgHandler {
 
             // Node selection.
             if (candidate != null) {
-                this.connection.connect(candidate);
+                this.connection.connect(candidate, authOptions);
                 logger.debug("Prepared channel to proposed leader candidate [{}]", candidate);
             } else {
                 try {
                     // TODO - Should we consider a discovery timeout?
-                    this.discovery.run(this.connection).get();
+                    this.discovery.run(this.connection, authOptions).get();
                 } catch (InterruptedException e) {
                     forceExit(e);
                 } catch (ExecutionException e) {
@@ -140,7 +150,7 @@ class ConnectionService implements Runnable, MsgHandler {
                 }
             }
 
-            if (this.loadServerFeatures()) {
+            if (this.loadServerFeatures(authOptions)) {
                 this.channelId = UUID.randomUUID();
                 this.connection.confirmChannel();
                 logger.info("Connection to endpoint [{}] created successfully", this.connection.getLastConnectedEndpoint());
@@ -154,7 +164,6 @@ class ConnectionService implements Runnable, MsgHandler {
         }
     }
 
-    @Override
     public void process(RunWorkItem args) {
         if (this.closed.get()) {
             logger.warn("Receive a command request but the connection to endpoint [{}] is already closed", this.connection.getLastConnectedEndpoint());
@@ -162,16 +171,20 @@ class ConnectionService implements Runnable, MsgHandler {
             return;
         }
 
-        // It's possible we haven't connected yet.
         if (this.connection.getCurrentChannel() == null) {
             logger.debug("Channel is not resolved yet, connecting...");
+            tryCreateChannel(
+                    null,
+                    args.getItem(),
+                    args.getAuthOptions());
+        }
 
-            try {
-                this.createChannel(this.channelId, null);
-            } catch (RuntimeException e) {
-                args.getItem().accept(null, e);
-                throw e;
-            }
+        if (this.connection.shouldRecreateSslContext(args.getAuthOptions())) {
+            logger.debug("Creating new channel with new user certificate...");
+            tryCreateChannel(
+                    this.connection.getLastConnectedEndpoint(),
+                    args.getItem(),
+                    args.getAuthOptions());
         }
 
         WorkItemArgs workArgs = new WorkItemArgs(
@@ -183,7 +196,6 @@ class ConnectionService implements Runnable, MsgHandler {
         args.getItem().accept(workArgs, null);
     }
 
-    @Override
     public void shutdown(Shutdown args) {
         if (this.closed.get()) {
             args.complete();

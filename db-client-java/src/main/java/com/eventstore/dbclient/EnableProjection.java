@@ -17,7 +17,7 @@ class EnableProjection {
     }
 
     public CompletableFuture execute() {
-        return this.client.run(channel -> {
+        return this.client.run(options, channel -> {
             Projectionmanagement.EnableReq.Options.Builder optionsBuilder =
                     Projectionmanagement.EnableReq.Options.newBuilder()
                             .setName(this.projectionName);

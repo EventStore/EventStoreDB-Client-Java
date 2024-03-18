@@ -3,7 +3,7 @@ package com.eventstore.dbclient;
 /**
  * Options of the list persistent subscriptions request.
  */
-public class ListPersistentSubscriptionsOptions extends OptionsBase<ListPersistentSubscriptionsOptions> {
+public class ListPersistentSubscriptionsOptions extends CallOptionsBase<ListPersistentSubscriptionsOptions> {
     ListPersistentSubscriptionsOptions(){}
 
     /**

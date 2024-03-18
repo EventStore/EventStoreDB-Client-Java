@@ -12,7 +12,7 @@ import static com.eventstore.dbclient.HttpUtils.checkForError;
 class RestartPersistentSubscriptionSubsystem {
     @SuppressWarnings("unchecked")
     public static CompletableFuture execute(GrpcClient client, RestartPersistentSubscriptionSubsystemOptions options) {
-        return client.runWithArgs(args -> {
+        return client.runWithArgs(options, args -> {
             CompletableFuture result = new CompletableFuture();
 
             if (args.supportFeature(FeatureFlags.PERSISTENT_SUBSCRIPTION_MANAGEMENT)) {

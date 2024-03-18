@@ -3,7 +3,7 @@ package com.eventstore.dbclient;
 /**
  * Options for create projection request.
  */
-public class CreateProjectionOptions extends OptionsBase<CreateProjectionOptions> {
+public class CreateProjectionOptions extends CallOptionsBase<CreateProjectionOptions> {
     private boolean trackEmittedStreams;
     private boolean emitEnabled;
 

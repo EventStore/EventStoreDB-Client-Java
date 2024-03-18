@@ -43,3 +43,9 @@ jobs:
     uses: ./.github/workflows/tests.yml
     with:
       esdb_version: ${{ matrix.version }}
+
+  plugins-tests:
+    needs: build
+    name: Plugins Tests
+    uses: ./.github/workflows/plugins-tests.yml
+    secrets: inherit

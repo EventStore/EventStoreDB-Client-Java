@@ -5,28 +5,31 @@ import java.util.StringJoiner;
 import java.util.UUID;
 
 class CreateChannel implements Msg {
-    final InetSocketAddress channel;
     final UUID previousId;
+    final InetSocketAddress endpoint;
+    final AuthOptionsBase authOptions;
 
-    public CreateChannel(UUID previousId) {
-        this.channel = null;
+    public CreateChannel(UUID previousId, AuthOptionsBase authOptions) {
+        this.endpoint = null;
         this.previousId = previousId;
+        this.authOptions = authOptions;
     }
 
-    public CreateChannel(UUID previousId, InetSocketAddress endpoint) {
-        this.channel = endpoint;
+    public CreateChannel(UUID previousId, InetSocketAddress endpoint, AuthOptionsBase authOptions) {
+        this.endpoint = endpoint;
         this.previousId = previousId;
+        this.authOptions = authOptions;
     }
 
     @Override
     public String toString() {
         return new StringJoiner(", ", CreateChannel.class.getSimpleName() + "[", "]")
-                .add("endpoint=" + (channel != null ? channel.toString() : "NOT_SET"))
+                .add("endpoint=" + (endpoint != null ? endpoint.toString() : "NOT_SET"))
                 .toString();
     }
 
     @Override
-    public void accept(MsgHandler handler) {
-        handler.createChannel(this.previousId, this.channel);
+    public void accept(ConnectionService handler) {
+        handler.createChannel(this.previousId, this.endpoint, this.authOptions);
     }
 }

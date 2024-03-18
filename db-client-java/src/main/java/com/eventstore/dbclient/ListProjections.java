@@ -19,7 +19,7 @@ class ListProjections {
     }
 
     public CompletableFuture<ListProjectionsResult> execute() {
-        return this.client.run(channel -> {
+        return this.client.run(options, channel -> {
             Projectionmanagement.StatisticsReq.Options.Builder optionsBuilder =
                 Projectionmanagement.StatisticsReq.Options.newBuilder()
                     .setContinuous(Shared.Empty.newBuilder());

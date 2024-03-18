@@ -1,6 +1,6 @@
 package com.eventstore.dbclient;
 
-class OptionsWithExpectedRevisionBase<T> extends OptionsBase<T> {
+class OptionsWithExpectedRevisionBase<T> extends CallOptionsBase<T> {
     private ExpectedRevision expectedRevision;
 
     protected OptionsWithExpectedRevisionBase() {

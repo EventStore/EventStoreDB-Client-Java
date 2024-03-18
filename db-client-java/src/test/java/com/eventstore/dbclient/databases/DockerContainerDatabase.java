@@ -8,28 +8,28 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DockerContainerDatabase extends GenericContainer<DockerContainerDatabase> implements Database {
-    private static final String REGISTRY;
-    private static final HealthCheck HEALTH_CHECK;
-
-    static {
-        REGISTRY = "ghcr.io/eventstore";
-        HEALTH_CHECK = new HealthCheck()
-                .withInterval(1000000000L)
-                .withTimeout(1000000000L)
-                .withRetries(10);
-    }
+    public static final String DEFAULT_REGISTRY = "ghcr.io/eventstore";
+    public static final String DEFAULT_IMAGE = "eventstore";
+    public static final String DEFAULT_VERSION = "latest";
 
     public static class Builder {
+        String registry;
         String image;
         String version;
         boolean secure;
         boolean anonymous;
+        Map<String, String> env;
 
         public Builder() {
-            this.image = "eventstore";
-            this.version = "latest";
+            this.registry = DEFAULT_REGISTRY;
+            this.image = DEFAULT_IMAGE;
+            this.version = DEFAULT_VERSION;
+            this.env = new HashMap<>();
         }
 
         public Builder secure(boolean secure) {
@@ -56,6 +56,16 @@ public class DockerContainerDatabase extends GenericContainer<DockerContainerDat
             return this;
         }
 
+        public Builder registry(String registry) {
+            this.registry = registry;
+            return this;
+        }
+
+        public Builder env(String envVar, String value) {
+            this.env.put(envVar, value);
+            return this;
+        }
+
         public DockerContainerDatabase build() {
             return new DockerContainerDatabase(this);
         }
@@ -65,7 +75,7 @@ public class DockerContainerDatabase extends GenericContainer<DockerContainerDat
     private final ClientTracker clientTracker;
 
     public DockerContainerDatabase(Builder builder) {
-        super(String.format("%s/%s:%s", REGISTRY, builder.image, builder.version));
+        super(String.format("%s/%s:%s", builder.registry, builder.image, builder.version));
         addExposedPorts(1113, 2113);
 
         withEnv("EVENTSTORE_RUN_PROJECTIONS", "ALL");
@@ -83,10 +93,16 @@ public class DockerContainerDatabase extends GenericContainer<DockerContainerDat
             withEnv("EVENTSTORE_INSECURE", "true");
         }
 
+        builder.env.forEach((envVar, value) -> withEnv(envVar, value));
+
         this.builder = builder;
         this.clientTracker = new ClientTracker();
 
-        withCreateContainerCmdModifier(cmd -> cmd.withHealthcheck(HEALTH_CHECK));
+        withCreateContainerCmdModifier(cmd -> cmd.withHealthcheck(new HealthCheck()
+                .withInterval(1000000000L)
+                .withTimeout(1000000000L)
+                .withRetries(10)));
+
         waitingFor(Wait.forHealthcheck());
 
         start();
@@ -134,11 +150,11 @@ public class DockerContainerDatabase extends GenericContainer<DockerContainerDat
 
     private static void verifyCertificatesExist() {
         String currentDir = System.getProperty("user.dir");
-        String[][] files =  {
-                 { "ca", "ca.crt" },
-                { "ca", "ca.key" },
-                { "node", "node.crt" },
-                { "node", "node.key" },
+        String[][] files = {
+                {"ca", "ca.crt"},
+                {"ca", "ca.key"},
+                {"node", "node.crt"},
+                {"node", "node.key"},
         };
 
         for (String[] strings : files) {

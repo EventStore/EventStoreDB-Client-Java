@@ -1,6 +1,6 @@
 package com.eventstore.dbclient;
 
-class OptionsWithResolveLinkTosBase<T> extends OptionsBase<T> {
+class OptionsWithResolveLinkTosBase<T> extends CallOptionsBase<T> {
     private boolean resolveLinkTos;
 
     protected OptionsWithResolveLinkTosBase(OperationKind kind) {

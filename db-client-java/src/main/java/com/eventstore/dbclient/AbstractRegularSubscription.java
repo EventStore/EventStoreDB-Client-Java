@@ -22,9 +22,9 @@ abstract class AbstractRegularSubscription {
     protected SubscriptionListener listener;
     protected Checkpointer checkpointer = null;
     private final GrpcClient client;
-    private final OptionsBase options;
+    private final CallOptionsBase options;
 
-    protected AbstractRegularSubscription(GrpcClient client, OptionsBase options) {
+    protected AbstractRegularSubscription(GrpcClient client, CallOptionsBase options) {
         this.client = client;
         this.options = options;
     }
@@ -42,7 +42,7 @@ abstract class AbstractRegularSubscription {
 
     @SuppressWarnings("unchecked")
     public CompletableFuture<Subscription> execute() {
-        return this.client.run(channel -> {
+        return this.client.run(options, channel -> {
             StreamsOuterClass.ReadReq readReq = StreamsOuterClass.ReadReq.newBuilder()
                     .setOptions(createOptions())
                     .build();

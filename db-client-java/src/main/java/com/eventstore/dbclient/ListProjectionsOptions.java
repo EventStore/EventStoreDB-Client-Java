@@ -3,7 +3,7 @@ package com.eventstore.dbclient;
 /**
  * Options of the list projections options.
  */
-public class ListProjectionsOptions extends OptionsBase<ListProjectionsOptions> {
+public class ListProjectionsOptions extends CallOptionsBase<ListProjectionsOptions> {
     private ListProjectionsOptions() {
     }
 

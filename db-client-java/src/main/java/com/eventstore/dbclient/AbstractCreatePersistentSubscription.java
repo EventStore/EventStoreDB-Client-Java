@@ -11,11 +11,11 @@ abstract class AbstractCreatePersistentSubscription<TPos, TSettings extends Pers
     private final GrpcClient client;
     private final String group;
     private final TSettings settings;
-    private final OptionsBase options;
+    private final CallOptionsBase options;
     private static final Logger logger = LoggerFactory.getLogger(AbstractCreatePersistentSubscription.class);
 
     public AbstractCreatePersistentSubscription(GrpcClient client, String group,
-                                                TSettings settings, OptionsBase options) {
+                                                TSettings settings, CallOptionsBase options) {
         this.client = client;
         this.group = group;
         this.settings = settings;
@@ -30,7 +30,7 @@ abstract class AbstractCreatePersistentSubscription<TPos, TSettings extends Pers
 
     @SuppressWarnings({"unchecked", "deprecation"})
     public CompletableFuture execute() {
-        return this.client.runWithArgs(args -> {
+        return this.client.runWithArgs(options, args -> {
             CompletableFuture result = new CompletableFuture();
             PersistentSubscriptionsGrpc.PersistentSubscriptionsStub client =
                     GrpcUtils.configureStub(PersistentSubscriptionsGrpc.newStub(args.getChannel()), this.client.getSettings(), this.options);

@@ -25,7 +25,9 @@ public class ParseInvalidConnectionStringTests {
                 Arguments.of("esdb://localhost?keepAliveInterval=sdfksjsfl"),
                 Arguments.of("esdb://localhost?keepAliveTimeout=sdfksjsfl"),
                 Arguments.of("esdb://localhost?keepAliveTimeout=-3"),
-                Arguments.of("esdb://localhost?nodePreference=read_only_replica")
+                Arguments.of("esdb://localhost?nodePreference=read_only_replica"),
+                Arguments.of("esdb://localhost?userCertFile=/path/to/cert"),
+                Arguments.of("esdb://localhost?userKeyFile=/path/to/key")
        );
     }
 

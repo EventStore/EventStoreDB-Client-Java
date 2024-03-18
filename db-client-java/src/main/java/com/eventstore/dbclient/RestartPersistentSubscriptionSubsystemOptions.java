@@ -3,7 +3,7 @@ package com.eventstore.dbclient;
 /**
  * Options of the restart persistent subscription subsystem request.
  */
-public class RestartPersistentSubscriptionSubsystemOptions extends OptionsBase<RestartPersistentSubscriptionSubsystemOptions> {
+public class RestartPersistentSubscriptionSubsystemOptions extends CallOptionsBase<RestartPersistentSubscriptionSubsystemOptions> {
     RestartPersistentSubscriptionSubsystemOptions(){}
 
     /**

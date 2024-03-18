@@ -3,7 +3,7 @@ package com.eventstore.dbclient;
 /**
  * Options of the abort projection request.
  */
-public class AbortProjectionOptions extends OptionsBase<AbortProjectionOptions> {
+public class AbortProjectionOptions extends CallOptionsBase<AbortProjectionOptions> {
     private AbortProjectionOptions() {
     }
 

@@ -48,7 +48,7 @@ class GetProjectionState<TResult> {
 
     public CompletableFuture<TResult> execute() {
 
-        return this.client.run(channel -> {
+        return this.client.run(options, channel -> {
 
             Projectionmanagement.StateReq.Options.Builder optionsBuilder =
                     Projectionmanagement.StateReq.Options.newBuilder()

@@ -8,6 +8,7 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.*;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -112,19 +113,27 @@ final class GrpcUtils {
                 .build();
     }
 
-    static public <S extends AbstractAsyncStub<S>, O> S configureStub(S stub, EventStoreDBClientSettings settings, OptionsBase<O> options) {
+    static public <S extends AbstractAsyncStub<S>, O> S configureStub(S stub, EventStoreDBClientSettings settings, CallOptionsBase<O> options) {
         return configureStub(stub, settings, options, null);
     }
 
-    static public <S extends AbstractAsyncStub<S>, O> S configureStub(S stub, EventStoreDBClientSettings settings, OptionsBase<O> options, Long forceDeadlineInMs) {
-        S finalStub = stub;
+    static public <S extends AbstractAsyncStub<S>> S configureStub(S stub, EventStoreDBClientSettings settings, AuthOptionsBase authOptions) {
         ConnectionMetadata metadata = new ConnectionMetadata();
+        configureAuthMetadata(metadata, settings, authOptions);
 
+        return stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata.build()));
+    }
+
+    static public <S extends AbstractAsyncStub<S>, O> S configureStub(S stub, EventStoreDBClientSettings settings, CallOptionsBase<O> options, Long forceDeadlineInMs) {
+        ConnectionMetadata metadata = new ConnectionMetadata();
+        configureAuthMetadata(metadata, settings, options);
+
+        S finalStub = stub;
         if (options.getKind() != OperationKind.Streaming) {
             long deadlineInMs = 10_000;
 
             if (forceDeadlineInMs != null) {
-               deadlineInMs = forceDeadlineInMs;
+                deadlineInMs = forceDeadlineInMs;
             } else if (options.getDeadline() != null) {
                 deadlineInMs = options.getDeadline();
             } else if (settings.getDefaultDeadline() != null) {
@@ -134,22 +143,21 @@ final class GrpcUtils {
             finalStub = finalStub.withDeadlineAfter(deadlineInMs, TimeUnit.MILLISECONDS);
         }
 
-        UserCredentials credentials = null;
-
-        if (options.hasUserCredentials()) {
-            credentials = options.getCredentials();
-        } else if (settings.getDefaultCredentials() != null) {
-            credentials = settings.getDefaultCredentials();
-        }
-
-        if (credentials != null) {
-            metadata.authenticated(credentials);
-        }
-
         if (options.isLeaderRequired() || settings.getNodePreference() == NodePreference.LEADER) {
             metadata.requiresLeader();
         }
 
         return finalStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata.build()));
+    }
+
+    static private void configureAuthMetadata(ConnectionMetadata metadata, EventStoreDBClientSettings settings, AuthOptionsBase authOptions) {
+        UserCredentials credentials = Optional
+                .ofNullable(authOptions)
+                .map(AuthOptionsBase::getUserCredentials)
+                .orElseGet(settings::getDefaultCredentials);
+
+        if (credentials != null) {
+            metadata.authenticated(credentials);
+        }
     }
 }

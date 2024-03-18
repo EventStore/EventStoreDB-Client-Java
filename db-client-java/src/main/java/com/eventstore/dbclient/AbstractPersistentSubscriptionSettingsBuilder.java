@@ -2,7 +2,7 @@ package com.eventstore.dbclient;
 
 import java.time.Duration;
 
-class AbstractPersistentSubscriptionSettingsBuilder<T, TSettings extends PersistentSubscriptionSettings> extends OptionsBase<T> {
+class AbstractPersistentSubscriptionSettingsBuilder<T, TSettings extends PersistentSubscriptionSettings> extends CallOptionsBase<T> {
     private final TSettings settings;
 
     public AbstractPersistentSubscriptionSettingsBuilder(TSettings settings) {

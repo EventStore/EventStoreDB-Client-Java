@@ -17,7 +17,7 @@ class DeleteProjection {
     }
 
     public CompletableFuture execute() {
-        return this.client.run(channel -> {
+        return this.client.run(options, channel -> {
             Projectionmanagement.DeleteReq.Options reqOptions =
                     Projectionmanagement.DeleteReq.Options.newBuilder()
                             .setName(this.projectionName)

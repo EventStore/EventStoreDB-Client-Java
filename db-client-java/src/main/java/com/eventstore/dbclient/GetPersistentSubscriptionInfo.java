@@ -17,7 +17,7 @@ import static com.eventstore.dbclient.HttpUtils.*;
 
 final class GetPersistentSubscriptionInfo {
     public static CompletableFuture<Optional<PersistentSubscriptionInfo>> execute(GrpcClient client, GetPersistentSubscriptionInfoOptions options, String stream, String groupName) {
-        return client.runWithArgs(args -> {
+        return client.runWithArgs(options, args -> {
             CompletableFuture<Optional<PersistentSubscriptionInfo>> result = new CompletableFuture<>();
 
             if (stream.equals("$all") && !args.supportFeature(FeatureFlags.PERSISTENT_SUBSCRIPTION_TO_ALL)) {

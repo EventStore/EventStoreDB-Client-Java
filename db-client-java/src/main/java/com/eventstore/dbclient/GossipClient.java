@@ -89,5 +89,5 @@ class GossipClient {
         };
     }
 
-    class GossipOption extends OptionsBase<Void> {}
+    class GossipOption extends CallOptionsBase<Void> {}
 }

@@ -16,9 +16,9 @@ abstract class AbstractRead implements Publisher<ReadMessage> {
     protected static final StreamsOuterClass.ReadReq.Options.Builder defaultReadOptions;
 
     private final GrpcClient client;
-    private final OptionsBase options;
+    private final CallOptionsBase options;
 
-    protected AbstractRead(GrpcClient client, OptionsBase options) {
+    protected AbstractRead(GrpcClient client, CallOptionsBase options) {
         this.client = client;
         this.options = options;
     }
@@ -38,7 +38,7 @@ abstract class AbstractRead implements Publisher<ReadMessage> {
         subscriber.onSubscribe(readSubscription);
 
         CompletableFuture<ReadSubscription> result = new CompletableFuture<>();
-        this.client.run(channel -> {
+        this.client.run(options, channel -> {
             StreamsOuterClass.ReadReq request = StreamsOuterClass.ReadReq.newBuilder()
                     .setOptions(createOptions())
                     .build();
