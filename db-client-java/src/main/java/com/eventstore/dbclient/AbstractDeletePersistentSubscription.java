@@ -20,7 +20,7 @@ abstract class AbstractDeletePersistentSubscription {
 
     @SuppressWarnings("unchecked")
     public CompletableFuture execute() {
-        return this.client.runWithArgs(args -> {
+        return this.client.runWithArgs(options, args -> {
             CompletableFuture result = new CompletableFuture();
             PersistentSubscriptionsGrpc.PersistentSubscriptionsStub client =
                     GrpcUtils.configureStub(PersistentSubscriptionsGrpc.newStub(args.getChannel()), this.client.getSettings(), this.options);

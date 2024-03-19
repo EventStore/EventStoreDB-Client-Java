@@ -27,7 +27,7 @@ class CreateProjection {
 
     @SuppressWarnings("unchecked")
     public CompletableFuture execute() {
-        return this.client.run(channel -> {
+        return this.client.run(options, channel -> {
             Projectionmanagement.CreateReq.Options.Continuous.Builder continuousBuilder =
                     Projectionmanagement.CreateReq.Options.Continuous.newBuilder()
                             .setName(projectionName)

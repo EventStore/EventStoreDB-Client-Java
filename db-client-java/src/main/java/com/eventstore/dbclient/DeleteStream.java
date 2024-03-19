@@ -23,7 +23,7 @@ class DeleteStream {
     }
 
     public CompletableFuture<DeleteResult> execute() {
-        return this.client.run(channel -> {
+        return this.client.run(options, channel -> {
             StreamsGrpc.StreamsStub client = GrpcUtils.configureStub(StreamsGrpc.newStub(channel), this.client.getSettings(), this.options);
 
             if (this.softDelete) {

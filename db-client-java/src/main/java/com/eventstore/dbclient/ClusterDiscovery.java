@@ -25,8 +25,8 @@ class ClusterDiscovery implements Discovery {
         }
     }
 
-    private static CompletableFuture<Optional<ClusterInfo.Member>> attemptDiscovery(NodeSelector selector, ConnectionState factory, InetSocketAddress seed) {
-        factory.connect(seed);
+    private static CompletableFuture<Optional<ClusterInfo.Member>> attemptDiscovery(NodeSelector selector, ConnectionState factory, InetSocketAddress seed, AuthOptionsBase authOptions) {
+        factory.connect(seed, authOptions);
         GossipClient client = new GossipClient(factory.getSettings(), factory.getCurrentChannel());
         return client.read().thenApply(info -> {
             if (factory.getLastConnectedEndpoint() != null) {
@@ -38,11 +38,11 @@ class ClusterDiscovery implements Discovery {
     }
 
     @Override
-    public CompletableFuture<Void> run(ConnectionState state) {
-        return CompletableFuture.runAsync(() -> discover(state));
+    public CompletableFuture<Void> run(ConnectionState state, AuthOptionsBase authOptions) {
+        return CompletableFuture.runAsync(() -> discover(state, authOptions));
     }
 
-    void discover(ConnectionState state) {
+    void discover(ConnectionState state, AuthOptionsBase authOptions) {
         List<InetSocketAddress> candidates = new ArrayList<>(this.seeds);
 
         if (candidates.size() > 1) {
@@ -56,14 +56,14 @@ class ClusterDiscovery implements Discovery {
         for (InetSocketAddress seed : candidates) {
             logger.debug("Using seed node [{}] for cluster node discovery.", seed);
             try {
-                Optional<ClusterInfo.Member> optionalMember = attemptDiscovery(this.nodeSelector, state, seed)
+                Optional<ClusterInfo.Member> optionalMember = attemptDiscovery(this.nodeSelector, state, seed, authOptions)
                         .get(state.getSettings().getGossipTimeout(), TimeUnit.MILLISECONDS);
 
                 if (optionalMember.isPresent()) {
                     ClusterInfo.Member member = optionalMember.get();
 
                     if (!member.getHttpEndpoint().equals(state.getLastConnectedEndpoint())) {
-                        state.connect(member.getHttpEndpoint());
+                        state.connect(member.getHttpEndpoint(), authOptions);
                     }
 
                     logger.debug("Selected cluster node [{}] in state [{}] for connection attempt.", member.getHttpEndpoint(), member.getState());

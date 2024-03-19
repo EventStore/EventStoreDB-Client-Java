@@ -12,15 +12,18 @@ import org.slf4j.LoggerFactory;
 import javax.net.ssl.SSLException;
 import java.io.File;
 import java.net.InetSocketAddress;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 class ConnectionState {
     private final static Logger logger = LoggerFactory.getLogger(ConnectionState.class);
     private final static int MAX_INBOUND_MESSAGE_LENGTH = 17 * 1_024 * 1_024; // 17MiB
     private final EventStoreDBClientSettings settings;
-    private final SslContext sslContext;
-    private InetSocketAddress previous;
+    private InetSocketAddress endpoint;
     private ManagedChannel currentChannel;
+    private UserCertificate userCertificate;
+    private SslContext sslContext;
 
     // Indicates if the current channel passed all the connection pre-requisites to be used by the user
     // Not exhaustive list includes:
@@ -31,32 +34,7 @@ class ConnectionState {
     ConnectionState(EventStoreDBClientSettings settings) {
         this.settings = settings;
 
-        if (settings.isTls()) {
-            try {
-                SslContextBuilder sslContextBuilder = GrpcSslContexts.forClient();
-
-                if (settings.getTlsCaFile() != null)
-                    sslContextBuilder.trustManager(new File(settings.getTlsCaFile()));
-
-                if (!settings.isTlsVerifyCert())
-                    sslContextBuilder.trustManager(InsecureTrustManagerFactory.INSTANCE);
-
-                this.sslContext = sslContextBuilder.build();
-            } catch (SSLException e) {
-                logger.error("Exception when creating SSL context", e);
-                throw new RuntimeException(e);
-            }
-        } else {
-            this.sslContext = null;
-        }
-    }
-
-    InetSocketAddress getLastConnectedEndpoint() {
-        return this.confirmedChannel ? this.previous : null;
-    }
-
-    void confirmChannel() {
-        this.confirmedChannel = true;
+        buildSslContext(settings.getDefaultUserCertificate());
     }
 
     ManagedChannel getCurrentChannel() {
@@ -67,33 +45,58 @@ class ConnectionState {
         return this.settings;
     }
 
-    void connect(InetSocketAddress addr) {
+    InetSocketAddress getLastConnectedEndpoint() {
+        return this.confirmedChannel ? this.endpoint : null;
+    }
+
+    boolean shouldRecreateSslContext(AuthOptionsBase authOptions) {
+        return !Objects.equals(
+                getUserCertificateOrDefault(authOptions),
+                this.userCertificate);
+    }
+
+    void confirmChannel() {
+        this.confirmedChannel = true;
+    }
+
+    void connect(InetSocketAddress endpoint, AuthOptionsBase authOptions) {
         this.closeChannel();
 
-        NettyChannelBuilder builder = NettyChannelBuilder
-                .forAddress(addr)
+        NettyChannelBuilder channelBuilder = NettyChannelBuilder
+                .forAddress(endpoint)
                 .maxInboundMessageSize(MAX_INBOUND_MESSAGE_LENGTH)
-                .intercept(settings.getInterceptors());
+                .intercept(this.settings.getInterceptors());
 
-        if (this.sslContext == null) {
-            builder.usePlaintext();
-        } else {
-            builder.sslContext(this.sslContext);
-        }
+        if (shouldRecreateSslContext(authOptions))
+            buildSslContext(getUserCertificateOrDefault(authOptions));
 
-        if (settings.getKeepAliveTimeout() <= 0)
-            builder.keepAliveTimeout(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+        if (this.sslContext != null)
+            channelBuilder.sslContext(this.sslContext);
         else
-            builder.keepAliveTimeout(settings.getKeepAliveTimeout(), TimeUnit.MILLISECONDS);
+            channelBuilder.usePlaintext();
 
-        if (settings.getKeepAliveInterval() <= 0)
-            builder.keepAliveTime(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+        if (this.settings.getKeepAliveTimeout() <= 0)
+            channelBuilder.keepAliveTimeout(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
         else
-            builder.keepAliveTime(settings.getKeepAliveInterval(), TimeUnit.MILLISECONDS);
+            channelBuilder.keepAliveTimeout(this.settings.getKeepAliveTimeout(), TimeUnit.MILLISECONDS);
 
-        this.currentChannel = builder.build();
+        if (this.settings.getKeepAliveInterval() <= 0)
+            channelBuilder.keepAliveTime(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+        else
+            channelBuilder.keepAliveTime(this.settings.getKeepAliveInterval(), TimeUnit.MILLISECONDS);
+
+        this.currentChannel = channelBuilder.build();
         this.confirmedChannel = false;
-        this.previous = addr;
+        this.endpoint = endpoint;
+    }
+
+    private UserCertificate getUserCertificateOrDefault(AuthOptionsBase authOptions) {
+        UserCertificate defaultUserCertificate = this.settings.getDefaultUserCertificate();
+
+        if (authOptions == null || authOptions.getUserCertificate() == null)
+            return defaultUserCertificate;
+
+        return authOptions.getUserCertificate();
     }
 
     private void closeChannel() {
@@ -113,12 +116,39 @@ class ConnectionState {
         }
     }
 
+    private void buildSslContext(UserCertificate userCertificate) {
+        if (!settings.isTls()) return;
+
+        SslContextBuilder sslContextBuilder = GrpcSslContexts.forClient();
+
+        if (userCertificate != null) {
+            sslContextBuilder.keyManager(
+                    new File(userCertificate.getCertFile()),
+                    new File(userCertificate.getKeyFile()));
+
+            this.userCertificate = userCertificate;
+        }
+
+        if (this.settings.getTlsCaFile() != null)
+            sslContextBuilder.trustManager(new File(this.settings.getTlsCaFile()));
+
+        if (!this.settings.isTlsVerifyCert())
+            sslContextBuilder.trustManager(InsecureTrustManagerFactory.INSTANCE);
+
+        try {
+            this.sslContext = sslContextBuilder.build();
+        } catch (SSLException e) {
+            logger.error("Exception when creating SSL context", e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public void shutdown() {
         this.closeChannel();
     }
 
     public void clear() {
-        this.previous = null;
+        this.endpoint = null;
         this.confirmedChannel = false;
     }
 }

@@ -3,7 +3,7 @@ package com.eventstore.dbclient;
 /**
  * Options of the delete persistent subscription request.
  */
-public class DeletePersistentSubscriptionOptions extends OptionsBase<DeletePersistentSubscriptionOptions> {
+public class DeletePersistentSubscriptionOptions extends CallOptionsBase<DeletePersistentSubscriptionOptions> {
     private DeletePersistentSubscriptionOptions() {
     }
 

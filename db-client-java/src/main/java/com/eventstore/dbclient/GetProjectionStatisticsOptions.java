@@ -3,7 +3,7 @@ package com.eventstore.dbclient;
 /**
  * Options of the get projection statistics request.
  */
-public class GetProjectionStatisticsOptions extends OptionsBase<GetProjectionStatisticsOptions> {
+public class GetProjectionStatisticsOptions extends CallOptionsBase<GetProjectionStatisticsOptions> {
     private GetProjectionStatisticsOptions() {
     }
 

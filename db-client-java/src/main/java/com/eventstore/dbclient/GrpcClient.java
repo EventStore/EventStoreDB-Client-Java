@@ -54,19 +54,19 @@ class GrpcClient {
     }
 
     public CompletableFuture<Optional<ServerVersion>> getServerVersion() {
-        return runWithArgs(args -> CompletableFuture.completedFuture(args.getServerVersion()));
+        return runWithArgs(null, args -> CompletableFuture.completedFuture(args.getServerVersion()));
     }
 
-    public <A> CompletableFuture<A> run(Function<ManagedChannel, CompletableFuture<A>> action) {
-        return runWithArgs(args -> action.apply(args.getChannel()));
+    public <A> CompletableFuture<A> run(AuthOptionsBase authOptions, Function<ManagedChannel, CompletableFuture<A>> action) {
+        return runWithArgs(authOptions, args -> action.apply(args.getChannel()));
     }
 
-    public <A> CompletableFuture<A> runWithArgs(Function<WorkItemArgs, CompletableFuture<A>> action) {
+    public <A> CompletableFuture<A> runWithArgs(AuthOptionsBase authOptions, Function<WorkItemArgs, CompletableFuture<A>> action) {
         final CompletableFuture<A> result = new CompletableFuture<>();
         final String msgId = UUID.randomUUID().toString();
         final LinkedBlockingQueue<Msg> queue = this.queue;
 
-        return this.push(new RunWorkItem(msgId, (args, fatalError) -> {
+        return this.push(new RunWorkItem(msgId, authOptions, (args, fatalError) -> {
             if (fatalError != null) {
                 result.completeExceptionally(fatalError);
                 return;
@@ -84,7 +84,7 @@ class GrpcClient {
                         // TODO - Currently we don't retry on not leader exception but we might consider
                         // allowing this on a case-by-case basis.
                         result.completeExceptionally(ex);
-                        queue.put(new CreateChannel(args.getId(), ex.getLeaderEndpoint()));
+                        queue.put(new CreateChannel(args.getId(), ex.getLeaderEndpoint(), authOptions));
 
                         return;
                     }
@@ -93,7 +93,7 @@ class GrpcClient {
                         StatusRuntimeException ex = (StatusRuntimeException) error;
 
                         if (ex.getStatus().getCode().equals(Status.Code.UNAVAILABLE)) {
-                            queue.put(new CreateChannel(args.getId()));
+                            queue.put(new CreateChannel(args.getId(), authOptions));
                         }
                     }
                     logger.debug("RunWorkItem[{}] completed exceptionally: {}", msgId, error.toString());

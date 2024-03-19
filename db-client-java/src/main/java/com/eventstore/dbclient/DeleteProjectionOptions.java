@@ -3,7 +3,7 @@ package com.eventstore.dbclient;
 /**
  * Options of the delete projection request.
  */
-public class DeleteProjectionOptions extends OptionsBase<DeleteProjectionOptions> {
+public class DeleteProjectionOptions extends CallOptionsBase<DeleteProjectionOptions> {
     private boolean deleteEmittedStreams;
     private boolean deleteStateStream;
     private boolean deleteCheckpointStream;

@@ -3,7 +3,7 @@ package com.eventstore.dbclient;
 /**
  * Options of the get persistent subscription info request.
  */
-public class GetPersistentSubscriptionInfoOptions extends OptionsBase<GetPersistentSubscriptionInfoOptions> {
+public class GetPersistentSubscriptionInfoOptions extends CallOptionsBase<GetPersistentSubscriptionInfoOptions> {
     /**
      * Returns options with default values.
      */

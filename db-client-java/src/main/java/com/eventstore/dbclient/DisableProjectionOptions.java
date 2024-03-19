@@ -3,7 +3,7 @@ package com.eventstore.dbclient;
 /**
  * Options of the disable projection request.
  */
-public class DisableProjectionOptions extends OptionsBase<DisableProjectionOptions> {
+public class DisableProjectionOptions extends CallOptionsBase<DisableProjectionOptions> {
     private DisableProjectionOptions() {
     }
 

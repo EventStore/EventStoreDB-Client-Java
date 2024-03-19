@@ -17,8 +17,8 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 
 class ServerFeatures {
-    public static Optional<ServerInfo> getSupportedFeatures(EventStoreDBClientSettings settings, ManagedChannel channel) {
-        final ServerFeaturesGrpc.ServerFeaturesStub stub = ServerFeaturesGrpc.newStub(channel);
+    public static Optional<ServerInfo> getSupportedFeatures(EventStoreDBClientSettings settings, AuthOptionsBase authOptions, ManagedChannel channel) {
+        final ServerFeaturesGrpc.ServerFeaturesStub stub = GrpcUtils.configureStub(ServerFeaturesGrpc.newStub(channel), settings, authOptions);
         try {
             return Optional.ofNullable(getSupportedFeaturesInternal(stub).get(settings.getGossipTimeout(), TimeUnit.MILLISECONDS));
         } catch (InterruptedException e) {

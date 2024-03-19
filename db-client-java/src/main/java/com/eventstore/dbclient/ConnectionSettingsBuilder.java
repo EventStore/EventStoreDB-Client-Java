@@ -24,6 +24,7 @@ public class ConnectionSettingsBuilder {
     private boolean _tls = true;
     private boolean _tlsVerifyCert = true;
     private UserCredentials _defaultCredentials;
+    private UserCertificate _defaultUserCertificate;
     private LinkedList<InetSocketAddress> _hosts = new LinkedList<>();
     private long _keepAliveTimeout = Consts.DEFAULT_KEEP_ALIVE_TIMEOUT_IN_MS;
     private long _keepAliveInterval = Consts.DEFAULT_KEEP_ALIVE_INTERVAL_IN_MS;
@@ -31,12 +32,14 @@ public class ConnectionSettingsBuilder {
     private List<ClientInterceptor> _interceptors = new ArrayList<>();
     private String _tlsCaFile = null;
 
-    ConnectionSettingsBuilder() {}
+    ConnectionSettingsBuilder() {
+    }
 
     /**
      * Returns configured connection settings.
-     * @see EventStoreDBClientSettings
+     *
      * @return configured settings.
+     * @see EventStoreDBClientSettings
      */
     public EventStoreDBClientSettings buildConnectionSettings() {
         return new EventStoreDBClientSettings(_dnsDiscover,
@@ -47,12 +50,14 @@ public class ConnectionSettingsBuilder {
                 _tls,
                 _tlsVerifyCert,
                 _defaultCredentials,
+                _defaultUserCertificate,
                 _hosts.toArray(new InetSocketAddress[0]),
                 _keepAliveTimeout,
                 _keepAliveInterval,
                 _defaultDeadline,
                 _interceptors,
-                _tlsCaFile);
+                _tlsCaFile
+        );
     }
 
     /**
@@ -120,6 +125,30 @@ public class ConnectionSettingsBuilder {
     }
 
     /**
+     * Default credentials used to authenticate requests.
+     */
+    public ConnectionSettingsBuilder defaultCredentials(UserCredentials defaultCredentials) {
+        this._defaultCredentials = defaultCredentials;
+        return this;
+    }
+
+    /**
+     * Client certificate used for user authentication.
+     */
+    public ConnectionSettingsBuilder defaultUserCertificate(String userCertFile, String userKeyFile) {
+        this._defaultUserCertificate = new UserCertificate(userCertFile, userKeyFile);
+        return this;
+    }
+
+    /**
+     * Client certificate used for user authentication.
+     */
+    public ConnectionSettingsBuilder defaultUserCertificate(UserCertificate defaultUserCertificate) {
+        this._defaultUserCertificate = defaultUserCertificate;
+        return this;
+    }
+
+    /**
      * Adds an endpoint the client will use to connect.
      */
     public ConnectionSettingsBuilder addHost(String host, int port) {
@@ -156,7 +185,7 @@ public class ConnectionSettingsBuilder {
     public ConnectionSettingsBuilder keepAliveInterval(long value) {
         if (value >= 0 && value < Consts.DEFAULT_KEEP_ALIVE_INTERVAL_IN_MS) {
             logger.warn("Specified keepAliveInterval of {} is less than recommended {}", value, Consts.DEFAULT_KEEP_ALIVE_INTERVAL_IN_MS);
-        } 
+        }
 
         if (value == -1)
             value = Long.MAX_VALUE;
@@ -176,6 +205,7 @@ public class ConnectionSettingsBuilder {
 
     /**
      * Register a gRPC interceptor every time a new gRPC channel is created.
+     *
      * @param interceptor
      */
     public ConnectionSettingsBuilder addInterceptor(ClientInterceptor interceptor) {
@@ -186,6 +216,7 @@ public class ConnectionSettingsBuilder {
     /**
      * Client certificate for secure connection. Not required for enabling secure connection. Useful for self-signed
      * certificate that are not installed on the system trust store.
+     *
      * @param filepath path to a certificate file.
      */
     public ConnectionSettingsBuilder tlsCaFile(String filepath) {
@@ -194,7 +225,7 @@ public class ConnectionSettingsBuilder {
     }
 
     void parseGossipSeed(String host) {
-        String[] hostParts =  host.split(":");
+        String[] hostParts = host.split(":");
 
         switch (hostParts.length) {
             case 1:
@@ -227,8 +258,7 @@ public class ConnectionSettingsBuilder {
                 } catch (UnsupportedEncodingException e) {
                     throw new RuntimeException(e);
                 }
-            }
-            else
+            } else
                 builder.defaultCredentials(splits[0], "");
         }
 
@@ -251,6 +281,8 @@ public class ConnectionSettingsBuilder {
         if (url.getQuery() == null)
             return builder.buildConnectionSettings();
 
+        String userCertFile = null;
+        String userKeyFile = null;
         for (String param : url.getQuery().split("&")) {
             String[] entry = param.split("=");
 
@@ -370,7 +402,8 @@ public class ConnectionSettingsBuilder {
 
                         builder._keepAliveInterval = parsedValue;
                     } catch (NumberFormatException e) {
-                        invalidParamFormat(entry[0], value);;
+                        invalidParamFormat(entry[0], value);
+                        ;
                     }
                     break;
 
@@ -394,11 +427,31 @@ public class ConnectionSettingsBuilder {
                     builder._tlsCaFile = entry[1];
                     break;
 
+                case "usercertfile":
+                    if (entry[1].isEmpty())
+                        invalidParamFormat(entry[0], entry[1]);
+
+                    userCertFile = entry[1];
+                    break;
+
+                case "userkeyfile":
+                    if (entry[1].isEmpty())
+                        invalidParamFormat(entry[0], entry[1]);
+
+                    userKeyFile = entry[1];
+                    break;
+
                 default:
                     logger.warn(String.format("Unknown setting '%s' is ignored", entry[0]));
                     break;
             }
         }
+
+        if (userCertFile != null ^ userKeyFile != null)
+            throw new RuntimeException("Invalid user certificate settings. Both 'userCertFile' and 'userKeyFile' must be provided.");
+
+        if (userCertFile != null)
+            builder.defaultUserCertificate(userCertFile, userKeyFile);
 
         return builder.buildConnectionSettings();
     }

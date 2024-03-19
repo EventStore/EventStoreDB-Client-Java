@@ -14,7 +14,7 @@ import static com.eventstore.dbclient.HttpUtils.*;
 final class ReplayParkedMessages {
     @SuppressWarnings("unchecked")
     public static CompletableFuture execute(GrpcClient client, ReplayParkedMessagesOptions options, String stream, String groupName) {
-        return client.runWithArgs(args -> {
+        return client.runWithArgs(options, args -> {
            CompletableFuture result = new CompletableFuture();
 
             if (stream.equals("$all") && !args.supportFeature(FeatureFlags.PERSISTENT_SUBSCRIPTION_TO_ALL)) {

@@ -11,7 +11,7 @@ class SingleNodeDiscovery implements Discovery {
     }
 
     @Override
-    public CompletableFuture<Void> run(ConnectionState state) {
-        return CompletableFuture.runAsync(() -> state.connect(endpoint));
+    public CompletableFuture<Void> run(ConnectionState state, AuthOptionsBase authOptions) {
+        return CompletableFuture.runAsync(() -> state.connect(endpoint, authOptions));
     }
 }

@@ -3,7 +3,7 @@ package com.eventstore.dbclient;
 /**
  * Options of the update projection request.
  */
-public class UpdateProjectionOptions extends OptionsBase<UpdateProjectionOptions> {
+public class UpdateProjectionOptions extends CallOptionsBase<UpdateProjectionOptions> {
     private boolean emitEnabled;
 
     private UpdateProjectionOptions() {

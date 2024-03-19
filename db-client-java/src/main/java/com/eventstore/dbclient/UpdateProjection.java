@@ -23,7 +23,7 @@ class UpdateProjection {
     }
 
     public CompletableFuture execute() {
-        return this.client.run(channel -> {
+        return this.client.run(options, channel -> {
             Projectionmanagement.UpdateReq.Options.Builder optionsBuilder =
                 Projectionmanagement.UpdateReq.Options.newBuilder()
                     .setName(this.projectionName)

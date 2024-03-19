@@ -40,7 +40,7 @@ class GetProjectionResult<TResult> {
 
     public CompletableFuture<TResult> execute() {
 
-        return this.client.run(channel -> {
+        return this.client.run(options, channel -> {
 
             Projectionmanagement.ResultReq.Options.Builder optionsBuilder =
                 Projectionmanagement.ResultReq.Options.newBuilder()

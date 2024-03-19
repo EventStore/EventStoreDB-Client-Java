@@ -3,7 +3,7 @@ package com.eventstore.dbclient;
 /**
  * Options of the reset projection request.
  */
-public class ResetProjectionOptions extends OptionsBase<ResetProjectionOptions> {
+public class ResetProjectionOptions extends CallOptionsBase<ResetProjectionOptions> {
     private ResetProjectionOptions() {
     }
 

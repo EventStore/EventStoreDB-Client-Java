@@ -3,7 +3,7 @@ package com.eventstore.dbclient;
 /**
  * Options of the replay parked messages request.
  */
-public class ReplayParkedMessagesOptions extends OptionsBase<ReplayParkedMessagesOptions> {
+public class ReplayParkedMessagesOptions extends CallOptionsBase<ReplayParkedMessagesOptions> {
     Long stopAt = null;
 
     ReplayParkedMessagesOptions(){}

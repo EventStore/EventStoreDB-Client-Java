@@ -3,7 +3,7 @@ package com.eventstore.dbclient;
 /**
  * Options of the subscribe persistent subscription request.
  */
-public class SubscribePersistentSubscriptionOptions extends OptionsBase<SubscribePersistentSubscriptionOptions> {
+public class SubscribePersistentSubscriptionOptions extends CallOptionsBase<SubscribePersistentSubscriptionOptions> {
     private int bufferSize;
 
     private SubscribePersistentSubscriptionOptions() {
