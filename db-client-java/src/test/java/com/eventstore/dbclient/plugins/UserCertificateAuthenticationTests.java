@@ -73,6 +73,23 @@ public interface UserCertificateAuthenticationTests extends ConnectionAware {
         });
     }
 
+    @Test
+    default void testDefaultCertificateAndOverrideCertificate() {
+        Assertions.assertDoesNotThrow(() -> {
+            EventStoreDBClient client = getDatabase()
+                    .createClient(getDatabase()
+                            .defaultSettingsBuilder()
+                            .defaultCredentials(null)
+                            .defaultUserCertificate(InvalidUserCertificate, InvalidUserKey)
+                            .buildConnectionSettings());
+
+            ReadAllOptions optionsWithOverrideCertificate = ReadAllOptions.get()
+                    .authenticated(new UserCertificate(ValidUserCertificate, ValidUserKey));
+
+            client.readAll(optionsWithOverrideCertificate).get();
+        });
+    }
+
     /*
      * User credentials should take precedence over a user certificate,
      * The below tests would fail with an unauthenticated error from
