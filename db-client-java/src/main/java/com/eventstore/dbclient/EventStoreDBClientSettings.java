@@ -32,6 +32,7 @@ public class EventStoreDBClientSettings {
     private final boolean tls;
     private final boolean tlsVerifyCert;
     private final UserCredentials defaultCredentials;
+    private final ClientCertificate defaultClientCertificate;
     private final InetSocketAddress[] hosts;
     private final long keepAliveTimeout;
     private final long keepAliveInterval;
@@ -92,11 +93,22 @@ public class EventStoreDBClientSettings {
 
     /**
      * Default credentials used to authenticate requests.
+     * User credentials take precedence over any configured {@link ClientCertificate}.
      * @see UserCredentials
      * @return default credentials null if not defined
      */
     public UserCredentials getDefaultCredentials() {
         return defaultCredentials;
+    }
+
+    /**
+     * Default certificate for user authentication.
+     * If any {@link UserCredentials} are configured, the server will ignore the user certificate.
+     * @see ClientCertificate
+     * @return user certificate, otherwise null.
+     */
+    public ClientCertificate getDefaultClientCertificate() {
+        return defaultClientCertificate;
     }
 
     /**
@@ -157,6 +169,7 @@ public class EventStoreDBClientSettings {
             boolean tls,
             boolean tlsVerifyCert,
             UserCredentials defaultCredentials,
+            ClientCertificate defaultClientCertificate,
             InetSocketAddress[] hosts,
             long keepAliveTimeout,
             long keepAliveInterval,
@@ -172,6 +185,7 @@ public class EventStoreDBClientSettings {
         this.tls = tls;
         this.tlsVerifyCert = tlsVerifyCert;
         this.defaultCredentials = defaultCredentials;
+        this.defaultClientCertificate = defaultClientCertificate;
         this.hosts = hosts;
         this.keepAliveTimeout = keepAliveTimeout;
         this.keepAliveInterval = keepAliveInterval;

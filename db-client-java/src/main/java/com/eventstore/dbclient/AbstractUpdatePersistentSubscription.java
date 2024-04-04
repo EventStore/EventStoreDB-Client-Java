@@ -8,15 +8,15 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.CompletableFuture;
 
 abstract class AbstractUpdatePersistentSubscription {
-    private final GrpcClient connection;
+    private final GrpcClient client;
     private final String group;
     private final PersistentSubscriptionSettings settings;
-    private final OptionsBase options;
+    private final OptionsBase<?> options;
     private static final Logger logger = LoggerFactory.getLogger(AbstractUpdatePersistentSubscription.class);
 
-    public AbstractUpdatePersistentSubscription(GrpcClient connection, String group,
-                                                PersistentSubscriptionSettings settings, OptionsBase options) {
-        this.connection = connection;
+    public AbstractUpdatePersistentSubscription(GrpcClient client, String group,
+                                                PersistentSubscriptionSettings settings, OptionsBase<?> options) {
+        this.client = client;
         this.group = group;
         this.settings = settings;
         this.options = options;
@@ -30,10 +30,10 @@ abstract class AbstractUpdatePersistentSubscription {
 
     @SuppressWarnings("unchecked")
     public CompletableFuture execute() {
-        return this.connection.runWithArgs(args -> {
+        return this.client.runWithArgs(args -> {
             CompletableFuture result = new CompletableFuture();
             PersistentSubscriptionsGrpc.PersistentSubscriptionsStub client =
-                    GrpcUtils.configureStub(PersistentSubscriptionsGrpc.newStub(args.getChannel()), this.connection.getSettings(), this.options);
+                    GrpcUtils.configureStub(PersistentSubscriptionsGrpc.newStub(args.getChannel()), this.client.getSettings(), this.options);
             Persistent.UpdateReq.Settings.Builder settingsBuilder = createSettings();
 
             settingsBuilder

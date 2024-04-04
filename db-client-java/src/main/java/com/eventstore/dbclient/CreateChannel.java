@@ -26,7 +26,7 @@ class CreateChannel implements Msg {
     }
 
     @Override
-    public void accept(MsgHandler handler) {
-        handler.createChannel(this.previousId, this.channel);
+    public void accept(ConnectionService connectionService) {
+        connectionService.createChannel(this.previousId, this.channel);
     }
 }

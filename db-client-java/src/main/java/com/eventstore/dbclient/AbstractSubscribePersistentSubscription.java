@@ -14,7 +14,7 @@ import java.util.concurrent.CompletableFuture;
 
 abstract class AbstractSubscribePersistentSubscription {
     protected static final Persistent.ReadReq.Options.Builder defaultReadOptions;
-    private final GrpcClient connection;
+    private final GrpcClient client;
     private final String group;
     private final PersistentSubscriptionListener listener;
     private final SubscribePersistentSubscriptionOptions options;
@@ -25,10 +25,10 @@ abstract class AbstractSubscribePersistentSubscription {
                         .setStructured(Shared.Empty.getDefaultInstance()));
     }
 
-    public AbstractSubscribePersistentSubscription(GrpcClient connection, String group,
+    public AbstractSubscribePersistentSubscription(GrpcClient client, String group,
                                                    SubscribePersistentSubscriptionOptions options,
                                                    PersistentSubscriptionListener listener) {
-        this.connection = connection;
+        this.client = client;
         this.group = group;
         this.options = options;
         this.listener = listener;
@@ -37,9 +37,9 @@ abstract class AbstractSubscribePersistentSubscription {
     protected abstract Persistent.ReadReq.Options.Builder createOptions();
 
     public CompletableFuture<PersistentSubscription> execute() {
-        return this.connection.runWithArgs(args -> {
+        return this.client.runWithArgs(args -> {
             PersistentSubscriptionsGrpc.PersistentSubscriptionsStub client =
-                    GrpcUtils.configureStub(PersistentSubscriptionsGrpc.newStub(args.getChannel()), this.connection.getSettings(), this.options);
+                    GrpcUtils.configureStub(PersistentSubscriptionsGrpc.newStub(args.getChannel()), this.client.getSettings(), this.options);
 
             final CompletableFuture<PersistentSubscription> result = new CompletableFuture<>();
 
