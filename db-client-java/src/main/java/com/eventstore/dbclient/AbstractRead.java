@@ -16,9 +16,9 @@ abstract class AbstractRead implements Publisher<ReadMessage> {
     protected static final StreamsOuterClass.ReadReq.Options.Builder defaultReadOptions;
 
     private final GrpcClient client;
-    private final OptionsBase options;
+    private final OptionsBase<?> options;
 
-    protected AbstractRead(GrpcClient client, OptionsBase options) {
+    protected AbstractRead(GrpcClient client, OptionsBase<?> options) {
         this.client = client;
         this.options = options;
     }

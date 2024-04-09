@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Main gRPC connection management service.
  */
-class ConnectionService implements Runnable, MsgHandler {
+class ConnectionService implements Runnable {
     private final Logger logger = LoggerFactory.getLogger(ConnectionService.class);
     private final GrpcClient client;
     private final AtomicBoolean closed;
@@ -99,7 +99,6 @@ class ConnectionService implements Runnable, MsgHandler {
         this.forceExit(null);
     }
 
-    @Override
     public void createChannel(UUID previousId, InetSocketAddress candidate) {
         if (this.closed.get()) {
             logger.warn("Channel creation request ignored, the connection to endpoint [{}] is already closed", this.connection.getLastConnectedEndpoint());
@@ -154,7 +153,6 @@ class ConnectionService implements Runnable, MsgHandler {
         }
     }
 
-    @Override
     public void process(RunWorkItem args) {
         if (this.closed.get()) {
             logger.warn("Receive a command request but the connection to endpoint [{}] is already closed", this.connection.getLastConnectedEndpoint());
@@ -183,7 +181,6 @@ class ConnectionService implements Runnable, MsgHandler {
         args.getItem().accept(workArgs, null);
     }
 
-    @Override
     public void shutdown(Shutdown args) {
         if (this.closed.get()) {
             args.complete();

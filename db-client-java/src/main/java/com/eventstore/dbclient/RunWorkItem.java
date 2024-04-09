@@ -16,6 +16,7 @@ class RunWorkItem implements Msg {
     public WorkItem getItem() {
         return item;
     }
+
     public void reportError(Exception e) {
         this.item.accept(null, e);
     }
@@ -26,7 +27,7 @@ class RunWorkItem implements Msg {
     }
 
     @Override
-    public void accept(MsgHandler handler) {
-        handler.process(this);
+    public void accept(ConnectionService connectionService) {
+        connectionService.process(this);
     }
 }

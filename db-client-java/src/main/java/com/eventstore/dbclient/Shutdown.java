@@ -19,7 +19,7 @@ class Shutdown implements Msg {
     }
 
     @Override
-    public void accept(MsgHandler handler) {
+    public void accept(ConnectionService handler) {
         handler.shutdown(this);
     }
 }

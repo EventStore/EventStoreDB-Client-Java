@@ -1,8 +1,10 @@
 package com.eventstore.dbclient;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.security.Security;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -22,6 +24,8 @@ public class EventStoreDBClientBase {
             discovery = new ClusterDiscovery(settings);
         }
 
+        // Required to instruct Netty to use BouncyCastle for TLS
+        Security.addProvider(new BouncyCastleProvider());
         ConnectionService service = new ConnectionService(settings, discovery);
         this.client = service.getHandle();
 

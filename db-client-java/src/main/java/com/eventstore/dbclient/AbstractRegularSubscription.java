@@ -22,9 +22,9 @@ abstract class AbstractRegularSubscription {
     protected SubscriptionListener listener;
     protected Checkpointer checkpointer = null;
     private final GrpcClient client;
-    private final OptionsBase options;
+    private final OptionsBase<?> options;
 
-    protected AbstractRegularSubscription(GrpcClient client, OptionsBase options) {
+    protected AbstractRegularSubscription(GrpcClient client, OptionsBase<?> options) {
         this.client = client;
         this.options = options;
     }

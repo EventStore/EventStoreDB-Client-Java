@@ -24,7 +24,6 @@ class OptionsBase<T> {
 
     /**
      * Sets user credentials for the request
-
      * @param credentials
      * @see UserCredentials
      * @return updated options
@@ -32,12 +31,11 @@ class OptionsBase<T> {
     @SuppressWarnings("unchecked")
     public T authenticated(UserCredentials credentials) {
         this.credentials = credentials;
-        return (T)this;
+        return (T) this;
     }
 
     /**
      * Sets user credentials for the request
-
      * @param login
      * @param password
      * @return updated options
@@ -70,7 +68,7 @@ class OptionsBase<T> {
     @SuppressWarnings("unchecked")
     public T requiresLeader(boolean value) {
         this.requiresLeader = value;
-        return (T)this;
+        return (T) this;
     }
 
     /**

@@ -124,7 +124,7 @@ final class GrpcUtils {
             long deadlineInMs = 10_000;
 
             if (forceDeadlineInMs != null) {
-               deadlineInMs = forceDeadlineInMs;
+                deadlineInMs = forceDeadlineInMs;
             } else if (options.getDeadline() != null) {
                 deadlineInMs = options.getDeadline();
             } else if (settings.getDefaultDeadline() != null) {
