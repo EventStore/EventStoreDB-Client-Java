@@ -1,5 +1,7 @@
 # EventStoreDB Client SDK for Java
 
+EventStoreDB is the event-native database, where business events are immutably stored and streamed. Designed for event-sourced, event-driven, and microservices architectures.
+
 This repository contains an [EventStoreDB][es] Client SDK written in Java for use with languages on the JVM. It is
 compatible with Java 8 and above.
 
@@ -174,9 +176,10 @@ Bear in mind that this client is not yet properly documented. We are working har
 If you find a vulnerability in our software, please contact us. You can find how to reach out us and report it at https://www.eventstore.com/security#security
 Thank you very much for supporting our software.
 
-## Community
+## Communities
 
-We have a community discussion space at [Event Store Discuss][discuss].
+- [Discuss](https://discuss.eventstore.com/)
+- [Discord (Event Store)](https://discord.gg/Phn9pmCw3t)
 
 ## Contributing
 
