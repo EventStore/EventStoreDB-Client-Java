@@ -10,7 +10,7 @@ import java.util.concurrent.ExecutionException;
 public interface DeletePersistentSubscriptionToStreamTests extends ConnectionAware {
     @Test
     default void testDeletePersistentSub() throws Throwable {
-        EventStoreDBPersistentSubscriptionsClient client = EventStoreDBPersistentSubscriptionsClient.from(getDatabase().defaultClient());
+        EventStoreDBPersistentSubscriptionsClient client = getDefaultPersistentSubscriptionClient();
         String streamName = generateName();
         String groupName = generateName();
 
@@ -23,7 +23,7 @@ public interface DeletePersistentSubscriptionToStreamTests extends ConnectionAwa
 
     @Test
     default void testDeletePersistentSubToAll() throws Throwable {
-        EventStoreDBPersistentSubscriptionsClient client = EventStoreDBPersistentSubscriptionsClient.from(getDatabase().defaultClient());
+        EventStoreDBPersistentSubscriptionsClient client = getDefaultPersistentSubscriptionClient();
         String groupName = generateName();
 
         client.createToAll(groupName)

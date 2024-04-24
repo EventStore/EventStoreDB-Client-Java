@@ -47,7 +47,7 @@ abstract class AbstractRegularSubscription {
                     .setOptions(createOptions())
                     .build();
 
-            StreamsGrpc.StreamsStub client = GrpcUtils.configureStub(StreamsGrpc.newStub(channel), this.client.getSettings(), this.options);
+            StreamsGrpc.StreamsStub streamsClient = GrpcUtils.configureStub(StreamsGrpc.newStub(channel), this.client.getSettings(), this.options);
 
             CompletableFuture<Subscription> future = new CompletableFuture<>();
             ClientResponseObserver<StreamsOuterClass.ReadReq, StreamsOuterClass.ReadResp> observer = new ClientResponseObserver<StreamsOuterClass.ReadReq, StreamsOuterClass.ReadResp>() {
@@ -106,7 +106,14 @@ abstract class AbstractRegularSubscription {
                     }
 
                     try {
-                        listener.onEvent(this._subscription, ResolvedEvent.fromWire(readResp.getEvent()));
+                        ResolvedEvent resolvedEvent = ResolvedEvent.fromWire(readResp.getEvent());
+                        ClientTelemetry.traceSubscribe(
+                                () -> listener.onEvent(this._subscription, resolvedEvent),
+                                _subscription.getSubscriptionId(),
+                                channel,
+                                client.getSettings(),
+                                options.getCredentials(),
+                                resolvedEvent.getOriginalEvent());
                     } catch (Exception e) {
                         onError(e);
                     }
@@ -144,7 +151,7 @@ abstract class AbstractRegularSubscription {
                 }
             };
 
-            client.read(readReq, observer);
+            streamsClient.read(readReq, observer);
 
             return future;
         });

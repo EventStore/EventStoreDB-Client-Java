@@ -10,7 +10,7 @@ public interface UpdatePersistentSubscriptionToStreamTests extends ConnectionAwa
         String streamName = generateName();
         String groupName = generateName();
 
-        EventStoreDBPersistentSubscriptionsClient client = EventStoreDBPersistentSubscriptionsClient.from(getDatabase().defaultClient());
+        EventStoreDBPersistentSubscriptionsClient client = getDefaultPersistentSubscriptionClient();
         client.createToStream(streamName, groupName)
                 .get();
 
@@ -25,7 +25,7 @@ public interface UpdatePersistentSubscriptionToStreamTests extends ConnectionAwa
     @Test
     default void testUpdatePersistentSubToAll() throws Throwable {
         String groupName = generateName();
-        EventStoreDBPersistentSubscriptionsClient client = EventStoreDBPersistentSubscriptionsClient.from(getDatabase().defaultClient());
+        EventStoreDBPersistentSubscriptionsClient client = getDefaultPersistentSubscriptionClient();
 
         client.createToAll(groupName)
                     .get();
