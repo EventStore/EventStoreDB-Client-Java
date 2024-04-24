@@ -38,6 +38,12 @@ Tests are written using [TestContainers](https://www.testcontainers.org/) and re
 
 Specific docker images can be specified via the enviroment variable `EVENTSTORE_IMAGE`.
 
+## Open Telemetry
+
+ Tracing is the only telemetry currently exported, specifically for the `Append` and `Subscribe` (Catchup and Persistent) operations.
+
+ For more information about Open Telemetry, refer to the [official documentation](https://opentelemetry.io/docs/what-is-opentelemetry/).
+
 ## EventStoreDB Server Compatibility
 
 This client is compatible with version `20.6.1` upwards.
