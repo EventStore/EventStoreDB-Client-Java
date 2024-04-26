@@ -35,7 +35,7 @@ public class DatabaseFactory {
 
     public static Database spawnPopulatedDatabase() {
         return singleNodeBuilder()
-                .grpcTestDataImage()
+                .withTestData()
                 .build();
     }
 

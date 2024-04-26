@@ -56,5 +56,4 @@ jobs:
     uses: ./.github/workflows/plugins-tests.yml
     with:
       esdb_version: ${{ matrix.version }}
-
     secrets: inherit
