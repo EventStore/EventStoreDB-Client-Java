@@ -12,8 +12,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DockerContainerDatabase extends GenericContainer<DockerContainerDatabase> implements Database {
-    public static final String DEFAULT_REGISTRY = "docker.eventstore.com/eventstore-ce";
-    public static final String DEFAULT_IMAGE = "eventstoredb-ce";
+    public static final String DEFAULT_REGISTRY = "docker.eventstore.com";
+    public static final String DEFAULT_IMAGE = "eventstore-ce/eventstoredb-ce";
     public static final String DEFAULT_VERSION = "latest";
 
     public static class Builder {
@@ -46,8 +46,8 @@ public class DockerContainerDatabase extends GenericContainer<DockerContainerDat
             return this;
         }
 
-        public Builder grpcTestDataImage() {
-            return this.image("testdata");
+        public Builder withTestData() {
+            return image("eventstore-utils/testdata");
         }
 
         public Builder image(String image) {
