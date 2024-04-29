@@ -3,18 +3,13 @@ package com.eventstore.dbclient;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.github.javafaker.Faker;
-import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
 import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 public interface ConnectionAware {
     Faker faker = new Faker();

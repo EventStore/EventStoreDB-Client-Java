@@ -31,28 +31,23 @@ public interface PersistentSubscriptionsTracingInstrumentationTests extends Tele
                         .build()
         };
 
-        CountDownLatch eventsLatch = new CountDownLatch(events.length);
         Exceptions exceptions = new Exceptions().registerGoAwayError();
         flaky(10, exceptions, () -> psClient.createToStream(streamName, groupName).get());
 
         streamsClient.appendToStream(streamName, events).get();
 
-        PersistentSubscription subscription = psClient.subscribeToStream(streamName, groupName, SubscribePersistentSubscriptionOptions.get()
-                .bufferSize(32), new PersistentSubscriptionListener() {
-            @Override
-            public void onEvent(PersistentSubscription subscription, int retryCount, ResolvedEvent event) {
-                subscription.ack(event);
-                eventsLatch.countDown();
-            }
+        CountDownLatch subscribeSpansLatch = new CountDownLatch(events.length);
+        onOperationSpanEnded(ClientTelemetryConstants.Operations.SUBSCRIBE, span -> subscribeSpansLatch.countDown());
 
-            @Override
-            public void onCancelled(PersistentSubscription subscription, Throwable throwable) {
-                if (throwable == null) return;
-                Assertions.fail(throwable);
-            }
-        }).get();
+        PersistentSubscription subscription = psClient.subscribeToStream(
+                streamName,
+                groupName,
+                SubscribePersistentSubscriptionOptions.get().bufferSize(32),
+                new PersistentSubscriptionListener() {
+                }
+        ).get();
 
-        eventsLatch.await();
+        subscribeSpansLatch.await();
         subscription.stop();
 
         List<ReadableSpan> appendSpans = getSpansForOperation(ClientTelemetryConstants.Operations.APPEND);
@@ -89,9 +84,6 @@ public interface PersistentSubscriptionsTracingInstrumentationTests extends Tele
         String streamName = generateName();
         String groupName = generateName();
 
-        CountDownLatch eventsLatch = new CountDownLatch(1);
-        RuntimeException expectedException = new RuntimeException("Oops! something went wrong...");
-
         Exceptions exceptions = new Exceptions().registerGoAwayError();
         flaky(10, exceptions, () -> psClient.createToStream(streamName, groupName).get());
 
@@ -102,25 +94,24 @@ public interface PersistentSubscriptionsTracingInstrumentationTests extends Tele
                                 .build())
                 .get();
 
+        CountDownLatch subscribeSpansLatch = new CountDownLatch(1);
+        onOperationSpanEnded(ClientTelemetryConstants.Operations.SUBSCRIBE, span -> subscribeSpansLatch.countDown());
+
+        RuntimeException expectedException = new RuntimeException("Oops! something went wrong...");
         PersistentSubscription subscription = psClient.subscribeToStream(streamName, groupName, new PersistentSubscriptionListener() {
             @Override
             public void onEvent(PersistentSubscription subscription, int retryCount, ResolvedEvent event) {
-                try {
-                    subscription.ack(event);
-                    throw expectedException;
-                } finally {
-                    eventsLatch.countDown();
-                }
+                throw expectedException;
             }
 
             @Override
             public void onCancelled(PersistentSubscription subscription, Throwable throwable) {
-                if (throwable == null || throwable.equals(expectedException)) return;
-                Assertions.fail(throwable);
+                if (throwable != null && !throwable.equals(expectedException))
+                    Assertions.fail(throwable);
             }
         }).get();
 
-        eventsLatch.await();
+        subscribeSpansLatch.await();
         subscription.stop();
 
         List<ReadableSpan> subscribeSpans = getSpansForOperation(ClientTelemetryConstants.Operations.SUBSCRIBE);

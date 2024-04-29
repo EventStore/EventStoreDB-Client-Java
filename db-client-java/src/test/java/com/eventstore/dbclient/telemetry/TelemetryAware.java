@@ -12,8 +12,10 @@ import io.opentelemetry.sdk.trace.internal.data.ExceptionEventData;
 import org.junit.jupiter.api.Assertions;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public interface TelemetryAware extends ConnectionAware {
+    void onOperationSpanEnded(String operation, Consumer<ReadableSpan> onSpanEnded);
     List<ReadableSpan> getSpansForOperation(String operation);
 
     default void assertAppendSpanHasExpectedAttributes(ReadableSpan span, String streamName) {

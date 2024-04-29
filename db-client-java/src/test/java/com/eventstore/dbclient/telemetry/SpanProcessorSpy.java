@@ -6,13 +6,14 @@ import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 public class SpanProcessorSpy implements SpanProcessor {
-    Consumer<ReadableSpan> consumer;
+    private final List<Consumer<ReadableSpan>> spanEndedHooks;
 
-    public SpanProcessorSpy(Consumer<ReadableSpan> consumer) {
-        this.consumer = consumer;
+    public SpanProcessorSpy(List<Consumer<ReadableSpan>> spanEndedHooks) {
+        this.spanEndedHooks = spanEndedHooks;
     }
 
     @Override
@@ -27,7 +28,7 @@ public class SpanProcessorSpy implements SpanProcessor {
 
     @Override
     public void onEnd(@NotNull ReadableSpan readableSpan) {
-        consumer.accept(readableSpan);
+        spanEndedHooks.forEach(hook -> hook.accept(readableSpan));
     }
 
     @Override

@@ -132,22 +132,17 @@ public interface StreamsTracingInstrumentationTests extends TelemetryAware {
         };
 
         client.appendToStream(streamName, events).get();
-        CountDownLatch eventsLatch = new CountDownLatch(events.length);
 
-        Subscription subscription = client.subscribeToStream(streamName, new SubscriptionListener() {
-            @Override
-            public void onEvent(Subscription subscription, ResolvedEvent event) {
-                eventsLatch.countDown();
-            }
+        CountDownLatch subscribeSpansLatch = new CountDownLatch(events.length);
+        onOperationSpanEnded(ClientTelemetryConstants.Operations.SUBSCRIBE, span -> subscribeSpansLatch.countDown());
 
-            @Override
-            public void onCancelled(Subscription subscription, Throwable throwable) {
-                if (throwable == null) return;
-                Assertions.fail(throwable);
-            }
-        }).get();
+        Subscription subscription = client.subscribeToStream(
+                streamName,
+                new SubscriptionListener() {
+                }
+        ).get();
 
-        eventsLatch.await();
+        subscribeSpansLatch.await();
         subscription.stop();
 
         List<ReadableSpan> appendSpans = getSpansForOperation(ClientTelemetryConstants.Operations.APPEND);
@@ -188,27 +183,25 @@ public interface StreamsTracingInstrumentationTests extends TelemetryAware {
                                 .build())
                 .get();
 
-        CountDownLatch eventsLatch = new CountDownLatch(1);
         RuntimeException expectedException = new RuntimeException("Oops! something went wrong...");
+
+        CountDownLatch subscribeSpansLatch = new CountDownLatch(1);
+        onOperationSpanEnded(ClientTelemetryConstants.Operations.SUBSCRIBE, span -> subscribeSpansLatch.countDown());
 
         Subscription subscription = client.subscribeToStream(streamName, new SubscriptionListener() {
             @Override
             public void onEvent(Subscription subscription, ResolvedEvent event) {
-                try {
-                    throw expectedException;
-                } finally {
-                    eventsLatch.countDown();
-                }
+                throw expectedException;
             }
 
             @Override
             public void onCancelled(Subscription subscription, Throwable throwable) {
-                if (throwable == null || throwable.equals(expectedException)) return;
-                Assertions.fail(throwable);
+                if (throwable != null && !throwable.equals(expectedException))
+                    Assertions.fail(throwable);
             }
         }).get();
 
-        eventsLatch.await();
+        subscribeSpansLatch.await();
         subscription.stop();
 
         List<ReadableSpan> subscribeSpans = getSpansForOperation(ClientTelemetryConstants.Operations.SUBSCRIBE);
