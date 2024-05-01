@@ -13,7 +13,7 @@ public interface ClientCertificateAuthenticationTests extends ConnectionAware {
             EventStoreDBClient client = getDatabase()
                     .createClient(getDatabase()
                             .defaultSettingsBuilder()
-                            .defaultClientCertificate(ClientCertificate("admin"), userKey("admin"))
+                            .defaultClientCertificate(clientCertificate("admin"), userKey("admin"))
                             .defaultCredentials(null)
                             .buildConnectionSettings());
 
@@ -21,7 +21,7 @@ public interface ClientCertificateAuthenticationTests extends ConnectionAware {
         });
     }
 
-    static String ClientCertificate(String user) {
+    static String clientCertificate(String user) {
         return buildCertPath(user, "crt");
     }
 

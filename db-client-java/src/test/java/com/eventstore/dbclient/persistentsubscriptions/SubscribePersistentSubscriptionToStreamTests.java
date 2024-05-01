@@ -13,7 +13,7 @@ public interface SubscribePersistentSubscriptionToStreamTests extends Connection
     default void testSubscribePersistentSub() throws Throwable {
         Exceptions exceptions = new Exceptions().registerGoAwayError();
         String streamName = generateName();
-        EventStoreDBPersistentSubscriptionsClient client = EventStoreDBPersistentSubscriptionsClient.from(getDatabase().defaultClient());
+        EventStoreDBPersistentSubscriptionsClient client = getDefaultPersistentSubscriptionClient();
         EventStoreDBClient streamsClient = getDatabase().defaultClient();
         JsonMapper jsonMapper = new JsonMapper();
 
@@ -66,7 +66,7 @@ public interface SubscribePersistentSubscriptionToStreamTests extends Connection
     default void testSubscribePersistentSubToAll() throws Throwable {
         Exceptions exceptions = new Exceptions().registerGoAwayError();
         String streamName = generateName();
-        EventStoreDBPersistentSubscriptionsClient client = EventStoreDBPersistentSubscriptionsClient.from(getDatabase().defaultClient());
+        EventStoreDBPersistentSubscriptionsClient client = getDefaultPersistentSubscriptionClient();
         EventStoreDBClient streamsClient = getDatabase().defaultClient();
         final JsonMapper jsonMapper = new JsonMapper();
 

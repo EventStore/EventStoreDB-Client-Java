@@ -12,7 +12,7 @@ public interface PersistentSubscriptionToAllWithFilterTests extends ConnectionAw
     @Test
     default void testPersistentSubscriptionToAllWithFilter() throws Throwable {
         Exceptions exceptions = new Exceptions().registerGoAwayError();
-        EventStoreDBPersistentSubscriptionsClient client = EventStoreDBPersistentSubscriptionsClient.from(getDatabase().defaultClient());
+        EventStoreDBPersistentSubscriptionsClient client = getDefaultPersistentSubscriptionClient();
         EventStoreDBClient streamsClient = getDatabase().defaultClient();
         String groupName = generateName();
         int filteredEventTypeCount = 10;

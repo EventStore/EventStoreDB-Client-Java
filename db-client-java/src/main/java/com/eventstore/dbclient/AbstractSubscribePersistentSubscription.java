@@ -38,7 +38,7 @@ abstract class AbstractSubscribePersistentSubscription {
 
     public CompletableFuture<PersistentSubscription> execute() {
         return this.client.runWithArgs(args -> {
-            PersistentSubscriptionsGrpc.PersistentSubscriptionsStub client =
+            PersistentSubscriptionsGrpc.PersistentSubscriptionsStub persistentSubscriptionsClient =
                     GrpcUtils.configureStub(PersistentSubscriptionsGrpc.newStub(args.getChannel()), this.client.getSettings(), this.options);
 
             final CompletableFuture<PersistentSubscription> result = new CompletableFuture<>();
@@ -91,7 +91,14 @@ abstract class AbstractSubscribePersistentSubscription {
                         int retryCount = readResp.getEvent().hasNoRetryCount() ? 0 : readResp.getEvent().getRetryCount();
 
                         try {
-                            listener.onEvent(this._subscription, retryCount, ResolvedEvent.fromWire(readResp.getEvent()));
+                            ResolvedEvent resolvedEvent = ResolvedEvent.fromWire(readResp.getEvent());
+                            ClientTelemetry.traceSubscribe(
+                                    () -> listener.onEvent(this._subscription, retryCount, resolvedEvent),
+                                    _subscription.getSubscriptionId(),
+                                    args.getChannel(),
+                                    client.getSettings(),
+                                    options.getCredentials(),
+                                    resolvedEvent.getOriginalEvent());
                         } catch (Exception e) {
                             onError(e);
                         }
@@ -129,7 +136,7 @@ abstract class AbstractSubscribePersistentSubscription {
                     }
                 };
 
-                StreamObserver<Persistent.ReadReq> wireStream = client.read(observer);
+                StreamObserver<Persistent.ReadReq> wireStream = persistentSubscriptionsClient.read(observer);
                 wireStream.onNext(req);
             }
 

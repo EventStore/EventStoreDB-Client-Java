@@ -27,10 +27,6 @@ public interface ProjectionManagementTests extends ConnectionAware {
     String COUNT_EVENTS_PARTITIONED_PROJECTION = loadResourceAsString(COUNT_EVENTS_PARTITIONED_PROJECTION_FILENAME);
     String UNKNOWN_KEYNAMES_PROJECTION = loadResourceAsString(UNKNOWN_KEYNAMES_PROJECTION_FILENAME);
 
-    default EventStoreDBProjectionManagementClient projectionClient() {
-        return EventStoreDBProjectionManagementClient.from(getDefaultClient());
-    }
-
     static String loadResourceAsString(String fileName) {
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(ProjectionManagementTests.class.getClassLoader()
@@ -45,7 +41,7 @@ public interface ProjectionManagementTests extends ConnectionAware {
     @Test
     @Order(1)
     default void testCreateAndGetContinuousProjection() throws ExecutionException, InterruptedException {
-        EventStoreDBProjectionManagementClient projectionClient = projectionClient();
+        EventStoreDBProjectionManagementClient projectionClient = getDefaultProjectionClient();
         String name = generateName();
         projectionClient
             .create(name, COUNT_EVENTS_PROJECTION)
@@ -63,7 +59,7 @@ public interface ProjectionManagementTests extends ConnectionAware {
     @Test
     @Order(2)
     default void testDeserializingBasedOnJavaType() throws ExecutionException, InterruptedException {
-        EventStoreDBProjectionManagementClient projectionClient = projectionClient();
+        EventStoreDBProjectionManagementClient projectionClient = getDefaultProjectionClient();
         String name = generateName();
         projectionClient
             .create(name, UNKNOWN_KEYNAMES_PROJECTION)
@@ -79,7 +75,7 @@ public interface ProjectionManagementTests extends ConnectionAware {
     @Test
     @Order(3)
     default void testEnablingProjection() throws ExecutionException, InterruptedException {
-        EventStoreDBProjectionManagementClient projectionClient = projectionClient();
+        EventStoreDBProjectionManagementClient projectionClient = getDefaultProjectionClient();
         String name = generateName();
         projectionClient
             .create(name, COUNT_EVENTS_PROJECTION)
@@ -96,7 +92,7 @@ public interface ProjectionManagementTests extends ConnectionAware {
     @Test
     @Order(4)
     default void testDisablingProjection() throws ExecutionException, InterruptedException {
-        EventStoreDBProjectionManagementClient projectionClient = projectionClient();
+        EventStoreDBProjectionManagementClient projectionClient = getDefaultProjectionClient();
         String name = generateName();
         projectionClient
             .create(name, COUNT_EVENTS_PROJECTION)
@@ -118,7 +114,7 @@ public interface ProjectionManagementTests extends ConnectionAware {
     @Test
     @Order(5)
     default void testAbortingProjection() throws ExecutionException, InterruptedException {
-        EventStoreDBProjectionManagementClient projectionClient = projectionClient();
+        EventStoreDBProjectionManagementClient projectionClient = getDefaultProjectionClient();
         String name = generateName();
         projectionClient
             .create(name, COUNT_EVENTS_PROJECTION)
@@ -134,7 +130,7 @@ public interface ProjectionManagementTests extends ConnectionAware {
     @Test
     @Order(6)
     default void testResettingProjection() throws ExecutionException, InterruptedException {
-        EventStoreDBProjectionManagementClient projectionClient = projectionClient();
+        EventStoreDBProjectionManagementClient projectionClient = getDefaultProjectionClient();
         String name = generateName();
         projectionClient
             .create(name, COUNT_EVENTS_PROJECTION)
@@ -163,7 +159,7 @@ public interface ProjectionManagementTests extends ConnectionAware {
     @Order(7)
     default void testDeletingProjection() throws ExecutionException, InterruptedException, TimeoutException {
         String name = generateName();
-        EventStoreDBProjectionManagementClient projectionClient = projectionClient();
+        EventStoreDBProjectionManagementClient projectionClient = getDefaultProjectionClient();
         projectionClient
             .create(name, COUNT_EVENTS_PROJECTION)
             .get();
@@ -197,7 +193,7 @@ public interface ProjectionManagementTests extends ConnectionAware {
     default void testGetProjectionStatistics() throws Exception {
         Exceptions exceptions = new Exceptions().registerUnknownError();
         String name = generateName();
-        EventStoreDBProjectionManagementClient projectionClient = projectionClient();
+        EventStoreDBProjectionManagementClient projectionClient = getDefaultProjectionClient();
 
         flaky(10, exceptions, () -> projectionClient
             .create(name, COUNT_EVENTS_PROJECTION)
@@ -220,7 +216,7 @@ public interface ProjectionManagementTests extends ConnectionAware {
     @Order(9)
     default void testUpdateProjection() throws ExecutionException, InterruptedException {
         String name = generateName();
-        EventStoreDBProjectionManagementClient projectionClient = projectionClient();
+        EventStoreDBProjectionManagementClient projectionClient = getDefaultProjectionClient();
         projectionClient
             .create(name, COUNT_EVENTS_PROJECTION)
             .get();
@@ -240,7 +236,7 @@ public interface ProjectionManagementTests extends ConnectionAware {
     @Order(10)
     default void testGetProjectionState() throws ExecutionException, InterruptedException {
         String name = generateName();
-        EventStoreDBProjectionManagementClient projectionClient = projectionClient();
+        EventStoreDBProjectionManagementClient projectionClient = getDefaultProjectionClient();
         projectionClient
             .create(name, COUNT_EVENTS_PROJECTION)
             .get();
@@ -258,7 +254,7 @@ public interface ProjectionManagementTests extends ConnectionAware {
     @Order(11)
     default void testGetProjectionResultByPartition() throws ExecutionException, InterruptedException {
         String name = generateName();
-        EventStoreDBProjectionManagementClient projectionClient = projectionClient();
+        EventStoreDBProjectionManagementClient projectionClient = getDefaultProjectionClient();
         projectionClient
             .create(name, COUNT_EVENTS_PARTITIONED_PROJECTION)
             .get();
@@ -297,7 +293,7 @@ public interface ProjectionManagementTests extends ConnectionAware {
     @Order(12)
     default void testGetProjectionStateByPartition() throws ExecutionException, InterruptedException {
         String name = generateName();
-        EventStoreDBProjectionManagementClient projectionClient = projectionClient();
+        EventStoreDBProjectionManagementClient projectionClient = getDefaultProjectionClient();
         projectionClient
             .create(name, COUNT_EVENTS_PARTITIONED_PROJECTION)
             .get();
@@ -333,7 +329,7 @@ public interface ProjectionManagementTests extends ConnectionAware {
     @Order(13)
     default void testGetProjectionStatus() throws ExecutionException, InterruptedException {
         String name = generateName();
-        EventStoreDBProjectionManagementClient projectionClient = projectionClient();
+        EventStoreDBProjectionManagementClient projectionClient = getDefaultProjectionClient();
         projectionClient
             .create(name, COUNT_EVENTS_PROJECTION)
             .get();
@@ -356,7 +352,7 @@ public interface ProjectionManagementTests extends ConnectionAware {
     @Test
     @Order(14)
     default void testListProjections() throws ExecutionException, InterruptedException {
-        EventStoreDBProjectionManagementClient projectionClient = projectionClient();
+        EventStoreDBProjectionManagementClient projectionClient = getDefaultProjectionClient();
         List<ProjectionDetails> projections = projectionClient.list().get();
         Assertions.assertTrue(projections.size() > 1);
     }
@@ -375,12 +371,12 @@ public interface ProjectionManagementTests extends ConnectionAware {
     @Test
     @Order(15)
     default void testRestartingProjectionSubsystem() throws ExecutionException, InterruptedException {
-        EventStoreDBProjectionManagementClient projectionClient = projectionClient();
+        EventStoreDBProjectionManagementClient projectionClient = getDefaultProjectionClient();
         projectionClient.restartSubsystem().get();
     }
 
     default Map<String, Item> getResultOfUnknownKeyNamesProjection(String name) throws ExecutionException, InterruptedException {
-        EventStoreDBProjectionManagementClient projectionClient = projectionClient();
+        EventStoreDBProjectionManagementClient projectionClient = getDefaultProjectionClient();
 
         return projectionClient
             .<Map<String, Item>>getResult(name, factory -> factory.constructMapType(HashMap.class, String.class, Item.class))
@@ -424,7 +420,7 @@ public interface ProjectionManagementTests extends ConnectionAware {
     }
 
     default void waitUntilProjectionStatusIs(String name, String... statuses) throws ExecutionException, InterruptedException {
-        final EventStoreDBProjectionManagementClient projectionClient = projectionClient();
+        final EventStoreDBProjectionManagementClient projectionClient = getDefaultProjectionClient();
         CompletableFuture.runAsync(() -> {
             String last = "";
             for (int i = 0; i < 6; i++) {
