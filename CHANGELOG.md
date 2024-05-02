@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - Updated CI workflows and tests to pull eventstore docker images from cloud smith registry. [EventStoreDB-Client-Java#263](https://github.com/EventStore/EventStoreDB-Client-Java/pull/263)
+- Added tracing instrumentation of Append and Subscribe (Catchup and Persistent) operations using the Open Telemetry APIs. [EventStoreDB-Client-Java#270](https://github.com/EventStore/EventStoreDB-Client-Java/pull/270)
 
 ## [5.3.2] - 2024-03-05
 ### Changed
