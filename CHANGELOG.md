@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [5.4.0] - 2024-05-23
 
 ### Added
 - new connection settings to provide an x.509 certificate for user authentication. [EventStoreDB-Client-Java#266](https://github.com/EventStore/EventStoreDB-Client-Java/pull/266)
