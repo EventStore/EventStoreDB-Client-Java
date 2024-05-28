@@ -69,6 +69,8 @@ dependencies {
     testImplementation 'org.slf4j:slf4j-simple:2.0.9'
     testImplementation "io.opentelemetry:opentelemetry-sdk"
     testImplementation "io.opentelemetry:opentelemetry-sdk-testing"
+    testImplementation 'io.opentelemetry:opentelemetry-exporter-logging:1.38.0'
+    testImplementation 'io.opentelemetry:opentelemetry-exporter-otlp-trace:1.14.0'
 }
 
 tasks.withType(Test).configureEach {
