@@ -127,6 +127,13 @@ class ConnectionService implements Runnable {
                 try {
                     // TODO - Should we consider a discovery timeout?
                     this.discovery.run(this.connection).get();
+
+                    if (this.loadServerFeatures()) {
+                        this.channelId = UUID.randomUUID();
+                        this.connection.confirmChannel();
+                        logger.info("Connection to endpoint [{}] created successfully", this.connection.getLastConnectedEndpoint());
+                        break;
+                    }
                 } catch (InterruptedException e) {
                     forceExit(e);
                 } catch (ExecutionException e) {
@@ -135,15 +142,7 @@ class ConnectionService implements Runnable {
                     // that has failed. It's possible that node might still be the best candidate if it manages to
                     // recover in the meantime.
                     this.connection.clear();
-                    continue;
                 }
-            }
-
-            if (this.loadServerFeatures()) {
-                this.channelId = UUID.randomUUID();
-                this.connection.confirmChannel();
-                logger.info("Connection to endpoint [{}] created successfully", this.connection.getLastConnectedEndpoint());
-                break;
             }
 
             // In case a candidate was provided, but we failed to connect to it.
