@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class DockerContainerDatabase extends GenericContainer<DockerContainerDatabase> implements Database {
     public static final String DEFAULT_REGISTRY = "docker.eventstore.com";
-    public static final String DEFAULT_IMAGE = "eventstore-ce/eventstoredb-ce";
+    public static final String DEFAULT_IMAGE = "eventstore-staging-ce/eventstoredb-oss";
     public static final String DEFAULT_VERSION = "latest";
 
     public static class Builder {
