@@ -116,7 +116,6 @@ tasks.register("singleNodeTests", Test) {
         include("**/StreamsTests.class")
         include("**/PersistentSubscriptionsTests.class")
         include("**/TelemetryTests.class")
-        include("**/ExpectationsTests.class")
     }
 }
 

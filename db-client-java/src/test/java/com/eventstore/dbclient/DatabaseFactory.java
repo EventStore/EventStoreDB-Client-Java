@@ -33,12 +33,6 @@ public class DatabaseFactory {
         return builder.secure(secure).build();
     }
 
-    public static Database spawnPopulatedDatabase() {
-        return singleNodeBuilder()
-                .withTestData()
-                .build();
-    }
-
     private static DockerContainerDatabase.Builder singleNodeBuilder() {
         return DockerContainerDatabase
                 .builder()

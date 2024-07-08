@@ -3,12 +3,23 @@ name: enterprise plugins tests workflow
 on:
   workflow_call:
     inputs:
+      runtime_env:
+        description: The runtime environment we want to run like release or staging
+        type: string
+        default: enterprise
+
       esdb_version:
         required: true
         type: string
 
 jobs:
+  provide_docker:
+    uses: ./.github/workflows/docker-repo.yml
+    with:
+      runtime_env: ${{ inputs.runtime_env }}
+
   single_node:
+    needs: provide_docker
     name: Single Node
 
     strategy:
@@ -47,7 +58,7 @@ jobs:
         run: ./gradlew ci --tests ${{ matrix.test }}Tests
         env:
           EVENTSTORE_DOCKER_REGISTRY_ENV: docker.eventstore.com
-          EVENTSTORE_DOCKER_IMAGE_ENV: eventstore-ee/eventstoredb-commercial
+          EVENTSTORE_DOCKER_IMAGE_ENV: ${{ needs.provide_docker.outputs.docker_repo }}/${{ needs.provide_docker.outputs.docker_container }}
           EVENTSTORE_DOCKER_TAG_ENV: ${{ inputs.esdb_version }}
           SECURE: true
 
@@ -59,6 +70,7 @@ jobs:
           if-no-files-found: error
 
   cluster:
+    needs: provide_docker
     name: Cluster
 
     strategy:
@@ -84,7 +96,7 @@ jobs:
         run: docker compose up -d
         env:
           CONTAINER_REGISTRY: docker.eventstore.com
-          CONTAINER_IMAGE: eventstore-ee/eventstoredb-commercial
+          CONTAINER_IMAGE: ${{ needs.provide_docker.outputs.docker_repo }}/${{ needs.provide_docker.outputs.docker_container }}
           CONTAINER_IMAGE_VERSION: ${{ inputs.esdb_version }}
 
       - name: Generate user certificates

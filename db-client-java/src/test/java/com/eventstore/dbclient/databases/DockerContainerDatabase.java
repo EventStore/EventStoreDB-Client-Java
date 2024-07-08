@@ -46,10 +46,6 @@ public class DockerContainerDatabase extends GenericContainer<DockerContainerDat
             return this;
         }
 
-        public Builder withTestData() {
-            return image("eventstore-utils/testdata");
-        }
-
         public Builder image(String image) {
             this.image = image;
             return this;
@@ -135,7 +131,7 @@ public class DockerContainerDatabase extends GenericContainer<DockerContainerDat
                 logger().error(result.getStderr());
                 throw new RuntimeException("Error when compressing server logs");
             }
-            copyFileFromContainer("/tmp/esdb_logs.tar.gz", "./esdb_logs.tar.gz");
+            copyFileFromContainer("/tmp/esdb_logs.tar.gz", "/tmp/esdb_logs.tar.gz");
         } catch (Exception e) {
             logger().error("Error when cleanup docker container", e);
         } finally {
