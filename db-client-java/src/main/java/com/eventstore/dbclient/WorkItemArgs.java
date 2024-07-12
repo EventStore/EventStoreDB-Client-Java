@@ -49,7 +49,7 @@ class WorkItemArgs {
     public <A> HttpURLConnection getHttpConnection(OptionsBase<A> options, EventStoreDBClientSettings settings, String path) {
         try {
             HttpURLConnection conn = (HttpURLConnection) getURL(settings.isTls(), this.endpoint, path).openConnection();
-            conn.setRequestProperty("Accept", "application/json");
+            conn.setRequestProperty("Accept", ContentType.JSON);
             String creds = options.getHttpCredentialString();
 
             if (creds == null && settings.getDefaultCredentials() != null) {

@@ -3,6 +3,7 @@ package com.eventstore.dbclient;
 import com.eventstore.dbclient.telemetry.PersistentSubscriptionsTracingInstrumentationTests;
 import com.eventstore.dbclient.telemetry.SpanProcessorSpy;
 import com.eventstore.dbclient.telemetry.StreamsTracingInstrumentationTests;
+import com.eventstore.dbclient.telemetry.TracingContextInjectionTests;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
@@ -20,7 +21,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class TelemetryTests implements StreamsTracingInstrumentationTests, PersistentSubscriptionsTracingInstrumentationTests {
+public class TelemetryTests implements StreamsTracingInstrumentationTests, PersistentSubscriptionsTracingInstrumentationTests, TracingContextInjectionTests {
     static private Database database;
     static private Logger logger;
 
