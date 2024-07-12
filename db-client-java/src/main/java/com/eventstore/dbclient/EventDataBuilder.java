@@ -15,16 +15,14 @@ public class EventDataBuilder {
     private boolean isJson;
     private UUID id;
 
-    EventDataBuilder() {
-    }
+    EventDataBuilder(){}
 
     /**
      * Configures builder to serialize event data as JSON.
-     *
      * @param eventType event's type.
      * @param eventData event's payload.
-     * @param <A>       a type that can be serialized in JSON.
      * @return an event data builder.
+     * @param <A> a type that can be serialized in JSON.
      */
     public static <A> EventDataBuilder json(String eventType, A eventData) {
         return json(null, eventType, eventData);
@@ -32,12 +30,11 @@ public class EventDataBuilder {
 
     /**
      * Configures an event data builder to host a JSON payload.
-     *
-     * @param id        event's id.
+     * @param id event's id.
      * @param eventType event's type.
      * @param eventData event's payload.
-     * @param <A>       a type that can be serialized in JSON.
      * @return an event data builder.
+     * @param <A> a type that can be serialized in JSON.
      */
     @Deprecated
     public static <A> EventDataBuilder json(UUID id, String eventType, A eventData) {
@@ -51,7 +48,6 @@ public class EventDataBuilder {
 
     /**
      * Configures an event data builder to host a JSON payload.
-     *
      * @param eventType event's type.
      * @param eventData event's payload.
      * @return an event data builder.
@@ -62,8 +58,7 @@ public class EventDataBuilder {
 
     /**
      * Configures an event data builder to host a JSON payload.
-     *
-     * @param id        event's id.
+     * @param id event's id.
      * @param eventType event's type.
      * @param eventData event's payload.
      * @return an event data builder.
@@ -74,7 +69,6 @@ public class EventDataBuilder {
 
     /**
      * Configures an event data builder to host a binary payload.
-     *
      * @param eventType event's type.
      * @param eventData event's payload.
      * @return an event data builder.
@@ -85,8 +79,7 @@ public class EventDataBuilder {
 
     /**
      * Configures an event data builder to host a binary payload.
-     *
-     * @param id        event's id.
+     * @param id event's id.
      * @param eventType event's type.
      * @param eventData event's payload.
      * @return an event data builder.
@@ -97,11 +90,10 @@ public class EventDataBuilder {
 
     /**
      * Configures an event data builder to host a binary payload.
-     *
-     * @param id        event's id.
+     * @param id event's id.
      * @param eventType event's type.
      * @param eventData event's payload.
-     * @param isJson    whether the payload is JSON or not.
+     * @param isJson whether the payload is JSON or not.
      * @return an event data builder.
      */
     public static EventDataBuilder binary(UUID id, String eventType, byte[] eventData, boolean isJson) {
@@ -125,7 +117,6 @@ public class EventDataBuilder {
 
     /**
      * Sets event's custom user metadata.
-     *
      * @param <A> an object that can be serialized in JSON.
      */
     @Deprecated
