@@ -155,7 +155,7 @@ public class EventDataBuilder {
      */
     public EventData build() {
         UUID eventId = this.id == null ? UUID.randomUUID() : this.id;
-        String contentType = this.isJson ? ContentType.JSON : ContentType.OCTET_STREAM;
+        String contentType = this.isJson ? ContentType.JSON : ContentType.BYTES;
         return new EventData(eventId, this.eventType, contentType, this.eventData, this.metadata);
     }
 }
