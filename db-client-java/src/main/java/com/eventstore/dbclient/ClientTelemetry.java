@@ -12,6 +12,7 @@ import io.opentelemetry.context.Scope;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.function.BiFunction;
@@ -29,11 +30,14 @@ class ClientTelemetry {
 
     private static List<EventData> tryInjectTracingContext(Span span, List<EventData> events) {
         List<EventData> injectedEvents = new ArrayList<>();
-        for (EventData event : events)
+        for (EventData event : events) {
+            boolean isJsonEvent = Objects.equals(event.getContentType(), ContentType.JSON);
+
             injectedEvents.add(EventDataBuilder
-                    .json(event.getEventId(), event.getEventType(), event.getEventData())
+                    .binary(event.getEventId(), event.getEventType(), event.getEventData(), isJsonEvent)
                     .metadataAsBytes(tryInjectTracingContext(span, event.getUserMetadata()))
                     .build());
+        }
         return injectedEvents;
     }
 

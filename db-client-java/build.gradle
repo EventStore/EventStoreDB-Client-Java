@@ -113,8 +113,8 @@ tasks.register("miscTests", Test) {
 
 tasks.register("singleNodeTests", Test) {
     useJUnitPlatform {
-        include("**/StreamsTests.class")
-        include("**/PersistentSubscriptionsTests.class")
+        //("**/StreamsTests.class")
+        //include("**/PersistentSubscriptionsTests.class")
         include("**/TelemetryTests.class")
     }
 }

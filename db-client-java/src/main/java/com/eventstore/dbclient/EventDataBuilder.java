@@ -15,14 +15,16 @@ public class EventDataBuilder {
     private boolean isJson;
     private UUID id;
 
-    EventDataBuilder(){}
+    EventDataBuilder() {
+    }
 
     /**
      * Configures builder to serialize event data as JSON.
+     *
      * @param eventType event's type.
      * @param eventData event's payload.
+     * @param <A>       a type that can be serialized in JSON.
      * @return an event data builder.
-     * @param <A> a type that can be serialized in JSON.
      */
     public static <A> EventDataBuilder json(String eventType, A eventData) {
         return json(null, eventType, eventData);
@@ -30,11 +32,12 @@ public class EventDataBuilder {
 
     /**
      * Configures an event data builder to host a JSON payload.
-     * @param id event's id.
+     *
+     * @param id        event's id.
      * @param eventType event's type.
      * @param eventData event's payload.
+     * @param <A>       a type that can be serialized in JSON.
      * @return an event data builder.
-     * @param <A> a type that can be serialized in JSON.
      */
     @Deprecated
     public static <A> EventDataBuilder json(UUID id, String eventType, A eventData) {
@@ -48,6 +51,7 @@ public class EventDataBuilder {
 
     /**
      * Configures an event data builder to host a JSON payload.
+     *
      * @param eventType event's type.
      * @param eventData event's payload.
      * @return an event data builder.
@@ -55,25 +59,22 @@ public class EventDataBuilder {
     public static EventDataBuilder json(String eventType, byte[] eventData) {
         return json(null, eventType, eventData);
     }
+
     /**
      * Configures an event data builder to host a JSON payload.
-     * @param id event's id.
+     *
+     * @param id        event's id.
      * @param eventType event's type.
      * @param eventData event's payload.
      * @return an event data builder.
      */
     public static EventDataBuilder json(UUID id, String eventType, byte[] eventData) {
-        EventDataBuilder self = new EventDataBuilder();
-        self.eventData = eventData;
-        self.eventType = eventType;
-        self.isJson = true;
-        self.id = id;
-
-        return self;
+        return binary(id, eventType, eventData, true);
     }
 
     /**
      * Configures an event data builder to host a binary payload.
+     *
      * @param eventType event's type.
      * @param eventData event's payload.
      * @return an event data builder.
@@ -84,17 +85,31 @@ public class EventDataBuilder {
 
     /**
      * Configures an event data builder to host a binary payload.
-     * @param id event's id.
+     *
+     * @param id        event's id.
      * @param eventType event's type.
      * @param eventData event's payload.
      * @return an event data builder.
      */
     public static EventDataBuilder binary(UUID id, String eventType, byte[] eventData) {
+        return binary(id, eventType, eventData, false);
+    }
+
+    /**
+     * Configures an event data builder to host a binary payload.
+     *
+     * @param id        event's id.
+     * @param eventType event's type.
+     * @param eventData event's payload.
+     * @param isJson    whether the payload is JSON or not.
+     * @return an event data builder.
+     */
+    public static EventDataBuilder binary(UUID id, String eventType, byte[] eventData, boolean isJson) {
         EventDataBuilder self = new EventDataBuilder();
 
         self.eventData = eventData;
         self.eventType = eventType;
-        self.isJson = false;
+        self.isJson = isJson;
         self.id = id;
 
         return self;
@@ -110,6 +125,7 @@ public class EventDataBuilder {
 
     /**
      * Sets event's custom user metadata.
+     *
      * @param <A> an object that can be serialized in JSON.
      */
     @Deprecated
@@ -134,11 +150,12 @@ public class EventDataBuilder {
 
     /**
      * Builds an event ready to be sent to EventStoreDB.
+     *
      * @see EventData
      */
     public EventData build() {
         UUID eventId = this.id == null ? UUID.randomUUID() : this.id;
-        String contentType = this.isJson ? "application/json" : "application/octet-stream";
+        String contentType = this.isJson ? ContentType.JSON : ContentType.OCTET_STREAM;
         return new EventData(eventId, this.eventType, contentType, this.eventData, this.metadata);
     }
 }
