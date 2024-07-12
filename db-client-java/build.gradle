@@ -113,8 +113,8 @@ tasks.register("miscTests", Test) {
 
 tasks.register("singleNodeTests", Test) {
     useJUnitPlatform {
-        //("**/StreamsTests.class")
-        //include("**/PersistentSubscriptionsTests.class")
+        include("**/StreamsTests.class")
+        include("**/PersistentSubscriptionsTests.class")
         include("**/TelemetryTests.class")
     }
 }
@@ -179,7 +179,7 @@ protobuf {
             // options.  Note the braces cannot be omitted, otherwise the
             // plugin will not be added. This is because of the implicit way
             // NamedDomainObjectContainer binds the methods.
-            grpc { }
+            grpc {}
         }
     }
 }
