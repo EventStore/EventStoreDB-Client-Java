@@ -1,26 +1,22 @@
 package com.eventstore.dbclient;
 
-import com.eventstore.dbclient.expectations.*;
+import com.eventstore.dbclient.plugins.ClientCertificateAuthenticationTests;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ExpectationsTests implements
-        ReadStreamTests,
-        ReadAllTests,
-        ReadAllReactiveTests,
-        SubscribeToAllTests,
-        ReadStreamReactiveTests,
-        SubscribeToStreamTests,
-        ProjectionManagementTests {
+/**
+ * PluginsTests require the enterprise edition of EventStoreDB (>= 24.2.0).
+ */
+public class PluginsTests implements ClientCertificateAuthenticationTests {
     static private Database database;
     static private Logger logger;
 
     @BeforeAll
     public static void setup() {
-        database = DatabaseFactory.spawnPopulatedDatabase();
-        logger = LoggerFactory.getLogger(ExpectationsTests.class);
+        database = DatabaseFactory.spawnEnterpriseWithPluginsEnabled("UserCertificates");
+        logger = LoggerFactory.getLogger(StreamsTests.class);
     }
 
     @Override
@@ -38,3 +34,4 @@ public class ExpectationsTests implements
         database.dispose();
     }
 }
+

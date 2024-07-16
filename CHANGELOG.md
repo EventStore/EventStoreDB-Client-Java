@@ -1,7 +1,22 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [5.4.0] - 2024-05-23
+
+### Added
+- new connection settings to provide an x.509 certificate for user authentication. [EventStoreDB-Client-Java#266](https://github.com/EventStore/EventStoreDB-Client-Java/pull/266)
+
+### Changed
+- Updated CI workflows and tests to pull eventstore docker images from cloud smith registry. [EventStoreDB-Client-Java#263](https://github.com/EventStore/EventStoreDB-Client-Java/pull/263)
+- Added tracing instrumentation of Append and Subscribe (Catchup and Persistent) operations using the Open Telemetry APIs. [EventStoreDB-Client-Java#270](https://github.com/EventStore/EventStoreDB-Client-Java/pull/270)
+- Updated everywhere to pull es-gencert-cli from Cloudsmith [EventStoreDB-Client-Java#271](https://github.com/EventStore/EventStoreDB-Client-Java/pull/271)
+
+## [5.3.2] - 2024-03-05
+### Changed
+- Updated protobuf & protoc to 3.25.3 [EventStoreDB-Client-Java#268](https://github.com/EventStore/EventStoreDB-Client-Java/pull/268)
+
+### Fixed
+- https://github.com/EventStore/EventStoreDB-Client-Java/issues/267 [EventStoreDB-Client-Java#268](https://github.com/EventStore/EventStoreDB-Client-Java/pull/268)
 
 ## [5.3.2] - 2024-03-05
 ### Changed

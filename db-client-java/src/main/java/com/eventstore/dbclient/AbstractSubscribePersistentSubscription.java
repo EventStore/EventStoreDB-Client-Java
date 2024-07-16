@@ -14,7 +14,7 @@ import java.util.concurrent.CompletableFuture;
 
 abstract class AbstractSubscribePersistentSubscription {
     protected static final Persistent.ReadReq.Options.Builder defaultReadOptions;
-    private final GrpcClient connection;
+    private final GrpcClient client;
     private final String group;
     private final PersistentSubscriptionListener listener;
     private final SubscribePersistentSubscriptionOptions options;
@@ -25,10 +25,10 @@ abstract class AbstractSubscribePersistentSubscription {
                         .setStructured(Shared.Empty.getDefaultInstance()));
     }
 
-    public AbstractSubscribePersistentSubscription(GrpcClient connection, String group,
+    public AbstractSubscribePersistentSubscription(GrpcClient client, String group,
                                                    SubscribePersistentSubscriptionOptions options,
                                                    PersistentSubscriptionListener listener) {
-        this.connection = connection;
+        this.client = client;
         this.group = group;
         this.options = options;
         this.listener = listener;
@@ -37,9 +37,9 @@ abstract class AbstractSubscribePersistentSubscription {
     protected abstract Persistent.ReadReq.Options.Builder createOptions();
 
     public CompletableFuture<PersistentSubscription> execute() {
-        return this.connection.runWithArgs(args -> {
-            PersistentSubscriptionsGrpc.PersistentSubscriptionsStub client =
-                    GrpcUtils.configureStub(PersistentSubscriptionsGrpc.newStub(args.getChannel()), this.connection.getSettings(), this.options);
+        return this.client.runWithArgs(args -> {
+            PersistentSubscriptionsGrpc.PersistentSubscriptionsStub persistentSubscriptionsClient =
+                    GrpcUtils.configureStub(PersistentSubscriptionsGrpc.newStub(args.getChannel()), this.client.getSettings(), this.options);
 
             final CompletableFuture<PersistentSubscription> result = new CompletableFuture<>();
 
@@ -91,7 +91,14 @@ abstract class AbstractSubscribePersistentSubscription {
                         int retryCount = readResp.getEvent().hasNoRetryCount() ? 0 : readResp.getEvent().getRetryCount();
 
                         try {
-                            listener.onEvent(this._subscription, retryCount, ResolvedEvent.fromWire(readResp.getEvent()));
+                            ResolvedEvent resolvedEvent = ResolvedEvent.fromWire(readResp.getEvent());
+                            ClientTelemetry.traceSubscribe(
+                                    () -> listener.onEvent(this._subscription, retryCount, resolvedEvent),
+                                    _subscription.getSubscriptionId(),
+                                    args.getChannel(),
+                                    client.getSettings(),
+                                    options.getCredentials(),
+                                    resolvedEvent.getOriginalEvent());
                         } catch (Exception e) {
                             onError(e);
                         }
@@ -129,7 +136,7 @@ abstract class AbstractSubscribePersistentSubscription {
                     }
                 };
 
-                StreamObserver<Persistent.ReadReq> wireStream = client.read(observer);
+                StreamObserver<Persistent.ReadReq> wireStream = persistentSubscriptionsClient.read(observer);
                 wireStream.onNext(req);
             }
 

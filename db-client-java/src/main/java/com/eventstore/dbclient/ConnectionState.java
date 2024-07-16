@@ -35,6 +35,11 @@ class ConnectionState {
             try {
                 SslContextBuilder sslContextBuilder = GrpcSslContexts.forClient();
 
+                if (settings.getDefaultClientCertificate() != null)
+                    sslContextBuilder.keyManager(
+                            new File(settings.getDefaultClientCertificate().getCertFile()),
+                            new File(settings.getDefaultClientCertificate().getKeyFile()));
+
                 if (settings.getTlsCaFile() != null)
                     sslContextBuilder.trustManager(new File(settings.getTlsCaFile()));
 
