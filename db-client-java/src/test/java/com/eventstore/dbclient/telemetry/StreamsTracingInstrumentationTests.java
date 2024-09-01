@@ -64,27 +64,62 @@ public interface StreamsTracingInstrumentationTests extends TelemetryAware {
     }
 
     @Test
-    default void testTracingContextInjectionIsIgnoredAsExpectedWhenUserMetadataIsNonNullAndNotAJsonObject() throws Throwable {
+    @Timeout(value = 2, unit = TimeUnit.MINUTES)
+    default void testTracingContextInjectionIsIgnoredAsExpectedWhenUserMetadataIsNonNullAndNotAJsonObject()
+            throws Throwable {
         EventStoreDBClient client = getDefaultClient();
         String streamName = generateName();
         byte[] userMetadata = mapper.writeValueAsBytes("clearlynotvalidjson");
 
+        EventData eventWithValidMetadata = EventData.builderAsJson("TestEvent", mapper.writeValueAsBytes(new Foo()))
+                .eventId(UUID.randomUUID())
+                .build();
+
+        EventData eventWithInvalidMetadata = EventData.builderAsJson("TestEvent", mapper.writeValueAsBytes(new Foo()))
+                .metadataAsBytes(userMetadata)
+                .eventId(UUID.randomUUID())
+                .build();
+
         client.appendToStream(
                         streamName,
                         AppendToStreamOptions.get().expectedRevision(ExpectedRevision.noStream()),
-                        EventData.builderAsJson("TestEvent", mapper.writeValueAsBytes(new Foo()))
-                                .metadataAsBytes(userMetadata)
-                                .eventId(UUID.randomUUID())
-                                .build())
+                        eventWithValidMetadata,
+                        eventWithInvalidMetadata)
                 .get();
 
         ReadResult readResult = client.readStream(streamName, ReadStreamOptions.get()).get();
 
-        ResolvedEvent resolvedEvent = readResult.getEvents().get(0);
-        Assertions.assertNotNull(resolvedEvent);
+        List<ResolvedEvent> resolvedEvent = readResult.getEvents();
+        Assertions.assertEquals(2, resolvedEvent.size());
 
         // Assert unchanged
-        Assertions.assertArrayEquals(userMetadata, resolvedEvent.getEvent().getUserMetadata());
+        Assertions.assertArrayEquals(userMetadata, resolvedEvent.get(1).getEvent().getUserMetadata());
+
+        CountDownLatch subscribeSpansLatch = new CountDownLatch(1);
+        onOperationSpanEnded(ClientTelemetryConstants.Operations.SUBSCRIBE, span -> subscribeSpansLatch.countDown());
+
+        Subscription subscription = client.subscribeToStream(
+                streamName,
+                new SubscriptionListener() {
+                }
+        ).get();
+
+        List<ReadableSpan> appendSpans = this.getSpansForOperation(ClientTelemetryConstants.Operations.APPEND);
+        Assertions.assertEquals(1, appendSpans.size());
+
+        subscribeSpansLatch.await();
+        subscription.stop();
+
+        List<ReadableSpan> subscribeSpans = this.getSpansForOperation(ClientTelemetryConstants.Operations.SUBSCRIBE);
+
+        Assertions.assertEquals(1, subscribeSpans.size());
+
+        assertSubscriptionActivityHasExpectedAttributes(
+                subscribeSpans.get(0),
+                streamName,
+                subscription.getSubscriptionId(),
+                eventWithValidMetadata.getEventId().toString(),
+                eventWithValidMetadata.getEventType());
     }
 
     @Test
