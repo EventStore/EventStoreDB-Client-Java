@@ -1,5 +1,9 @@
 package com.eventstore.dbclient;
 
+import com.eventstore.dbclient.resolution.DeferredNodeResolution;
+import com.eventstore.dbclient.resolution.DeprecatedNodeResolution;
+import com.eventstore.dbclient.resolution.FixedSeedsNodeResolution;
+import com.eventstore.dbclient.resolution.NodeResolution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,15 +17,18 @@ import java.util.concurrent.TimeoutException;
 class ClusterDiscovery implements Discovery {
     private static final Logger logger = LoggerFactory.getLogger(ClusterDiscovery.class);
     private final NodeSelector nodeSelector;
-    private final List<InetSocketAddress> seeds;
+    private final NodeResolution resolution;
 
     ClusterDiscovery(EventStoreDBClientSettings settings) {
         this.nodeSelector = new NodeSelector(settings.getNodePreference());
 
         if (settings.isDnsDiscover()) {
-            this.seeds = Collections.singletonList(settings.getHosts()[0]);
+            if (settings.getFeatures().contains(ClientFeatureFlags.DNS_LOOKUP))
+                this.resolution = new DeprecatedNodeResolution(settings.getHosts()[0]);
+            else
+                this.resolution = new DeferredNodeResolution(settings.getHosts()[0]);
         } else {
-            this.seeds = Arrays.asList(settings.getHosts());
+            this.resolution = new FixedSeedsNodeResolution(settings.getHosts());
         }
     }
 
@@ -43,7 +50,7 @@ class ClusterDiscovery implements Discovery {
     }
 
     void discover(ConnectionState state) {
-        List<InetSocketAddress> candidates = new ArrayList<>(this.seeds);
+        List<InetSocketAddress> candidates = resolution.resolve();
 
         if (candidates.size() > 1) {
             Collections.shuffle(candidates);
