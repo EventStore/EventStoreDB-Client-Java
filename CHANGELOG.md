@@ -3,8 +3,21 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-## [5.4.0] - 2024-05-23
+### Changed
+- Extract tracing metadata from Event. [EventStoreDB-Client-Java#284](https://github.com/EventStore/EventStoreDB-Client-Java/pull/284)
 
+## [5.4.1] - 2024-07-16
+### Changed
+- Add user certificates and otel samples. [EventStoreDB-Client-Java#274](https://github.com/EventStore/EventStoreDB-Client-Java/pull/274)
+- Support different runtime environments out-of-the-box. [EventStoreDB-Client-Java#279](https://github.com/EventStore/EventStoreDB-Client-Java/pull/279)
+- Remove expectation oriented tests. [EventStoreDB-Client-Java#279](https://github.com/EventStore/EventStoreDB-Client-Java/pull/279)
+- Fixed bug in the ClientTelemetry whereby injection logic forces all events to have JSON content type. [EventStoreDB-Client-Java#281](https://github.com/EventStore/EventStoreDB-Client-Java/pull/281)
+
+### Fixed
+- Use connection string in user certificate sample. [EventStoreDB-Client-Java#276](https://github.com/EventStore/EventStoreDB-Client-Java/pull/276)
+- Fix connection service skipping discovery interval sleeps. [EventStoreDB-Client-Java#278](https://github.com/EventStore/EventStoreDB-Client-Java/pull/278)
+
+## [5.4.0] - 2024-05-23
 ### Added
 - new connection settings to provide an x.509 certificate for user authentication. [EventStoreDB-Client-Java#266](https://github.com/EventStore/EventStoreDB-Client-Java/pull/266)
 
