@@ -31,6 +31,7 @@ public class ConnectionSettingsBuilder {
     private Long _defaultDeadline = null;
     private List<ClientInterceptor> _interceptors = new ArrayList<>();
     private String _tlsCaFile = null;
+    private Set<String> _features = new HashSet<>();
 
     ConnectionSettingsBuilder() {}
 
@@ -54,7 +55,8 @@ public class ConnectionSettingsBuilder {
                 _keepAliveInterval,
                 _defaultDeadline,
                 _interceptors,
-                _tlsCaFile);
+                _tlsCaFile,
+                _features);
     }
 
     /**
@@ -216,6 +218,22 @@ public class ConnectionSettingsBuilder {
      */
     public ConnectionSettingsBuilder tlsCaFile(String filepath) {
         this._tlsCaFile = filepath;
+        return this;
+    }
+
+    /**
+     * Add feature flags.
+     */
+    public ConnectionSettingsBuilder features(String... features) {
+        this._features.addAll(Arrays.asList(features));
+        return this;
+    }
+
+    /**
+     * Add feature flag.
+     */
+    public ConnectionSettingsBuilder feature(String feature) {
+        this._features.add(feature);
         return this;
     }
 
@@ -434,6 +452,10 @@ public class ConnectionSettingsBuilder {
                         invalidParamFormat(entry[0], entry[1]);
 
                     userKeyFile = entry[1];
+                    break;
+
+                case "feature":
+                    builder._features.add(value);
                     break;
 
                 default:

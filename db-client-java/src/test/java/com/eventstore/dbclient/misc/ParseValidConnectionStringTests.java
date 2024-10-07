@@ -110,6 +110,14 @@ public class ParseValidConnectionStringTests {
                 Arguments.of(
                         "esdb://127.0.0.1:21573?userCertFile=/path/to/cert&userKeyFile=/path/to/key",
                         "{\"dnsDiscover\":false,\"maxDiscoverAttempts\":3,\"discoveryInterval\":500,\"gossipTimeout\":3000,\"nodePreference\":\"leader\",\"tls\":true,\"tlsVerifyCert\":true,\"throwOnAppendFailure\":true,\"hosts\":[{\"address\":\"127.0.0.1\",\"port\":21573}], \"defaultClientCertificate\": {\"clientCertFile\": \"/path/to/cert\", \"clientKeyFile\": \"/path/to/key\"}}"
+                ),
+                Arguments.of(
+                        "esdb://localhost?feature=foobar",
+                        "{\"dnsDiscover\":false,\"maxDiscoverAttempts\":3,\"discoveryInterval\":500,\"gossipTimeout\":3000,\"nodePreference\":\"leader\",\"tls\":true,\"tlsVerifyCert\":true,\"throwOnAppendFailure\":true,\"hosts\":[{\"address\":\"localhost\",\"port\":2113}], \"features\": \"foobar\"}"
+                ),
+                Arguments.of(
+                        "esdb://localhost?feature=foobar&feature=baz",
+                        "{\"dnsDiscover\":false,\"maxDiscoverAttempts\":3,\"discoveryInterval\":500,\"gossipTimeout\":3000,\"nodePreference\":\"leader\",\"tls\":true,\"tlsVerifyCert\":true,\"throwOnAppendFailure\":true,\"hosts\":[{\"address\":\"localhost\",\"port\":2113}], \"features\": [\"foobar\", \"baz\"]}"
                 )
         );
     }
@@ -214,6 +222,15 @@ public class ParseValidConnectionStringTests {
         tree.get("hosts").elements().forEachRemaining((host) -> {
             builder.addHost(new InetSocketAddress(host.get("address").asText(), host.get("port").asInt()));
         });
+
+        if (tree.get("features") != null) {
+           JsonNode features = tree.get("features");
+
+           if (features.isArray())
+               features.elements().forEachRemaining(feature -> builder.feature(feature.asText()));
+           else
+               builder.feature(features.asText());
+        }
 
         return builder.buildConnectionSettings();
     }
