@@ -4,6 +4,7 @@ import io.grpc.ClientInterceptor;
 
 import java.net.InetSocketAddress;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Gathers all the settings related to a gRPC client with an EventStoreDB database.
@@ -39,6 +40,7 @@ public class EventStoreDBClientSettings {
     private final Long defaultDeadline;
     private final List<ClientInterceptor> interceptors;
     private final String tlsCaFile;
+    private final Set<String> features;
 
     /**
      * If the dns discovery is enabled.
@@ -160,6 +162,11 @@ public class EventStoreDBClientSettings {
         return tlsCaFile;
     }
 
+    /**
+     * Feature flags
+     */
+    public Set<String> getFeatures() { return features; }
+
     EventStoreDBClientSettings(
             boolean dnsDiscover,
             int maxDiscoverAttempts,
@@ -175,7 +182,8 @@ public class EventStoreDBClientSettings {
             long keepAliveInterval,
             Long defaultDeadline,
             List<ClientInterceptor> interceptors,
-            String tlsCaFile
+            String tlsCaFile,
+            Set<String> features
     ) {
         this.dnsDiscover = dnsDiscover;
         this.maxDiscoverAttempts = maxDiscoverAttempts;
@@ -192,6 +200,7 @@ public class EventStoreDBClientSettings {
         this.defaultDeadline = defaultDeadline;
         this.interceptors = interceptors;
         this.tlsCaFile = tlsCaFile;
+        this.features = features;
     }
 
     /**
