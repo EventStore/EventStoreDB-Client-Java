@@ -77,14 +77,18 @@ class ClientTelemetry {
             if (!TraceId.isValid(traceId) || !SpanId.isValid(spanId))
                 return null;
 
-            return SpanContext.createFromRemoteParent(traceId, spanId, TraceFlags.getSampled(), TraceState.getDefault());
+            return SpanContext.createFromRemoteParent(traceId, spanId, TraceFlags.getSampled(),
+                    TraceState.getDefault());
         } catch (Throwable t) {
             return null;
         }
     }
 
-    static CompletableFuture<WriteResult> traceAppend(BiFunction<ManagedChannel, List<EventData>, CompletableFuture<WriteResult>> appendOperation, ManagedChannel channel,
-                                                      List<EventData> events, String streamId, EventStoreDBClientSettings settings, UserCredentials optionalCallCredentials) {
+    static CompletableFuture<WriteResult> traceAppend(
+            BiFunction<ManagedChannel, List<EventData>, CompletableFuture<WriteResult>> appendOperation,
+            ManagedChannel channel,
+            List<EventData> events, String streamId, EventStoreDBClientSettings settings,
+            UserCredentials optionalCallCredentials) {
         Span span = createSpan(
                 ClientTelemetryConstants.Operations.APPEND,
                 SpanKind.CLIENT,
@@ -115,9 +119,16 @@ class ClientTelemetry {
         }
     }
 
-    static void traceSubscribe(Runnable tracedOperation, String subscriptionId, ManagedChannel channel, EventStoreDBClientSettings settings,
+    static void traceSubscribe(Runnable tracedOperation, String subscriptionId, ManagedChannel channel,
+                               EventStoreDBClientSettings settings,
                                UserCredentials optionalCallCredentials, RecordedEvent event) {
         SpanContext remoteParentContext = tryExtractTracingContext(event.getUserMetadata());
+
+        if (remoteParentContext == null) {
+            tracedOperation.run();
+            return;
+        }
+
         Span span = createSpan(
                 ClientTelemetryConstants.Operations.SUBSCRIBE,
                 SpanKind.CONSUMER,
@@ -145,7 +156,8 @@ class ClientTelemetry {
         }
     }
 
-    static Span createSpan(String operationName, SpanKind spanKind, SpanContext parentContext, ClientTelemetryTags customAttributes) {
+    static Span createSpan(String operationName, SpanKind spanKind, SpanContext parentContext,
+                           ClientTelemetryTags customAttributes) {
         SpanBuilder spanBuilder = getTracer().spanBuilder(operationName).setSpanKind(spanKind);
 
         if (parentContext != null)

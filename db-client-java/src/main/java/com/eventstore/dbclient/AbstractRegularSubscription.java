@@ -113,7 +113,7 @@ abstract class AbstractRegularSubscription {
                                 channel,
                                 client.getSettings(),
                                 options.getCredentials(),
-                                resolvedEvent.getOriginalEvent());
+                                resolvedEvent.getEvent());
                     } catch (Exception e) {
                         onError(e);
                     }
