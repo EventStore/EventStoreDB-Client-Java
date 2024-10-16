@@ -2,6 +2,8 @@ package com.eventstore.dbclient;
 
 import io.grpc.Metadata;
 
+import java.util.Map;
+
 class ConnectionMetadata {
     private Metadata metadata;
 
@@ -24,6 +26,13 @@ class ConnectionMetadata {
 
     public ConnectionMetadata requiresLeader() {
         this.metadata.put(Metadata.Key.of("requires-leader", Metadata.ASCII_STRING_MARSHALLER), String.valueOf(true));
+        return this;
+    }
+
+    public ConnectionMetadata headers(Map<String, String> headers) {
+        for (Map.Entry<String, String> entry : headers.entrySet())
+            this.metadata.put(Metadata.Key.of(entry.getKey(), Metadata.ASCII_STRING_MARSHALLER), entry.getValue());
+
         return this;
     }
 
