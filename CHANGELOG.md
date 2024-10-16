@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [5.4.2] - 2024-10-16
+### Added
+- Support custom headers. [EventStoreDB-Client-Java#289](https://github.com/EventStore/EventStoreDB-Client-Java/pull/289)
+
 ### Changed
 - Extract tracing metadata from Event. [EventStoreDB-Client-Java#284](https://github.com/EventStore/EventStoreDB-Client-Java/pull/284)
 
