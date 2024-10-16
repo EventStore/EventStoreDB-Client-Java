@@ -1,10 +1,14 @@
 package com.eventstore.dbclient;
 
+import java.util.HashMap;
+import java.util.Map;
+
 class OptionsBase<T> {
     private Long deadline;
     private final OperationKind kind;
     private UserCredentials credentials;
     private boolean requiresLeader;
+    private Map<String, String> headers = new HashMap<>();
 
     protected OptionsBase() {
         this(OperationKind.Regular);
@@ -83,6 +87,15 @@ class OptionsBase<T> {
         return (T)this;
     }
 
+    /**
+     * Adds a custom HTTP header that will be added to the request.
+     */
+    @SuppressWarnings("unchecked")
+    public T header(String key, String value) {
+        headers.put(key, value);
+        return (T)this;
+    }
+
     Long getDeadline() {
         return deadline;
     }
@@ -97,5 +110,9 @@ class OptionsBase<T> {
 
     UserCredentials getCredentials() {
         return this.credentials;
+    }
+
+    Map<String, String> getHeaders() {
+        return this.headers;
     }
 }

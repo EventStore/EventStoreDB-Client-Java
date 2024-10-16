@@ -150,6 +150,8 @@ final class GrpcUtils {
             metadata.requiresLeader();
         }
 
+        metadata.headers(options.getHeaders());
+
         return finalStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata.build()));
     }
 }
