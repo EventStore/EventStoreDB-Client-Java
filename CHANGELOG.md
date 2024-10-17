@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- Support custom headers. [EventStoreDB-Client-Java#289](https://github.com/EventStore/EventStoreDB-Client-Java/pull/289)
+
 ## [5.4.2] - 2024-10-16
 ### Added
 - Support custom headers. [EventStoreDB-Client-Java#289](https://github.com/EventStore/EventStoreDB-Client-Java/pull/289)
