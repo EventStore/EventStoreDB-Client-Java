@@ -6,6 +6,8 @@ public class ClientTelemetryConstants {
     public static class Metadata {
         public static final String TRACE_ID = "$traceId";
         public static final String SPAN_ID = "$spanId";
+        public static final String TRACE_PARENT = "$traceParent";
+        public static final String TRACE_STATE = "$traceState";
     }
 
     public static class Operations {

@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 
 import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_NAME;
 
-public class TelemetryTests implements StreamsTracingInstrumentationTests, PersistentSubscriptionsTracingInstrumentationTests, TracingContextInjectionTests {
+public class TelemetryTests implements StreamsTracingInstrumentationTests, PersistentSubscriptionsTracingInstrumentationTests, TracingContextInjectionTests, TracingContextPropagationTests {
     static private Database database;
     static private Logger logger;
 
