@@ -16,6 +16,12 @@ import java.util.List;
 public interface TracingContextPropagationTests {
     String TRACE_ID = "0af7651916cd43dd8448eb211c80319c";
     String SPAN_ID = "b7ad6b7169203331";
+    String STALE_METADATA = "{"
+            + "\"$traceParent\":\"00-11111111111111111111111111111111-1111111111111111-01\","
+            + "\"$traceState\":\"dd=s:1\","
+            + "\"$traceId\":\"11111111111111111111111111111111\","
+            + "\"$spanId\":\"1111111111111111\""
+            + "}";
 
     default Span spanWith(TraceFlags flags, TraceState traceState) {
         return Span.wrap(SpanContext.create(TRACE_ID, SPAN_ID, flags, traceState));
@@ -26,25 +32,12 @@ public interface TracingContextPropagationTests {
     }
 
     @Test
-    default void testTracingContextIsInjectedForUnsampledSpans() throws Exception {
-        Span span = spanWith(TraceFlags.getDefault(), TraceState.getDefault());
-
-        ObjectNode metadata = parseMetadata(ClientTelemetry.tryInjectTracingContext(span, (byte[]) null));
-
-        Assertions.assertEquals(
-                "00-" + TRACE_ID + "-" + SPAN_ID + "-00",
-                metadata.get(ClientTelemetryConstants.Metadata.TRACE_PARENT).asText());
-        Assertions.assertNull(metadata.get(ClientTelemetryConstants.Metadata.TRACE_ID));
-        Assertions.assertNull(metadata.get(ClientTelemetryConstants.Metadata.SPAN_ID));
-        Assertions.assertNull(metadata.get(ClientTelemetryConstants.Metadata.TRACE_STATE));
-    }
-
-    @Test
-    default void testTracingContextIsInjectedWithSampledFlagAndTraceState() throws Exception {
+    default void testInjectsSampledTraceContextAlongsideLegacyFields() throws Exception {
         TraceState traceState = TraceState.builder().put("dd", "s:1").build();
         Span span = spanWith(TraceFlags.getSampled(), traceState);
+        byte[] userMetadata = "{\"foo\":\"bar\"}".getBytes(StandardCharsets.UTF_8);
 
-        ObjectNode metadata = parseMetadata(ClientTelemetry.tryInjectTracingContext(span, (byte[]) null));
+        ObjectNode metadata = parseMetadata(ClientTelemetry.tryInjectTracingContext(span, userMetadata));
 
         Assertions.assertEquals(
                 "00-" + TRACE_ID + "-" + SPAN_ID + "-01",
@@ -52,60 +45,15 @@ public interface TracingContextPropagationTests {
         Assertions.assertEquals("dd=s:1", metadata.get(ClientTelemetryConstants.Metadata.TRACE_STATE).asText());
         Assertions.assertEquals(TRACE_ID, metadata.get(ClientTelemetryConstants.Metadata.TRACE_ID).asText());
         Assertions.assertEquals(SPAN_ID, metadata.get(ClientTelemetryConstants.Metadata.SPAN_ID).asText());
-    }
-
-    @Test
-    default void testInjectionPreservesExistingUserMetadata() throws Exception {
-        Span span = spanWith(TraceFlags.getSampled(), TraceState.getDefault());
-        byte[] userMetadata = "{\"foo\":\"bar\"}".getBytes(StandardCharsets.UTF_8);
-
-        ObjectNode metadata = parseMetadata(ClientTelemetry.tryInjectTracingContext(span, userMetadata));
-
         Assertions.assertEquals("bar", metadata.get("foo").asText());
-        Assertions.assertNotNull(metadata.get(ClientTelemetryConstants.Metadata.TRACE_PARENT));
     }
 
     @Test
-    default void testInjectionLeavesNonJsonObjectMetadataUntouched() {
-        Span span = spanWith(TraceFlags.getSampled(), TraceState.getDefault());
-        byte[] userMetadata = "clearlynotvalidjson".getBytes(StandardCharsets.UTF_8);
-
-        byte[] result = ClientTelemetry.tryInjectTracingContext(span, userMetadata);
-
-        Assertions.assertArrayEquals(userMetadata, result);
-    }
-
-    @Test
-    default void testInjectionIsSkippedForInvalidSpanContext() {
-        List<EventData> events = Collections.singletonList(
-                EventData.builderAsJson("TestEvent", "{}".getBytes(StandardCharsets.UTF_8)).build());
-
-        List<EventData> result = ClientTelemetry.tryInjectTracingContext(Span.getInvalid(), events);
-
-        Assertions.assertSame(events, result);
-    }
-
-    @Test
-    default void testInjectionIsSkippedForInvalidSpanContextOnRawMetadata() {
-        byte[] userMetadata = "{\"foo\":\"bar\"}".getBytes(StandardCharsets.UTF_8);
-
-        byte[] result = ClientTelemetry.tryInjectTracingContext(Span.getInvalid(), userMetadata);
-
-        Assertions.assertSame(userMetadata, result);
-    }
-
-    @Test
-    default void testInjectionOverwritesStaleTracingMetadata() throws Exception {
-        String staleMetadata = "{"
-                + "\"$traceParent\":\"00-11111111111111111111111111111111-1111111111111111-01\","
-                + "\"$traceState\":\"dd=s:1\","
-                + "\"$traceId\":\"11111111111111111111111111111111\","
-                + "\"$spanId\":\"1111111111111111\""
-                + "}";
+    default void testInjectsUnsampledTraceContextAndStripsStaleTracingFields() throws Exception {
         Span span = spanWith(TraceFlags.getDefault(), TraceState.getDefault());
 
         ObjectNode metadata = parseMetadata(ClientTelemetry.tryInjectTracingContext(
-                span, staleMetadata.getBytes(StandardCharsets.UTF_8)));
+                span, STALE_METADATA.getBytes(StandardCharsets.UTF_8)));
 
         Assertions.assertEquals(
                 "00-" + TRACE_ID + "-" + SPAN_ID + "-00",
@@ -113,6 +61,19 @@ public interface TracingContextPropagationTests {
         Assertions.assertNull(metadata.get(ClientTelemetryConstants.Metadata.TRACE_ID));
         Assertions.assertNull(metadata.get(ClientTelemetryConstants.Metadata.SPAN_ID));
         Assertions.assertNull(metadata.get(ClientTelemetryConstants.Metadata.TRACE_STATE));
+    }
+
+    @Test
+    default void testSkipsInjectionForInvalidSpanOrNonJsonObjectMetadata() {
+        List<EventData> events = Collections.singletonList(
+                EventData.builderAsJson("TestEvent", "{}".getBytes(StandardCharsets.UTF_8)).build());
+        byte[] jsonMetadata = "{\"foo\":\"bar\"}".getBytes(StandardCharsets.UTF_8);
+        byte[] nonJsonMetadata = "clearlynotvalidjson".getBytes(StandardCharsets.UTF_8);
+        Span validSpan = spanWith(TraceFlags.getSampled(), TraceState.getDefault());
+
+        Assertions.assertSame(events, ClientTelemetry.tryInjectTracingContext(Span.getInvalid(), events));
+        Assertions.assertSame(jsonMetadata, ClientTelemetry.tryInjectTracingContext(Span.getInvalid(), jsonMetadata));
+        Assertions.assertArrayEquals(nonJsonMetadata, ClientTelemetry.tryInjectTracingContext(validSpan, nonJsonMetadata));
     }
 
     @Test
@@ -136,31 +97,22 @@ public interface TracingContextPropagationTests {
 
     @Test
     default void testExtractionFallsBackToLegacyFieldsAsSampled() {
-        String metadata = "{\"$traceId\":\"" + TRACE_ID + "\",\"$spanId\":\"" + SPAN_ID + "\"}";
-
-        SpanContext extracted = ClientTelemetry.tryExtractTracingContext(metadata.getBytes(StandardCharsets.UTF_8));
-
-        Assertions.assertNotNull(extracted);
-        Assertions.assertEquals(TRACE_ID, extracted.getTraceId());
-        Assertions.assertEquals(SPAN_ID, extracted.getSpanId());
-        Assertions.assertTrue(extracted.isSampled());
-        Assertions.assertTrue(extracted.isRemote());
-    }
-
-    @Test
-    default void testExtractionFallsBackToLegacyFieldsWhenTraceParentIsMalformed() {
-        String metadata = "{"
+        String legacyOnly = "{\"$traceId\":\"" + TRACE_ID + "\",\"$spanId\":\"" + SPAN_ID + "\"}";
+        String malformedTraceParent = "{"
                 + "\"$traceParent\":\"not-a-traceparent\","
                 + "\"$traceId\":\"" + TRACE_ID + "\","
                 + "\"$spanId\":\"" + SPAN_ID + "\""
                 + "}";
 
-        SpanContext extracted = ClientTelemetry.tryExtractTracingContext(metadata.getBytes(StandardCharsets.UTF_8));
+        for (String metadata : new String[]{legacyOnly, malformedTraceParent}) {
+            SpanContext extracted = ClientTelemetry.tryExtractTracingContext(metadata.getBytes(StandardCharsets.UTF_8));
 
-        Assertions.assertNotNull(extracted);
-        Assertions.assertEquals(TRACE_ID, extracted.getTraceId());
-        Assertions.assertEquals(SPAN_ID, extracted.getSpanId());
-        Assertions.assertTrue(extracted.isSampled());
+            Assertions.assertNotNull(extracted);
+            Assertions.assertEquals(TRACE_ID, extracted.getTraceId());
+            Assertions.assertEquals(SPAN_ID, extracted.getSpanId());
+            Assertions.assertTrue(extracted.isSampled());
+            Assertions.assertTrue(extracted.isRemote());
+        }
     }
 
     @Test
